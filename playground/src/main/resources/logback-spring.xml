@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LESSON: Structured JSON logging.
+  In production at Allegro (and most microservice shops), logs are consumed by
+  Elasticsearch/Kibana or Datadog. Structured JSON makes filtering trivial:
+    {"level":"INFO","ts":"2024-01-01T12:00:00Z","logger":"...","msg":"...","traceId":"..."}
+  Plain text requires regex parsing — fragile and slow.
+
+  This config uses Spring Boot's default appender for local dev (human-readable)
+  and a JSON appender activated by the `json-logs` Spring profile.
+  Run with: java -Dspring.profiles.active=json-logs -jar app.jar
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Human-readable console for local development -->
+    <springProfile name="!json-logs">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- JSON structured output for staging/production -->
+    <springProfile name="json-logs">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!-- LESSON: This is a simplified JSON format.
+                     In real production use logstash-logback-encoder for full MDC support. -->
+                <pattern>{"level":"%level","ts":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","logger":"%logger{36}","msg":"%message"}%n</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

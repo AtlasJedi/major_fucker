@@ -1,0 +1,25 @@
+# Personal data & progress
+state/
+
+# Claude Code local settings
+.claude/settings.json
+.claude/settings.local.json
+
+# macOS
+.DS_Store
+
+# Playground build artifacts
+playground/.gradle/
+playground/.kotlin/
+playground/build/
+playground/.idea/
+playground/*.iws
+playground/*.iml
+playground/*.ipr
+playground/out/
+playground/local.properties
+*.class
+*.jar
+*.war
+*.ear
+*.log
