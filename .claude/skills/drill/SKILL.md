@@ -15,6 +15,8 @@ Tryb intensywnego utrwalania. 10 pytań pod rząd z bieżącego tematu, krótka 
 
 Wczytaj `state/current.json`. Jeśli brak `active_topic` — uruchom `/start`.
 
+Sprawdź czy `content/topics/<active_topic>.md` istnieje. Jeśli nie — wygeneruj (lazy generation, CLAUDE.md sekcja 8.1).
+
 Zapisz w `current.json`:
 ```json
 {

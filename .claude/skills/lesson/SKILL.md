@@ -22,6 +22,8 @@ Jeśli uczeń powiedział tylko „/lesson" — Major sam wybiera:
 
 ### Krok 2 — wczytaj kontekst
 
+Sprawdź czy `content/topics/<active_topic>.md` istnieje. Jeśli nie — wygeneruj (lazy generation, CLAUDE.md sekcja 8.1).
+
 Z `content/topics/<active_topic>.md` znajdź pytania powiązane (po tagach). Treść modelowych odpowiedzi to surowiec do wykładu.
 
 ### Krok 3 — struktura wykładu
