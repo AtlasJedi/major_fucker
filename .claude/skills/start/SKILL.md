@@ -21,7 +21,12 @@ Przeczytaj:
 
 ### Krok 2 — decyzja: onboarding czy wznowienie?
 
-**Jeśli `learner_profile.json` jest pusty (`{}` lub brak pól `experience`, `goal`, `interview_date`):**
+**Jeśli `learner_profile.json` jest pusty (`{}` lub brak pól `experience`, `goal`) ORAZ `topics.json` nie ma tematów:**
+→ Zaproponuj `/onboard`:
+> "NOWY REKRUT WYKRYTY. Wpisz `/onboard` żeby wrzucić CV i ofertę pracy — zbuduję ci plan. Albo `/more` żeby dodać tematy ręcznie."
+Czekaj na odpowiedź. Jeśli uczeń chce szybki start bez CV — kontynuuj do Onboarding (krok 3a).
+
+**Jeśli `learner_profile.json` jest pusty ale `topics.json` ma tematy:**
 → Onboarding (krok 3a).
 
 **W przeciwnym razie:**
@@ -94,7 +99,7 @@ Czekaj na potwierdzenie ucznia („tak"/„dawaj"/„gotów"). Jeśli nie potwie
 
 ### Krok 4 — pierwsze pytanie
 
-- Otwórz `content/topics/<active_topic>.md`.
+- Otwórz `content/topics/<active_topic>.md`. Jeśli plik nie istnieje — wygeneruj go (procedura lazy generation z CLAUDE.md sekcja 8.1).
 - Wybierz pytanie na poziomie Blooma odpowiednim do `mastery` (mapa w sekcji 3.2 CLAUDE.md):
   - mastery < 0.3 → `recall`
   - 0.3 ≤ mastery < 0.6 → `understand`
