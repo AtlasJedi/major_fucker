@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Domain-Driven Design (DDD) — question bank
 
 > Context: Java/Kotlin developer on an e-commerce platform actively migrating toward DDD. Focus on tactical patterns (entities, aggregates, value objects, domain events, repositories) and strategic patterns (bounded contexts, ubiquitous language). Practical, not theoretical.

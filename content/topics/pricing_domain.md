@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Pricing domain — bank pytań
 
 > Kontekst: stanowisko Software Engineer w platformie do zarządzania ceną. Ten temat to NIE głęboka ekspertyza — to język domeny pricingowej, którym posługuje się rekruter techniczny i z którym musisz brzmieć kompetentnie. Pytania ułożone na poziomie zrozumieniowym i applied; analyze pyta o decyzje architektoniczne na styku biznes-tech.

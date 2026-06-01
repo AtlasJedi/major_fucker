@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # SQL — bank pytań
 
 > Kontekst: pricing engine na bazie relacyjnej (Postgres/Oracle/MS SQL). Pytania ułożone od podstaw przez analitykę po decyzje architektoniczne. Składnia w odpowiedziach głównie ANSI SQL z notatkami dialect-specific.

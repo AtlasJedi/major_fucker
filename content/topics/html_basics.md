@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # HTML basics — bank pytań
 
 > Kontekst: stanowisko nie jest frontend-heavy, ale rekruter sprawdza podstawy semantyki HTML5, formularzy, accessibility i interakcji z REST. Pytania ułożone do quick-warmup w mocku, nie do głębokiej ekspertyzy.

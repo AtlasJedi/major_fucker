@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # E-commerce Domain — question bank
 
 > Context: Backend Java/Kotlin developer on a major European e-commerce platform. Focus areas from the job: recommendation mechanisms, promotional campaign reporting, promoted offers across international markets. Millions of daily users.

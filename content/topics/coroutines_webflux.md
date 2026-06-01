@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Coroutines + WebFlux — bank pytań
 
 > Kotlin coroutines and Spring WebFlux are the two pillars of Allegro's high-RPS backend stack. This bank assumes you know blocking Spring MVC well and are learning the reactive + coroutine model from scratch. Every question targets the daily codebase of a recommendations-system developer: suspend functions at the HTTP edge, parallel feature fetching with async/await, streaming with Flow, WebClient configuration, and the threading model that makes 40ms p99 budgets achievable. Coverage spans definition (recall) through trade-off reasoning at scale (analyze).

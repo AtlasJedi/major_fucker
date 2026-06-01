@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Groovy — bank pytań
 
 > Stack referencyjny: Groovy 4.x (LTS) i Groovy 5.0 (sierpień 2025). Kontekst zastosowań: pricing engine, scripting w platformie e-commerce, integracje (XML/JSON), testowanie (Spock). Pytania ułożone od recall przez understand i apply do analyze.

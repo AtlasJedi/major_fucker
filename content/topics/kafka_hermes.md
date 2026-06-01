@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Kafka + Hermes — bank pytań
 
 > Apache Kafka is the distributed log backbone for event-driven systems at Allegro. Hermes is Allegro's own open-source pub/sub platform that wraps Kafka behind a REST interface — publishers POST JSON/Avro over HTTP, Hermes stores messages in Kafka, and Hermes Consumers push batches to subscriber HTTP endpoints. For a Kotlin developer on the recommendations team, Kafka fundamentals explain *why* things behave the way they do, and Hermes internals explain the contract you code against every day.

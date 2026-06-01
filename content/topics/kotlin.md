@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Kotlin — question bank
 
 > Context: Java developer transitioning to Kotlin for backend microservices. Focus on idiomatic Kotlin, Java interop, null safety, coroutines, and patterns used in Spring Boot + Kotlin projects.

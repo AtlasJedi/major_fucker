@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # REST API — bank pytań
 
 > Kontekst: pricing engine eksponowany jako REST API dla front-endu (Angular) i innych systemów (ERP integration). Konsumenci HTTP/JSON. Ważne: idempotencja, semantyka kodów, paginacja, wersjonowanie.

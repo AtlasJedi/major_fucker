@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # The Codest Stack — bank pytań
 
 > Firma The Codest (Warsaw software house, ~30 osób) rekrutuje na Java/Kotlin. Ich publiczny kod ujawnia konkretny stos: Java 17, Google Guice DI (nie Spring w nowszych projektach), Vavr, Lombok, JUnit 5 + Mockito, AWS Lambda/S3, Slack SDK. Ten bank celuje w to co zobaczysz na rozmowie.

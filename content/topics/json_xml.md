@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # JSON / XML — bank pytań
 
 > Kontekst: pricing engine konsumujący XML feedy z legacy ERP, eksponujący JSON dla nowoczesnych klientów. Parsowanie, walidacja, transformacja, performance.

@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Microservices — question bank
 
 > Context: Backend Java/Kotlin developer working on a major e-commerce platform with microservices architecture. Focus on patterns, communication, resilience, service decomposition, and DDD alignment.

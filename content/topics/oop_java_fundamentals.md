@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # OOP / Java fundamentals — bank pytań
 
 > Kontekst: Groovy interop z Javą (oba kompilują do JVM bytecode), pricing engine używa wielu konwencji Java (Spring, Hibernate, Bean Validation). Solidne fundamenty Java są wymagane od Software Engineera, nawet gdy główny język to Groovy.

@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Allegro Stack — bank pytań
 
 > Allegro (allegro.pl, allegro.tech) — największa polska platforma e-commerce. 1000+ mikroserwisów na Kubernetes, własny service mesh control plane (Envoy Control), własna platforma messaging (Hermes na Kafce). Kotlin > Java jako primary backend. Heavy publikacja na blog.allegro.tech.

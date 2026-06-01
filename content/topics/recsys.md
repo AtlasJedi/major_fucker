@@ -1,3 +1,5 @@
+> Pre-built topic bank. Your /onboard will generate personalized content for your target role.
+
 # Recsys — bank pytań
 
 > Covers recommendation system fundamentals with a focus on the **serving/engineering path** — not model training from scratch. Context: Allegro's production Two-Tower DLRM system as described in arxiv 2508.03702 ("Suggest, Complement, Inspire: Story of Two Tower Recommendations at Allegro.com"). You will be on the **recommendations system team as a Kotlin Regular Developer**, meaning your job is to build and operate the infrastructure that encodes requests, calls Faiss, ranks results, logs telemetry, and keeps p99 latency under 40ms at ~20k RPS. ML literacy here means speaking the language of data scientists and understanding the system's constraints — not training models.
