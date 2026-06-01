@@ -1,139 +1,137 @@
-# major_fucker — twój prywatny instruktor
+# major_fucker — your private drill instructor
 
-System agenta-tutora w Claude Code do nauki technologii pod presją rozmów rekrutacyjnych. Persona Sierżanta Hartmana z *Full Metal Jacket*, ale **pedagogika prawdziwa**: aktywne przypominanie, mastery learning, spaced repetition, immediate feedback.
+A Claude Code agent-tutor system for learning tech under interview pressure. Persona modeled after Gunnery Sergeant Hartman from *Full Metal Jacket*, but the **pedagogy is real**: active recall, mastery learning, spaced repetition, immediate feedback. Harsh, profane, R-rated — built for adults who learn better when someone's screaming at them.
 
 ---
 
-## Jak zacząć
+## Getting started
 
-1. Otwórz tę reposytorię w Claude Code:
+1. Open this repo in Claude Code:
    ```
    cd ~/P/major_fucker
    claude
    ```
 
-2. Wpisz w czacie:
+2. Type in chat:
    ```
    /start
    ```
 
-3. Major przeprowadzi onboarding (5 pytań — 2-3 min) i odpali pierwsze pytanie z dyscyplinarnego tematu.
+3. The Major runs onboarding (5 questions — 2-3 min) and fires the first question from the top-priority topic.
 
 ---
 
-## Komendy
+## Commands
 
-| Komenda | Co robi |
-|---------|---------|
-| `/start` | Rozpocznij lub wznów sesję. Onboarding przy pierwszym uruchomieniu. |
-| `/next` | Pomiń aktualny temat, przeskocz do następnego. |
-| `/knowledge` | Raport stanu wiedzy: tabela mastery per temat + readiness score. |
-| `/more` | Dodaj nową technologię / temat do programu. Major sam zbuduje bank pytań. |
-| `/drill` | Tryb intensywny: 10 pytań pod rząd, krótkie oceny, pełen feedback na końcu. |
-| `/lesson` | Mini-wykład Majora 200-400 słów + pytanie sprawdzające. Persona zredukowana. |
-| `/review` | Powtórka tematów dojrzałych do spaced repetition (Leitner 1/3/7 sesji). |
-| `/mock` | Pełna symulacja rozmowy rekrutacyjnej 45-60 min. Major wyłącza personę. |
-| `/status` | Snapshot bieżącej sesji (1 ekran, fakty). |
-| `/pause` | Zachowaj stan, przerwij sesję. Wznawiasz `/start`. |
-| `/debrief` | Strukturalna refleksja po sesji + plan na jutro. Zamyka sesję. |
-
----
-
-## Co Major naprawdę robi
-
-**Każde pytanie Major:**
-1. Wybiera z banku tematu na poziomie Blooma odpowiednim do twojego mastery.
-2. Zapisuje co zadał do `state/current.json`.
-3. Czeka na twoją odpowiedź.
-4. Ocenia: `correct` / `partial` / `correct_with_gap` / `incorrect`.
-5. Pokazuje modelową odpowiedź (zawsze, niezależnie od oceny).
-6. Aktualizuje twój mastery formułą EWMA (`new = 0.7×old + 0.3×score`).
-7. Append do `state/answer_log.jsonl` i `state/topics.json`.
-
-**Po sesji** (`/debrief`):
-- Append do `state/session_log.jsonl` z metrykami.
-- Update mastery, status tematów.
-- Plan na jutro.
-
-**Co kilka pytań** Major dorzuca pytanie z innego, już opanowanego tematu — interleaving (kontrola retencji).
+| Command | What it does |
+|---------|-------------|
+| `/start` | Start or resume a session. Runs onboarding on first launch. |
+| `/next` | Skip current topic, jump to the next one in queue. |
+| `/knowledge` | Knowledge report: mastery table per topic + readiness score. |
+| `/more` | Add a new technology / topic to the curriculum. Major builds the question bank. |
+| `/drill` | Intensive mode: 10 questions back-to-back, short grades, full feedback at the end. |
+| `/lesson` | Mini-lecture 200-400 words + check question. Persona reduced. |
+| `/review` | Review topics due for spaced repetition (Leitner 1/3/7 sessions). |
+| `/mock` | Full mock interview simulation 45-60 min. Major drops the persona entirely. |
+| `/code` | Coding mode: implement a task in `playground/`, Major reviews code + scores. |
+| `/status` | Snapshot of the current session (1 screen, facts only). |
+| `/pause` | Save state, interrupt session. Resume with `/start`. |
+| `/debrief` | Structured post-session reflection + plan for tomorrow. Closes session. |
 
 ---
 
-## Stack startowy
+## What the Major actually does
 
-System przygotowany pod konkretną rozmowę rekrutacyjną na **Software Engineer** ze stackiem **Groovy + SQL + REST + JSON/XML + HTML + OOP/Java** w platformie do zarządzania ceną (pricing engine).
+**Every question cycle:**
+1. Picks a question from the topic bank at the Bloom level matching your mastery.
+2. Records what was asked to `state/current.json`.
+3. Waits for your answer.
+4. Grades: `correct` / `partial` / `correct_with_gap` / `incorrect`.
+5. Shows the model answer (always, regardless of grade).
+6. Updates your mastery via EWMA (`new = 0.7 * old + 0.3 * score`).
+7. Appends to `state/answer_log.jsonl` and updates `state/topics.json`.
 
-| Temat | Priorytet | Pytań w banku | Pokrycie |
-|-------|-----------|---------------|----------|
-| Groovy | critical | 32 | składnia, closures, AST, MOP, Spock, Groovy 5.0 nowości |
+**After session** (`/debrief`):
+- Appends to `state/session_log.jsonl` with metrics.
+- Updates mastery, topic statuses.
+- Plan for tomorrow.
+
+**Every few questions** the Major throws in a question from a different, already mastered topic — interleaving (retention check).
+
+---
+
+## Starter stack
+
+System built for a specific **Software Engineer** interview with the stack **Groovy + SQL + REST + JSON/XML + HTML + OOP/Java** in a pricing engine platform.
+
+| Topic | Priority | Questions in bank | Coverage |
+|-------|----------|-------------------|----------|
+| Groovy | critical | 32 | syntax, closures, AST, MOP, Spock, Groovy 5.0 features |
 | SQL | critical | 32 | JOIN, window functions, CTE, indexes, transactions, isolation |
 | OOP / Java | high | 32 | SOLID, equals/hashCode, generics, streams, concurrency, records, Java 21 |
-| REST API | high | 32 | metody, idempotencja, kody, JWT, OAuth2, paginacja, rate limiting |
-| JSON / XML | normal | 32 | Jackson, JAXB, Slurper, parsing, walidacja, security (XXE, billion laughs) |
+| REST API | high | 32 | methods, idempotency, status codes, JWT, OAuth2, pagination, rate limiting |
+| JSON / XML | normal | 32 | Jackson, JAXB, Slurper, parsing, validation, security (XXE, billion laughs) |
 | Pricing domain | normal | 32 | waterfall, contracts, RGM, what-if, multi-currency, CPQ |
 | HTML basics | low | 32 | semantic, forms, a11y, fetch, CORS, web components |
 
-**224 pytania w banku startowym**, każde z modelową odpowiedzią + pułapką rozmowną.
+**224 questions in the starter bank**, each with a model answer + interview trap.
 
 ---
 
-## Dorzucanie nowych tematów
+## Adding new topics
 
-Wpisz `/more`, Major przeprowadzi cię przez:
-1. Nazwa technologii (np. „Spring Security", „Kafka", „React Hooks").
-2. Cel (rozmowa o pracę / projekt / ciekawość).
-3. Samoocena 1-5.
-4. Priorytet.
+Type `/more`, the Major walks you through:
+1. Technology name (e.g. "Spring Security", "Kafka", "React Hooks").
+2. Goal (job interview / project / curiosity).
+3. Self-assessment 1-5.
+4. Priority.
 
-Major sam wypełni `content/topics/<slug>.md` bankiem pytań (min. 20 pytań × 4 poziomy Blooma).
+The Major fills `content/topics/<slug>.md` with a question bank (min. 20 questions x 4 Bloom levels).
 
 ---
 
-## Pliki które tworzy / aktualizuje
+## Files it creates / updates
 
 ```
 state/
-├── learner_profile.json    # twój profil, cel, deadline
-├── topics.json             # mastery, status, due dates per temat
-├── current.json            # co teraz robimy
-├── answer_log.jsonl        # historia każdej odpowiedzi (append-only)
-└── session_log.jsonl       # historia sesji (append-only)
+├── learner_profile.json    # your profile, goal, deadline
+├── topics.json             # mastery, status, due dates per topic
+├── current.json            # what we're doing right now
+├── answer_log.jsonl        # history of every answer (append-only)
+└── session_log.jsonl       # session history (append-only)
 ```
 
 ---
 
-## Filozofia
+## Philosophy
 
-System jest oparty na sprawdzonych zasadach pedagogicznych. Patrz [`docs/pedagogy.md`](./docs/pedagogy.md) dla referencji (Karpicke & Roediger 2008, Bloom 2-sigma, mastery learning, Cepeda 2006).
+The system is built on proven pedagogical principles. See [`docs/pedagogy.md`](./docs/pedagogy.md) for references (Karpicke & Roediger 2008, Bloom 2-sigma, mastery learning, Cepeda 2006).
 
-**Major nie:**
-- Nie chwali na zapas („dobre pytanie!", „świetna odpowiedź!").
-- Nie podaje odpowiedzi przed twoją próbą.
-- Nie pozwala udawać że umiesz.
-- Nie wymyśla treści technicznych — bank pytań to `content/topics/*.md`.
-- Nie zmyśla. Honesty rule: „TEGO NIE WIEM, ROBAKU, ALE ZARAZ ZWERYFIKUJĘ" jest OK; halucynacja nie.
+**The Major does NOT:**
+- Give preemptive praise ("good question!", "great answer!").
+- Show the answer before your attempt.
+- Let you pretend you know something.
+- Make up technical content — the question bank is `content/topics/*.md`.
+- Bullshit. Honesty rule: "I DON'T KNOW THAT SHIT, MAGGOT, BUT I'LL VERIFY" is OK; hallucination is not.
 
 ---
 
 ## FAQ
 
-**Q: Major krzyczy, ale to dla pedagogiki?**
-A: Tak. Persona Hartmana to przyprawa zwiększająca pamięciowe zakorzenienie (emotional encoding). Merytoryka pod krzykiem jest precyzyjna i prawdziwa.
+**Q: The Major screams — is that pedagogically sound?**
+A: Yes. The Hartman persona is seasoning that enhances memory encoding (emotional encoding). The substance under the screaming is precise and truthful.
 
-**Q: Co jeśli Major się myli?**
-A: Popraw go. Major przyzna („Masz rację, robaku. Poprawiam bank.") i zaktualizuje `content/topics/<topic>.md`. Honesty over ego.
+**Q: What if the Major is wrong?**
+A: Correct him. The Major owns it ("You're right, maggot. Fixing the bank.") and updates `content/topics/<topic>.md`. Honesty over ego.
 
-**Q: Mogę po angielsku?**
-A: Domyślnie polski. Możesz prosić o angielski w `/start` (Major dostosuje frazowanie). Kod zawsze w oryginale.
+**Q: Can I use this beyond interview prep?**
+A: Yes. `/more` adds any topic. The system is curriculum-agnostic.
 
-**Q: Mogę używać poza prepem do rozmowy?**
-A: Tak. `/more` dorzuca dowolny topic. System jest curriculum-agnostic.
-
-**Q: Gdzie jest pełna dokumentacja struktury?**
-A: [`docs/extending.md`](./docs/extending.md) — jak rozbudowywać; [`CLAUDE.md`](./CLAUDE.md) — twardy regulamin Majora.
+**Q: Where's the full structural documentation?**
+A: [`CLAUDE.md`](./CLAUDE.md) — the Major's hard rulebook.
 
 ---
 
-## Licencja / kredyty
+## License / credits
 
-Personalny projekt Pawła. Persona inspirowana Sierżantem Hartmanem (R. Lee Ermey, *Full Metal Jacket* Stanley Kubricka 1987) — nie naruszająca jego pracy, tylko ducha musztry-pedagogiki. Treści techniczne z własnej wiedzy + research webowy.
+Personal project. Persona inspired by Gunnery Sergeant Hartman (R. Lee Ermey, *Full Metal Jacket*, Stanley Kubrick 1987) — not infringing on the work, just channeling the spirit of drill-sergeant pedagogy. Technical content from personal knowledge + web research.
