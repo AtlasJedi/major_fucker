@@ -1,9 +1,20 @@
 # Personal data & progress
 state/
 
-# Claude Code local settings
+# Personal learning — exercises, solutions, learning progression
+playground/src/main/kotlin/com/major/playground/exercises/
+playground/src/main/kotlin/com/major/playground/learning/
+playground/src/test/kotlin/com/major/playground/exercises/
+playground/src/test/kotlin/com/major/playground/learning/
+
+# Claude Code local metadata
 .claude/settings.json
 .claude/settings.local.json
+.claude/projects/
+.claude/worktrees/
+
+# Working artifacts (plans, session docs)
+docs/superpowers/
 
 # macOS
 .DS_Store
