@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-# Usage: ./scripts/scaffold-playground.sh <stack>
-# Generates a playground project structure for the given stack.
-# Stacks: kotlin, java, python, typescript, go
-#
-# If playground/ already exists and matches the stack, does nothing.
-# If playground/ exists but is a different stack, backs up to playground.bak/ first.
-
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
