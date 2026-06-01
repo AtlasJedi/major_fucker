@@ -1,9 +1,11 @@
-# Personal data & progress
-state/
+# User progress (not tracked — personal data)
+state/answer_log.jsonl
+state/session_log.jsonl
 
 # Claude Code local settings
 .claude/settings.json
 .claude/settings.local.json
+.claude/worktrees/
 
 # macOS
 .DS_Store

@@ -1,0 +1,8 @@
+{
+  "topics": {},
+  "queue_strategy": "weighted_priority_then_oldest_due",
+  "interleave_ratio": 0.2,
+  "leitner_intervals_sessions": [1, 3, 7],
+  "job_context": null,
+  "study_track": []
+}
