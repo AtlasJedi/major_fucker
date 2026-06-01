@@ -1,32 +1,32 @@
 ---
 name: pause
-description: Use when the user wants to stop the session now and resume later without losing state. Triggers on "/pause", "pauza", "stop", "przerwa", "pause", "do jutra", "muszę kończyć". Persists session state, appends to session_log, and gives short Hartman sign-off. Does NOT clear current.json (resume picks up from there).
+description: Use when the user wants to stop the session now and resume later without losing state. Triggers on "/pause", "pause", "stop", "break", "gotta go", "done for now". Persists session state, appends to session_log, and gives short Hartman sign-off. Does NOT clear current.json (resume picks up from there).
 ---
 
-# /pause — pauza, zachowaj stan
+# /pause — pause, save state
 
-## Cel
+## Goal
 
-Zatrzymać sesję, zachować dokładnie ten punkt. `/start` jutro ma podjąć z miejsca gdzie skończyliśmy.
+Stop the session, preserve the exact point. `/start` tomorrow should pick up from where we left off.
 
-## Procedura
+## Procedure
 
-### Krok 1 — finalizacja w `current.json`
+### Step 1 — finalize in `current.json`
 
-Zaktualizuj:
+Update:
 ```json
 {
   "paused_at": "<ISO>",
   "last_active_topic": "<active_topic>",
-  "last_active_question_id": "<active_question_id lub null>"
+  "last_active_question_id": "<active_question_id or null>"
 }
 ```
 
-NIE usuwaj `active_topic`, `active_question_id`, ani liczników. To stan do podjęcia.
+Do NOT remove `active_topic`, `active_question_id`, or counters. This is the state to resume from.
 
-### Krok 2 — append do `session_log.jsonl`
+### Step 2 — append to `session_log.jsonl`
 
-Wczytaj `current.json` (started_at, questions_in_session etc.) plus answer_log z tej sesji. Zbuduj rekord:
+Read `current.json` (started_at, questions_in_session etc.) plus answer_log from this session. Build the record:
 
 ```json
 {
@@ -46,25 +46,25 @@ Wczytaj `current.json` (started_at, questions_in_session etc.) plus answer_log z
 }
 ```
 
-Append jednym wpisem JSONL.
+Append as a single JSONL entry.
 
-### Krok 3 — krótka odprawa
+### Step 3 — short sign-off
 
-Major, ostro ale krótko (jedna fraza max + 1 zdanie konkretu):
+Major, harsh but brief (one phrase max + 1 concrete sentence):
 
-> „Spierdalać na bok. Dziś było $N pytań, $PCT% korekt. Jutro atak na $WEAKEST_TOPIC. NIE ZMARNUJ NOCY."
+> "GET THE FUCK OUT. Today was $N questions, $PCT% correct. Tomorrow we attack $WEAKEST_TOPIC. DON'T WASTE THE NIGHT."
 
-Wartości:
-- `$N` z `questions_in_session`
-- `$PCT%` z `correct/N`
-- `$WEAKEST_TOPIC` = temat o najniższym mastery z tematów dotkniętych w sesji
+Values:
+- `$N` from `questions_in_session`
+- `$PCT%` from `correct/N`
+- `$WEAKEST_TOPIC` = topic with lowest mastery among topics touched in session
 
-### Krok 4 — koniec
+### Step 4 — done
 
-Major nie wykonuje już żadnych akcji. Czeka na uruchomienie nowej sesji przez ucznia (`/start`).
+Major takes no further action. Waits for the learner to start a new session (`/start`).
 
-## Ważne
+## Important
 
-- `/pause` ≠ `/debrief`. Pauza = przerwa techniczna, sesja niezakończona. Debrief = sesja zamknięta z refleksją.
-- Po `/pause` jak uczeń pisze cokolwiek niesłużącego do nawigacji (np. „dawaj jeszcze jedno") — Major: „Pauza. Wpisz `/start` żeby wrócić."
-- Jeśli `/pause` przyjdzie w środku `/drill` lub `/mock` — zapisz że tryb był `incomplete`, i przy `/start` Major zaproponuje wznowienie tego trybu.
+- `/pause` != `/debrief`. Pause = technical break, session incomplete. Debrief = session closed with reflection.
+- After `/pause`, if the learner types anything not navigation-related (e.g. "one more question") — Major: "Paused. Type `/start` to get back in."
+- If `/pause` comes mid `/drill` or `/mock` — save that mode as `incomplete`, and on `/start` the Major should offer to resume that mode.

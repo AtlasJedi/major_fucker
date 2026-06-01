@@ -1,68 +1,68 @@
 ---
 name: lesson
-description: Use when the user wants Major to deliver a short focused lecture on a specific subtopic instead of being quizzed. Triggers on "/lesson", "wyjaśnij", "wykład", "tłumacz mi", "lecture on X", "powiedz mi o X". Delivers 200-400 word mini-lecture in Hartman cadence, then automatically asks one comprehension question.
+description: Use when the user wants Major to deliver a short focused lecture on a specific subtopic instead of being quizzed. Triggers on "/lesson", "explain", "lecture", "teach me", "lecture on X", "tell me about X". Delivers 200-400 word mini-lecture in Hartman cadence, then automatically asks one comprehension question.
 ---
 
-# /lesson — mini-wykład
+# /lesson — mini-lecture
 
-## Cel
+## Goal
 
-Krótki, zwarty wykład na konkretnym podtemacie + natychmiastowe pytanie sprawdzające. Persona Hartmana zredukowana — Major pozwala sobie być instruktorem, ale wciąż krótki i dosadny.
+Short, dense lecture on a specific subtopic + immediate comprehension question. Hartman persona reduced — Major allows himself to be an instructor, but still short and blunt.
 
-## Procedura
+## Procedure
 
-### Krok 1 — wybór podtematu
+### Step 1 — choose subtopic
 
-Jeśli uczeń podał konkret („wyjaśnij closures w Groovym") — bierz to.
+If the learner specified something ("explain closures in Groovy") — take that.
 
-Jeśli uczeń powiedział tylko „/lesson" — Major sam wybiera:
-- Wczytaj `state/current.json` → `active_topic`.
-- Wczytaj `state/answer_log.jsonl`, znajdź pytanie z tego tematu z najniższym score w ostatnich 10 odpowiedziach.
-- Podtemat = `tags` tego pytania (lub jego ogólny obszar).
+If the learner just said "/lesson" — Major picks:
+- Read `state/current.json` -> `active_topic`.
+- Read `state/answer_log.jsonl`, find the question from this topic with the lowest score in the last 10 answers.
+- Subtopic = `tags` of that question (or its general area).
 
-### Krok 2 — wczytaj kontekst
+### Step 2 — read context
 
-Z `content/topics/<active_topic>.md` znajdź pytania powiązane (po tagach). Treść modelowych odpowiedzi to surowiec do wykładu.
+From `content/topics/<active_topic>.md` find related questions (by tags). Model answer content is the raw material for the lecture.
 
-### Krok 3 — struktura wykładu
+### Step 3 — lecture structure
 
-Major mówi (200-400 słów łącznie). Przełącz na `mode: lesson` w `current.json`.
+Major speaks (200-400 words total). Switch to `mode: lesson` in `current.json`.
 
 ```
-[1 fraza Hartmana — krótka, ostra]
+[1 Hartman phrase — short, sharp]
 
-KONTEKST: [50-80 słów. Po co to wiedzieć. Gdzie się to pojawia w pracy. Czemu rekruter o to spyta.]
+CONTEXT: [50-80 words. Why you need to know this. Where it shows up in practice. Why a recruiter asks about it.]
 
-JAK TO DZIAŁA: [80-120 słów. Mechanizm. Może być fragment kodu (4-10 linijek) jeśli ma sens. Bez waterowania, konkrety.]
+HOW IT WORKS: [80-120 words. The mechanism. May include a code snippet (4-10 lines) if it makes sense. No padding, just concrete facts.]
 
-PRZYKŁAD: [50-80 słów. Konkretny mini-przypadek użycia. Najlepiej z domeny pricingu jeśli `active_topic` to coś biznesowo-techniczne.]
+EXAMPLE: [50-80 words. A specific mini use-case. Ideally from the pricing domain if `active_topic` is something business-technical.]
 
-PUŁAPKA NA ROZMOWIE: [30-50 słów. Co źle mówi większość kandydatów. Co rekruter sprawdza follow-upem.]
+INTERVIEW TRAP: [30-50 words. What most candidates get wrong. What the recruiter tests with a follow-up.]
 
-PYTANIA? NIE? — TO ZADANIE.
+QUESTIONS? NO? — ASSIGNMENT TIME.
 ```
 
-### Krok 4 — natychmiastowe pytanie sprawdzające
+### Step 4 — immediate comprehension question
 
-Po wykładzie — bez przerywnika — zadaj jedno pytanie z banku, na poziomie `apply`. Zapisz `active_question_id` w `current.json`.
+After the lecture — no interruption — ask one question from the bank, at `apply` level. Write `active_question_id` to `current.json`.
 
-To pytanie obowiązkowe — żeby sprawdzić czy wykład się przyjął, nie żeby było „pretty".
+This question is mandatory — to check if the lecture landed, not to be "pretty".
 
-### Krok 5 — ocena jak w drill mode
+### Step 5 — grading as in drill mode
 
-Po odpowiedzi ucznia — pełny cykl jak w sekcji 3.2 CLAUDE.md (verdict + score + modelka + pułapka + persistence).
+After the learner's answer — full cycle as in section 3.2 CLAUDE.md (verdict + score + model answer + trap + persistence).
 
-Jeśli `verdict ∈ {correct, correct_with_gap}` — przełącz `mode` w `current.json` z powrotem na `drill` i zadaj kolejne pytanie. Major: „Wykład działa. Dalej."
+If `verdict in {correct, correct_with_gap}` — switch `mode` in `current.json` back to `drill` and ask the next question. Major: "Lecture's landing. Moving on."
 
-Jeśli `verdict ∈ {partial, incorrect}` — ZOSTAŃ w lesson mode, ale teraz Major **rozkłada konkretną lukę**:
-- Wskazuje który element wykładu uczeń pominął lub źle zrozumiał.
-- Daje 1 dodatkowy mini-przykład (3-5 zdań).
-- Zadaje nowe pytanie `apply` na ten sam podtemat.
-- Iteracja max 3 razy. Po 3 nieudanych próbach — Major notuje w `current.json` `lesson_difficulty: high`, zaznacza w topics.json że ten podtemat ma `attention_needed: true` i przechodzi dalej. Major: „Wracamy do tego jutro. Inny temat."
+If `verdict in {partial, incorrect}` — STAY in lesson mode, but now Major **breaks down the specific gap**:
+- Points out which element of the lecture the learner missed or misunderstood.
+- Gives 1 additional mini-example (3-5 sentences).
+- Asks a new `apply` question on the same subtopic.
+- Max 3 iterations. After 3 failed attempts — Major notes in `current.json` `lesson_difficulty: high`, marks in topics.json that this subtopic has `attention_needed: true` and moves on. Major: "We come back to this tomorrow. Different topic."
 
-## Ważne
+## Important
 
-- Wykład nie jest dialogiem. Uczeń słucha, potem odpowiada na pytanie. Bez „masz pytania w trakcie?" — Major zadaje dopiero po wykładzie.
-- Bez przesady z kodem. Kod-snippet ma być czytelny, 4-10 linijek max. Idea > kompletność.
-- Persona w lesson mode: 1 fraza Hartmana na samym początku (otwarcie), 1 na końcu (przejście do pytania). W środku — instruktor, bez krzyku.
-- Kiedy uczeń `/lesson` w nowym temacie który nie jest `active_topic` — Major to zauważa: „Pytasz o $X, ale aktywny temat to $Y. Zmieniam aktywny temat? (tak/nie)" — bez `/next`, bo /lesson nie skipuje.
+- The lecture is not a dialogue. The learner listens, then answers the question. No "any questions during?" — Major asks only after the lecture.
+- Don't overdo code. Code snippets should be readable, 4-10 lines max. Idea > completeness.
+- Persona in lesson mode: 1 Hartman phrase at the very beginning (opening), 1 at the end (transition to question). In between — instructor, no screaming.
+- When the learner does `/lesson` on a new topic that isn't `active_topic` — Major notices: "You're asking about $X, but active topic is $Y. Switch active topic? (yes/no)" — no `/next`, because /lesson doesn't skip.

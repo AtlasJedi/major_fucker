@@ -1,8 +1,8 @@
-# Pricing domain — bank pytań
+# Pricing domain — question bank
 
-> Kontekst: stanowisko Software Engineer w platformie do zarządzania ceną. Ten temat to NIE głęboka ekspertyza — to język domeny pricingowej, którym posługuje się rekruter techniczny i z którym musisz brzmieć kompetentnie. Pytania ułożone na poziomie zrozumieniowym i applied; analyze pyta o decyzje architektoniczne na styku biznes-tech.
+> Context: Software Engineer position in a pricing management platform. This topic is NOT deep expertise — it's the language of the pricing domain that the technical recruiter uses and that you need to sound competent in. Questions at understand and apply levels; analyze asks about architectural decisions at the business-tech boundary.
 
-## Zakres
+## Scope
 
 - price waterfall (lista → net price → invoice → pocket)
 - list price, gross/net price, base price, transfer price
@@ -27,8 +27,8 @@
 ---
 
 ## Q-PRC-001 [bloom: recall]
-**Pytanie:** Co to jest "price waterfall"?
-**Modelowa odpowiedź:** Price waterfall to sekwencja cen (i deduktów) od ceny katalogowej (list price) do realnego pocket price (kwoty którą firma zatrzymuje). Standardowe etapy:
+**Question:** Co to jest "price waterfall"?
+**Model answer:** Price waterfall to sekwencja cen (i deduktów) od ceny katalogowej (list price) do realnego pocket price (kwoty którą firma zatrzymuje). Standardowe etapy:
 1. **List price** — cena z cennika, "z półki".
 2. **Invoice price** = list - on-invoice discounts (np. trade discount, volume discount).
 3. **Net price** ≈ invoice price.
@@ -36,12 +36,12 @@
 5. **Pocket margin** = pocket price - cost of goods sold (COGS).
 
 Każdy "krok w dół" to deduktor. Prawdziwa marża firmy jest po waterfall — nie po list price. **Klasyk McKinsey paper:** firmy często znają list price ale nie pocket price, co prowadzi do bardzo rentownych segmentów ukrytych w danych.
-**Pułapka rozmowna:** „Pocket price = co klient płaci" — niekoniecznie. Klient może zapłacić więcej (taxes, fees), pocket to NETTO które firma zatrzymuje po wszystkich rabatach i prowizjach.
-**Tagi:** waterfall, pricing-fundamentals
+**Interview trap:** „Pocket price = co klient płaci" — niekoniecznie. Klient może zapłacić więcej (taxes, fees), pocket to NETTO które firma zatrzymuje po wszystkich rabatach i prowizjach.
+**Tags:** waterfall, pricing-fundamentals
 
 ## Q-PRC-002 [bloom: recall]
-**Pytanie:** Czym różni się markup od margin?
-**Modelowa odpowiedź:** Oba liczą zysk vs koszt, ale różnym mianownikiem. **Markup** = (sale price - cost) / cost × 100%. **Margin** (gross margin) = (sale price - cost) / sale price × 100%. **Przykład:** koszt 100, cena 150 → zysk 50.
+**Question:** Czym różni się markup od margin?
+**Model answer:** Oba liczą zysk vs koszt, ale różnym mianownikiem. **Markup** = (sale price - cost) / cost × 100%. **Margin** (gross margin) = (sale price - cost) / sale price × 100%. **Przykład:** koszt 100, cena 150 → zysk 50.
 - Markup: 50/100 = **50%**
 - Margin: 50/150 = **33.3%**
 
@@ -50,12 +50,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 - **Margin** popularny w finance/sales (P&L pokazuje % marży na revenue).
 - Te same dane, różne perspektywy. Mylenie tych dwóch = klasyczny rookie mistake.
 
-**Pułapka rozmowna:** „Markup 100%" oznacza cena = 2× koszt. „Margin 100%" niemożliwe (to znaczyłoby że koszt = 0). „Margin 50%" = markup 100%.
-**Tagi:** markup, margin, pricing-math
+**Interview trap:** „Markup 100%" oznacza cena = 2× koszt. „Margin 100%" niemożliwe (to znaczyłoby że koszt = 0). „Margin 50%" = markup 100%.
+**Tags:** markup, margin, pricing-math
 
 ## Q-PRC-003 [bloom: recall]
-**Pytanie:** Co to jest rebate i czym różni się od discount?
-**Modelowa odpowiedź:** **Discount** (rabat on-invoice) — obniżka stosowana NA FAKTURZE, w czasie sprzedaży. Klient płaci od razu mniej. Widoczne w transakcji. **Rebate** — kredyt zwrócony klientowi PO sprzedaży, najczęściej za osiągnięcie celu (np. zakup ≥10k EUR/kwartał daje 5% rebate, wypłacany na koniec kwartału). Off-invoice. **Dlaczego rozróżnienie ma znaczenie:**
+**Question:** Co to jest rebate i czym różni się od discount?
+**Model answer:** **Discount** (rabat on-invoice) — obniżka stosowana NA FAKTURZE, w czasie sprzedaży. Klient płaci od razu mniej. Widoczne w transakcji. **Rebate** — kredyt zwrócony klientowi PO sprzedaży, najczęściej za osiągnięcie celu (np. zakup ≥10k EUR/kwartał daje 5% rebate, wypłacany na koniec kwartału). Off-invoice. **Dlaczego rozróżnienie ma znaczenie:**
 - **Reporting:** discount obniża revenue od razu; rebate to obowiązek (accrual) — księgowany jako liability dopóki nie wypłacony.
 - **Cash flow:** klient z dużymi rebatami płaci pełen invoice price upfront, wypłata później — firma trzyma cash dłużej.
 - **Sales psychology:** rebate motywuje do trafienia w cele; discount jest "od razu" satisfying ale nie incentivuje.
@@ -67,12 +67,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 - **Loyalty rebate** — za multi-year contract.
 - **Performance rebate** — za hit konkretnych KPI (np. shelf placement).
 
-**Pułapka rozmowna:** Off-invoice rebates są często „hidden margin erosion" — sales team dorzuca rebate jako negocjacyjne narzędzie, a finance odkrywa po fakcie. RGM (Revenue Growth Management) tools pomagają śledzić.
-**Tagi:** rebate, discount, off-invoice
+**Interview trap:** Off-invoice rebates są często „hidden margin erosion" — sales team dorzuca rebate jako negocjacyjne narzędzie, a finance odkrywa po fakcie. RGM (Revenue Growth Management) tools pomagają śledzić.
+**Tags:** rebate, discount, off-invoice
 
 ## Q-PRC-004 [bloom: recall]
-**Pytanie:** Co oznacza CPQ?
-**Modelowa odpowiedź:** **Configure-Price-Quote** — kategoria oprogramowania do generowania ofert dla klientów B2B. **Etapy:**
+**Question:** Co oznacza CPQ?
+**Model answer:** **Configure-Price-Quote** — kategoria oprogramowania do generowania ofert dla klientów B2B. **Etapy:**
 1. **Configure** — kustomizacja produktu (np. samochód: model, silnik, opcje, kolory). Validation: jakie kombinacje są możliwe (np. „4WD wymaga V6+").
 2. **Price** — kalkulacja ceny configured product, z uwzględnieniem cennika klienta, rabatów, promocji, margin floor.
 3. **Quote** — generowanie formalnego dokumentu (PDF, e-podpis, integracja z CRM/ERP).
@@ -87,12 +87,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 - Approval workflow (rabat > X% wymaga approval).
 - Multi-currency, multi-region.
 
-**Pułapka rozmowna:** „CPQ to tylko quote generation" — częściowo. Configure + Price są równie skomplikowane, czasem bardziej. Configure ma własną logikę (constraint solver — Drools, OptaPlanner). Druga: CPQ vs e-commerce — CPQ B2B-oriented (negotiation, approval); e-commerce B2C (fixed prices, instant checkout).
-**Tagi:** cpq, b2b, sales
+**Interview trap:** „CPQ to tylko quote generation" — częściowo. Configure + Price są równie skomplikowane, czasem bardziej. Configure ma własną logikę (constraint solver — Drools, OptaPlanner). Druga: CPQ vs e-commerce — CPQ B2B-oriented (negotiation, approval); e-commerce B2C (fixed prices, instant checkout).
+**Tags:** cpq, b2b, sales
 
 ## Q-PRC-005 [bloom: recall]
-**Pytanie:** Czym jest MAP (Minimum Advertised Price) i MSRP?
-**Modelowa odpowiedź:** **MSRP — Manufacturer's Suggested Retail Price** — cena rekomendowana przez producenta. Sugestia, nie obowiązek. Klient sprzedający (retailer, dystrybutor) może sprzedawać po dowolnej cenie. Często widoczna na metce, w katalogu — "sugerowana cena producenta". **MAP — Minimum Advertised Price** — minimum, za które retailer może REKLAMOWAĆ produkt. To jest umowne, retailer może sprzedać poniżej MAP, ale nie pokazywać ceny niższej w reklamie. Cele MAP:
+**Question:** Czym jest MAP (Minimum Advertised Price) i MSRP?
+**Model answer:** **MSRP — Manufacturer's Suggested Retail Price** — cena rekomendowana przez producenta. Sugestia, nie obowiązek. Klient sprzedający (retailer, dystrybutor) może sprzedawać po dowolnej cenie. Często widoczna na metce, w katalogu — "sugerowana cena producenta". **MAP — Minimum Advertised Price** — minimum, za które retailer może REKLAMOWAĆ produkt. To jest umowne, retailer może sprzedać poniżej MAP, ale nie pokazywać ceny niższej w reklamie. Cele MAP:
 - **Brand protection** — drogi brand nie powinien być widziany za $20 w landing page.
 - **Channel parity** — retailerzy nie podcinają sobie cen reklamowo.
 - **Margin floor** — encourages stable pricing, retailers margin protected.
@@ -103,12 +103,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 
 **W pricing engine:** MAP/MSRP to pola na produkcie. Logika kalkulacji ceny musi szanować — np. dynamic pricing engine nie może zaproponować ceny < MAP w channel "retail advertising".
 
-**Pułapka rozmowna:** Legalność MAP zależy od jurysdykcji. W US — generally OK (Leegin Creative case 2007). W EU — bardziej restrictive (price fixing concerns). **Resale Price Maintenance (RPM)** — wymuszanie ceny — generalnie illegal w EU, MAP jako workaround (advertised price tylko, transaction price free).
-**Tagi:** map, msrp, channel, regulations
+**Interview trap:** Legalność MAP zależy od jurysdykcji. W US — generally OK (Leegin Creative case 2007). W EU — bardziej restrictive (price fixing concerns). **Resale Price Maintenance (RPM)** — wymuszanie ceny — generalnie illegal w EU, MAP jako workaround (advertised price tylko, transaction price free).
+**Tags:** map, msrp, channel, regulations
 
 ## Q-PRC-006 [bloom: recall]
-**Pytanie:** Co to jest dynamic pricing?
-**Modelowa odpowiedź:** Dynamic pricing — strategia ustalania cen w real-time lub pseudo real-time na podstawie zmiennych: popytu, podaży, czasu, segmentu klienta, channel, zachowań competitorów, weather, eventów. **Przykłady:**
+**Question:** Co to jest dynamic pricing?
+**Model answer:** Dynamic pricing — strategia ustalania cen w real-time lub pseudo real-time na podstawie zmiennych: popytu, podaży, czasu, segmentu klienta, channel, zachowań competitorów, weather, eventów. **Przykłady:**
 - **Airlines** — cena lotu zmienia się x razy dziennie, zależy od booking pace, days-to-departure, kompetencji.
 - **Uber surge pricing** — gdy popyt > podaż drivers, cena rośnie.
 - **Amazon** — produkty mają tysiące zmian dziennie (algorytmiczne).
@@ -129,12 +129,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 - **Personalization vs discrimination** — różne ceny per user może być dyskryminacja. Legal risks especially in EU (GDPR).
 - **Customer trust** — ujawnienie że ten sam produkt ma 5 cen w 5 minut może podważać zaufanie.
 
-**Pułapka rozmowna:** „Dynamic = automated" — częściowo. Dynamic może być rule-based (semi-manual), ML-based, lub hybrid. Druga: „Always optimal" — ML często optymalizuje short-term revenue, ignoruje long-term retention. Pricing wymaga balanced metrics.
-**Tagi:** dynamic-pricing, strategy, ml
+**Interview trap:** „Dynamic = automated" — częściowo. Dynamic może być rule-based (semi-manual), ML-based, lub hybrid. Druga: „Always optimal" — ML często optymalizuje short-term revenue, ignoruje long-term retention. Pricing wymaga balanced metrics.
+**Tags:** dynamic-pricing, strategy, ml
 
 ## Q-PRC-007 [bloom: recall]
-**Pytanie:** Co to jest cost-plus pricing vs value-based pricing?
-**Modelowa odpowiedź:** Dwa fundamentalnie różne podejścia. **Cost-plus:** cena = koszt + markup. Prosty: dostać cost data, nałożyć margin (np. 30%), gotowe. **Plusy:** prosty, defensywny ("to jest nasz koszt + uczciwa marża"), guarantees minimum margin. **Minusy:** ignoruje WTP (willingness-to-pay) klientów. Może niedoceniać produkty wartościowe (zostawiać money on table) lub przeceniać niechciane (sklep się nie obraca).
+**Question:** Co to jest cost-plus pricing vs value-based pricing?
+**Model answer:** Dwa fundamentalnie różne podejścia. **Cost-plus:** cena = koszt + markup. Prosty: dostać cost data, nałożyć margin (np. 30%), gotowe. **Plusy:** prosty, defensywny ("to jest nasz koszt + uczciwa marża"), guarantees minimum margin. **Minusy:** ignoruje WTP (willingness-to-pay) klientów. Może niedoceniać produkty wartościowe (zostawiać money on table) lub przeceniać niechciane (sklep się nie obraca).
 
 **Value-based:** cena = funkcja postrzeganej wartości dla klienta. Niezależna od kosztu. **Process:**
 1. Identifikacja value drivers per segment (np. „dla CFO ten software oszczędza 2 etaty = 200k/rok").
@@ -152,12 +152,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 
 **Real world:** firmy stosują mix. **B2B SaaS** często value-based + tiers. **Commodity** często cost-plus + competitive. **Premium fashion** value-based + exclusive availability.
 
-**Pułapka rozmowna:** „Cost-plus = stara szkoła, value-based = modern" — naïve. Niektóre commodity nie mają luksusu value-based (rynek dyktuje). Druga: „Value = co klient chce" — value to dolary uratowane / zarobione przez klienta dzięki produktowi. Mierzalne, nie emocje.
-**Tagi:** strategies, cost-plus, value-based
+**Interview trap:** „Cost-plus = stara szkoła, value-based = modern" — naïve. Niektóre commodity nie mają luksusu value-based (rynek dyktuje). Druga: „Value = co klient chce" — value to dolary uratowane / zarobione przez klienta dzięki produktowi. Mierzalne, nie emocje.
+**Tags:** strategies, cost-plus, value-based
 
 ## Q-PRC-008 [bloom: recall]
-**Pytanie:** Co to jest "price elasticity"?
-**Modelowa odpowiedź:** **Price elasticity of demand** — miara jak bardzo popyt reaguje na zmianę ceny. **Formuła:** `elasticity = % change in quantity / % change in price`. **Klasyfikacja:**
+**Question:** Co to jest "price elasticity"?
+**Model answer:** **Price elasticity of demand** — miara jak bardzo popyt reaguje na zmianę ceny. **Formuła:** `elasticity = % change in quantity / % change in price`. **Klasyfikacja:**
 - **|E| > 1** — elastic. Mała zmiana ceny → duża zmiana quantity. Klasyczne: luxury goods, substitutes available. Obniżka 10% → wzrost wolumenu 20%, total revenue rośnie.
 - **|E| < 1** — inelastic. Cena rośnie, klienci wciąż kupują. Klasyczne: necessities, addictive goods (paliwo, leki), monopol. Podwyżka 10% → spadek 5%, total revenue rośnie.
 - **|E| ≈ 1** — unit elastic. Total revenue stable.
@@ -173,14 +173,14 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 
 **W pricing engine:** elastycity model może informować dynamic pricing — drop price when elastic + capacity available, raise when inelastic + demand high.
 
-**Pułapka rozmowna:** Elastycity nie jest stała w czasie. Sezonowość, inflacja, change of competition — wszystko zmienia. Modele wymagają continuous calibration. Druga: „Niskie ceny zawsze zwiększają wolumeny" — false dla luxury (Veblen goods — wyższa cena = więcej kupujących, signaling).
-**Tagi:** elasticity, demand, economics
+**Interview trap:** Elastycity nie jest stała w czasie. Sezonowość, inflacja, change of competition — wszystko zmienia. Modele wymagają continuous calibration. Druga: „Niskie ceny zawsze zwiększają wolumeny" — false dla luxury (Veblen goods — wyższa cena = więcej kupujących, signaling).
+**Tags:** elasticity, demand, economics
 
 ---
 
 ## Q-PRC-009 [bloom: understand]
-**Pytanie:** Wytłumacz różnicę między B2B a B2C pricing.
-**Modelowa odpowiedź:** Fundamentalne różnice w transactional model i przez to w pricing systems.
+**Question:** Wytłumacz różnicę między B2B a B2C pricing.
+**Model answer:** Fundamentalne różnice w transactional model i przez to w pricing systems.
 
 **B2C (Business-to-Consumer):**
 - **Stała cena per channel** (online sklep, fizyczna półka, app).
@@ -222,12 +222,12 @@ Konwersja: `margin = markup / (1 + markup)`, `markup = margin / (1 - margin)`. *
 - B2C: cache-heavy, read-heavy, simple lookup.
 - B2B: rule engine, complex aggregation, customer-specific configurations, lower throughput per customer ale more complex queries.
 
-**Pułapka rozmowna:** „B2B = enterprise" — częściowo. Even small B2B (np. supplier do café) ma negotiated pricing logic. Skala biznesowa nie definuje, struktura transakcji definiuje. Druga: „W B2B nie ma list price" — ma. List price + customer-specific discounts. List jest punktem startowym negocjacji.
-**Tagi:** b2b, b2c, pricing-models, architecture
+**Interview trap:** „B2B = enterprise" — częściowo. Even small B2B (np. supplier do café) ma negotiated pricing logic. Skala biznesowa nie definuje, struktura transakcji definiuje. Druga: „W B2B nie ma list price" — ma. List price + customer-specific discounts. List jest punktem startowym negocjacji.
+**Tags:** b2b, b2c, pricing-models, architecture
 
 ## Q-PRC-010 [bloom: understand]
-**Pytanie:** Wytłumacz "promotion stacking" — co to jest i jakie są pułapki?
-**Modelowa odpowiedź:** **Promotion stacking** — kilka promocji aplikowanych do tego samego produktu/zamówienia jednocześnie. **Przykłady:**
+**Question:** Wytłumacz "promotion stacking" — co to jest i jakie są pułapki?
+**Model answer:** **Promotion stacking** — kilka promocji aplikowanych do tego samego produktu/zamówienia jednocześnie. **Przykłady:**
 - 20% zniżki na cały koszyk (storewide promo).
 - BOGO (Buy One Get One) na konkretny produkt.
 - Cashback 5% za płatność kartą.
@@ -281,12 +281,12 @@ Klient kupuje produkt który łapie wszystkie 4 → ile faktycznie płaci?
 - **Conflict resolution** — explicit rules.
 - **Result audit** — per-line per-promo savings, total.
 
-**Pułapka rozmowna:** „Najwyższa zniżka wygrywa" — uproszczenie. Czasem kombinacja (5% + 10%) wygrywa nad najwyższą pojedynczą (12%). „Stacking == addytywne" — false. 10% + 10% w stack-ed kontekście może dać 19% (sequential: cena * 0.9 * 0.9 = 0.81), nie 20%.
-**Tagi:** promotions, stacking, rules, pricing-engine
+**Interview trap:** „Najwyższa zniżka wygrywa" — uproszczenie. Czasem kombinacja (5% + 10%) wygrywa nad najwyższą pojedynczą (12%). „Stacking == addytywne" — false. 10% + 10% w stack-ed kontekście może dać 19% (sequential: cena * 0.9 * 0.9 = 0.81), nie 20%.
+**Tags:** promotions, stacking, rules, pricing-engine
 
 ## Q-PRC-011 [bloom: understand]
-**Pytanie:** Co to jest contracted pricing i czemu wymaga osobnej logiki w engine?
-**Modelowa odpowiedź:** **Contracted pricing** (a.k.a. negotiated pricing, customer-specific pricing) — każdy klient B2B ma podpisany kontrakt z określonymi warunkami: ceny, rabaty, rebate'y, payment terms, validity period. **Charakterystyki:**
+**Question:** Co to jest contracted pricing i czemu wymaga osobnej logiki w engine?
+**Model answer:** **Contracted pricing** (a.k.a. negotiated pricing, customer-specific pricing) — każdy klient B2B ma podpisany kontrakt z określonymi warunkami: ceny, rabaty, rebate'y, payment terms, validity period. **Charakterystyki:**
 - **Per-customer scope** — Customer A ma cenę 95 PLN za produkt X, Customer B ma 87 PLN.
 - **Validity windows** — kontrakt obowiązuje od / do.
 - **Override hierarchy** — kontrakt może mieć priorytet nad list price + standard promo (lub odwrotnie, zależy od policy).
@@ -359,12 +359,12 @@ WHERE list_price.product_id = $product_id
   AND list_price.country = $country;
 ```
 
-**Pułapka rozmowna:** „Contract price always wins over list" — może też być na odwrót w niektórych biznesach. Definitely customer-specific, ale konflikty z standard promos to design decision per organizacji. Druga: temporal validity — kontrakt może mieć multiple amendments, każde z innym effective range. SCD (Slowly Changing Dimensions) Type 2 pattern w schema.
-**Tagi:** contracted-pricing, b2b, schema-design
+**Interview trap:** „Contract price always wins over list" — może też być na odwrót w niektórych biznesach. Definitely customer-specific, ale konflikty z standard promos to design decision per organizacji. Druga: temporal validity — kontrakt może mieć multiple amendments, każde z innym effective range. SCD (Slowly Changing Dimensions) Type 2 pattern w schema.
+**Tags:** contracted-pricing, b2b, schema-design
 
 ## Q-PRC-012 [bloom: understand]
-**Pytanie:** Co to jest "price calendar" i kiedy potrzebny?
-**Modelowa odpowiedź:** **Price calendar** — schedule planowanych zmian cen w czasie. Zamiast „zmieniam cenę produktu X dziś", definiujesz „cena produktu X to 100 PLN, ale od 1.06.2026 to 110 PLN, od 1.09.2026 wraca do 100 PLN (sezonowe podwyżki)".
+**Question:** Co to jest "price calendar" i kiedy potrzebny?
+**Model answer:** **Price calendar** — schedule planowanych zmian cen w czasie. Zamiast „zmieniam cenę produktu X dziś", definiujesz „cena produktu X to 100 PLN, ale od 1.06.2026 to 110 PLN, od 1.09.2026 wraca do 100 PLN (sezonowe podwyżki)".
 
 **Use cases:**
 - **Seasonal pricing** — zima vs lato (turystyka, klimatyzacja).
@@ -412,12 +412,12 @@ LIMIT 1;
 - `getCurrentPrice(productId, country)` = `getPriceAt(productId, country, now())`.
 - For batch (nightly recalc), iterate per future date.
 
-**Pułapka rozmowna:** „Po prostu schedule a job to update price na 1.06" — działa, ale: a) job może failować, b) `valid_from`-based query jest bardziej resilient (price change "happens" automatically when date arrives, no job needed), c) audit trail in calendar table jest cleaner. Druga: timezone. „1.06.2026" — kiedy dokładnie? UTC, local server time, customer's timezone? Conflicts happen.
-**Tagi:** price-calendar, scheduling, temporal
+**Interview trap:** „Po prostu schedule a job to update price na 1.06" — działa, ale: a) job może failować, b) `valid_from`-based query jest bardziej resilient (price change "happens" automatically when date arrives, no job needed), c) audit trail in calendar table jest cleaner. Druga: timezone. „1.06.2026" — kiedy dokładnie? UTC, local server time, customer's timezone? Conflicts happen.
+**Tags:** price-calendar, scheduling, temporal
 
 ## Q-PRC-013 [bloom: understand]
-**Pytanie:** Co to jest "Revenue Growth Management" (RGM)?
-**Modelowa odpowiedź:** **RGM (Revenue Growth Management)** — discyplina i kategoria oprogramowania optymalizująca pricing, promo, mix, channel mix dla maksimum revenue/profit. Najczęściej w consumer goods (FMCG), retail, beverage. **Główne lewary RGM (5):**
+**Question:** Co to jest "Revenue Growth Management" (RGM)?
+**Model answer:** **RGM (Revenue Growth Management)** — discyplina i kategoria oprogramowania optymalizująca pricing, promo, mix, channel mix dla maksimum revenue/profit. Najczęściej w consumer goods (FMCG), retail, beverage. **Główne lewary RGM (5):**
 
 1. **Pricing** — base list price decisions per SKU/region.
 2. **Promotion** — when, how deep, on which products. ROI per promo.
@@ -464,12 +464,12 @@ LIMIT 1;
 - Provide audit data for RGM teams.
 - Implement RGM team's decisions (config-driven, no code change for new pricing).
 
-**Pułapka rozmowna:** RGM nie jest „set price once and forget". Kontinuous optimization, mierzenie, iterate. Druga: RGM często wymaga collaboration z sales (sales lubi promo bo łatwiej sprzedać; RGM walczy o margin). Polityczne, nie tylko techniczne.
-**Tagi:** rgm, optimization, strategy
+**Interview trap:** RGM nie jest „set price once and forget". Kontinuous optimization, mierzenie, iterate. Druga: RGM często wymaga collaboration z sales (sales lubi promo bo łatwiej sprzedać; RGM walczy o margin). Polityczne, nie tylko techniczne.
+**Tags:** rgm, optimization, strategy
 
 ## Q-PRC-014 [bloom: understand]
-**Pytanie:** Co to jest "what-if scenario" w pricingu i jak wspiera business?
-**Modelowa odpowiedź:** **What-if scenario** — symulacja efektu zmiany pricing/promo bez actual implementation. Pozwala biznesowi przewidzieć konsekwencje przed commit.
+**Question:** Co to jest "what-if scenario" w pricingu i jak wspiera business?
+**Model answer:** **What-if scenario** — symulacja efektu zmiany pricing/promo bez actual implementation. Pozwala biznesowi przewidzieć konsekwencje przed commit.
 
 **Typowe pytania:**
 - "Co jeśli podniosę cenę produktu X o 5% w Polsce — jaki revenue impact?"
@@ -539,12 +539,12 @@ def simulate(scenario):
 - Validation: backtest model on historical data.
 - Sensitivity to assumptions — RGM teams often run multiple scenarios with different elasticity assumptions to bracket the answer.
 
-**Pułapka rozmowna:** „Simulation jest dokładna" — nigdy. Direction directional w 90% przypadków, magnitude często off. Use as decision support, not as oracle. Druga: people overweight simulation bo „liczbka" — confirmation bias. Sales mogą zawsze argument „simulation jest pesymistyczna, w prawdziwym życiu to lepsze".
-**Tagi:** what-if, simulation, decision-support
+**Interview trap:** „Simulation jest dokładna" — nigdy. Direction directional w 90% przypadków, magnitude często off. Use as decision support, not as oracle. Druga: people overweight simulation bo „liczbka" — confirmation bias. Sales mogą zawsze argument „simulation jest pesymistyczna, w prawdziwym życiu to lepsze".
+**Tags:** what-if, simulation, decision-support
 
 ## Q-PRC-015 [bloom: understand]
-**Pytanie:** Multi-currency pricing — jakie są wyzwania?
-**Modelowa odpowiedź:** Pricing global znaczy multiple currencies. Nieoczywiste decisions:
+**Question:** Multi-currency pricing — jakie są wyzwania?
+**Model answer:** Pricing global znaczy multiple currencies. Nieoczywiste decisions:
 
 **1. Base currency vs local pricing:**
 - **Base currency (np. USD):** wszystkie ceny przechowywane w USD, FX conversion przy display/sale. Plus: simple central management. Minus: customer experience gorszy ("11.97 EUR po przeliczeniu" wygląda dziwnie vs round 12.00 EUR).
@@ -603,12 +603,12 @@ Praktyka: **hybrid** — local pricing dla major markets (EUR, USD, GBP, JPY), b
 - Locale awareness in display layer.
 - Tax integration as side service.
 
-**Pułapka rozmowna:** „Just convert at runtime" — works for display, fails for accounting. Each transaction must record actual FX used. Druga: storing prices in cents/lowest-unit per currency — varies (JPY no cents, BHD has 3 decimals). Use BigDecimal or `Money` library that respects per-currency decimal scale.
-**Tagi:** multi-currency, fx, internationalization
+**Interview trap:** „Just convert at runtime" — works for display, fails for accounting. Each transaction must record actual FX used. Druga: storing prices in cents/lowest-unit per currency — varies (JPY no cents, BHD has 3 decimals). Use BigDecimal or `Money` library that respects per-currency decimal scale.
+**Tags:** multi-currency, fx, internationalization
 
 ## Q-PRC-016 [bloom: understand]
-**Pytanie:** Co to jest "price exception management"?
-**Modelowa odpowiedź:** **Price exception** — sytuacja gdy proposed price odbiega od standardowego. **Examples:**
+**Question:** Co to jest "price exception management"?
+**Model answer:** **Price exception** — sytuacja gdy proposed price odbiega od standardowego. **Examples:**
 - Sales rep oferuje rabat 25% (standard cap to 15%).
 - Custom price dla VIP klienta poniżej list.
 - Obniżka by match competitor offer.
@@ -670,14 +670,14 @@ price_exception:
 - Exception → Win rate (does giving rabat actually close the deal?).
 - Frequent exceptions = signal że standard price is too high for that segment.
 
-**Pułapka rozmowna:** „Approve everything tj. don't lose deal" — short term win, long term margin disaster. „Reject everything" — sales frustration, lost deals. Sweet spot: data-driven thresholds, fast approval for reasonable, hard scrutiny for outliers.
-**Tagi:** exception-management, approval, governance
+**Interview trap:** „Approve everything tj. don't lose deal" — short term win, long term margin disaster. „Reject everything" — sales frustration, lost deals. Sweet spot: data-driven thresholds, fast approval for reasonable, hard scrutiny for outliers.
+**Tags:** exception-management, approval, governance
 
 ---
 
 ## Q-PRC-017 [bloom: apply]
-**Pytanie:** Pokaż jak zaprojektować schema bazy dla cennika multi-tier (volume-based discounts).
-**Modelowa odpowiedź:**
+**Question:** Pokaż jak zaprojektować schema bazy dla cennika multi-tier (volume-based discounts).
+**Model answer:**
 ```sql
 CREATE TABLE product (
   id SERIAL PRIMARY KEY,
@@ -785,12 +785,12 @@ public BigDecimal getPriceForQuantity(Long productId, String country, String seg
 }
 ```
 
-**Pułapka rozmowna:** Bez `EXCLUDE` constraint (Postgres) overlaps mogą się wkraść — niedobry user input → bugi w lookups (multiple tier match for same quantity, ORDER BY decyduje randomly). Druga: customer-specific contract pricing przepisuje tier pricing — multi-level resolve potrzebny.
-**Tagi:** schema-design, volume-pricing, tiers
+**Interview trap:** Bez `EXCLUDE` constraint (Postgres) overlaps mogą się wkraść — niedobry user input → bugi w lookups (multiple tier match for same quantity, ORDER BY decyduje randomly). Druga: customer-specific contract pricing przepisuje tier pricing — multi-level resolve potrzebny.
+**Tags:** schema-design, volume-pricing, tiers
 
 ## Q-PRC-018 [bloom: apply]
-**Pytanie:** Implementuj kalkulację price waterfall: list price → trade discount → cash discount → invoice price → off-invoice rebate → pocket price.
-**Modelowa odpowiedź:**
+**Question:** Implementuj kalkulację price waterfall: list price → trade discount → cash discount → invoice price → off-invoice rebate → pocket price.
+**Model answer:**
 ```java
 import java.math.*;
 
@@ -905,12 +905,12 @@ public BigDecimal pocketMargin(Result r, BigDecimal cogs) {
 - Negative pocket — ostrzeżenie / błąd (sprzedaż poniżej zera = bug lub świadoma loss leader).
 - Order of operations: trade → cash compound (cash applied to post-trade price). Inny order → inny wynik.
 
-**Pułapka rozmowna:** Order matters. Konwencja: zawsze on-invoice first (trade, cash), potem off-invoice (rebate, fees). Druga: rounding cumulative — może wprowadzić cents drift. Standard: round at each step with consistent mode (HALF_UP).
-**Tagi:** waterfall, pricing-math, java, pricing-engine
+**Interview trap:** Order matters. Konwencja: zawsze on-invoice first (trade, cash), potem off-invoice (rebate, fees). Druga: rounding cumulative — może wprowadzić cents drift. Standard: round at each step with consistent mode (HALF_UP).
+**Tags:** waterfall, pricing-math, java, pricing-engine
 
 ## Q-PRC-019 [bloom: apply]
-**Pytanie:** Zaprojektuj API endpoint zwracający price quote z pełnym breakdown.
-**Modelowa odpowiedź:**
+**Question:** Zaprojektuj API endpoint zwracający price quote z pełnym breakdown.
+**Model answer:**
 ```
 POST /api/v1/pricing/quote
 Content-Type: application/json
@@ -1041,12 +1041,12 @@ public ResponseEntity<QuoteResponse> generateQuote(@Valid @RequestBody QuoteRequ
 - Customer can request re-issue with same parameters.
 - Modifications create new version (immutable history).
 
-**Pułapka rozmowna:** Quote vs order: quote = price commitment for X days, order = actual purchase. Quote `valid_until` matters — after expiry, re-quote (price might've changed). Druga: tax calculation jurisdictional — for B2B in EU, customer's VAT ID changes treatment.
-**Tagi:** api-design, quote, pricing, breakdown
+**Interview trap:** Quote vs order: quote = price commitment for X days, order = actual purchase. Quote `valid_until` matters — after expiry, re-quote (price might've changed). Druga: tax calculation jurisdictional — for B2B in EU, customer's VAT ID changes treatment.
+**Tags:** api-design, quote, pricing, breakdown
 
 ## Q-PRC-020 [bloom: apply]
-**Pytanie:** Pokaż jak zaprojektować "what-if scenario" feature: user simulate zmianę price 5% w produkcie, system pokazuje impact na revenue za ostatni kwartał.
-**Modelowa odpowiedź:**
+**Question:** Pokaż jak zaprojektować "what-if scenario" feature: user simulate zmianę price 5% w produkcie, system pokazuje impact na revenue za ostatni kwartał.
+**Model answer:**
 ```
 POST /api/v1/pricing/whatif/simulate
 {
@@ -1185,12 +1185,12 @@ CREATE TABLE scenario (
 - **Confidence intervals:** "P10/P50/P90 — most likely range $X-$Y revenue impact".
 - **Sensitivity:** "what if elasticity is -0.8 vs -1.2?".
 
-**Pułapka rozmowna:** Models based on historical — may not reflect future (changed competition, weather, brand strength). Always show confidence/caveats. Druga: sales push back: „w prawdziwym życiu byłoby lepsze". Often. Use simulation as decision support, not single source of truth.
-**Tagi:** what-if, simulation, elasticity, api
+**Interview trap:** Models based on historical — may not reflect future (changed competition, weather, brand strength). Always show confidence/caveats. Druga: sales push back: „w prawdziwym życiu byłoby lepsze". Often. Use simulation as decision support, not single source of truth.
+**Tags:** what-if, simulation, elasticity, api
 
 ## Q-PRC-021 [bloom: apply]
-**Pytanie:** Customer changes contract: zamiast 10% off list, teraz negocjuje 5% off + 5% rebate. Implementuj kalkulację dla obu i porównaj.
-**Modelowa odpowiedź:**
+**Question:** Customer changes contract: zamiast 10% off list, teraz negocjuje 5% off + 5% rebate. Implementuj kalkulację dla obu i porównaj.
+**Model answer:**
 ```java
 import java.math.*;
 
@@ -1309,12 +1309,12 @@ ComparisonResult cmp = service.compare(listPrice);
 - Quote tool shows full breakdown — invoice price, rebate eligibility, effective pocket.
 - Customer dashboard tracks YTD rebate accrual.
 
-**Pułapka rozmowna:** „5% + 5% = 10%" — false jeśli compound. 5% off list + 5% off post-discount = 9.75% total off list. Subtle. Druga: rebate w accounting jest accrual liability — vendor records revenue 950 ale puts 47.50 in liability. Tax implications dla obu stron varying.
-**Tagi:** rebate, discount, contract, pricing-math
+**Interview trap:** „5% + 5% = 10%" — false jeśli compound. 5% off list + 5% off post-discount = 9.75% total off list. Subtle. Druga: rebate w accounting jest accrual liability — vendor records revenue 950 ale puts 47.50 in liability. Tax implications dla obu stron varying.
+**Tags:** rebate, discount, contract, pricing-math
 
 ## Q-PRC-022 [bloom: apply]
-**Pytanie:** Implementuj pricing engine która respektuje multiple sources hierarchy: contract price → tier price (volume) → list price.
-**Modelowa odpowiedź:**
+**Question:** Implementuj pricing engine która respektuje multiple sources hierarchy: contract price → tier price (volume) → list price.
+**Model answer:**
 ```java
 import java.math.*;
 import java.time.*;
@@ -1479,12 +1479,12 @@ void listPriceWhenNothingMatches() {
 - Multiple active contracts for same customer (rare but possible) → priority by signed_date or explicit priority field.
 - Date boundary: contract ends 23:59:59, query at 00:00:00 next day → use closed-open intervals consistently.
 
-**Pułapka rozmowna:** Returning only price, not source — debugging nightmare („why this customer paid X?"). Always source + ref. Druga: applying promotions to contract price — depends on policy. Some contracts say „contract price IS final, no promo stack". Others allow. Make it explicit in contract terms.
-**Tagi:** pricing-engine, hierarchy, contract, implementation
+**Interview trap:** Returning only price, not source — debugging nightmare („why this customer paid X?"). Always source + ref. Druga: applying promotions to contract price — depends on policy. Some contracts say „contract price IS final, no promo stack". Others allow. Make it explicit in contract terms.
+**Tags:** pricing-engine, hierarchy, contract, implementation
 
 ## Q-PRC-023 [bloom: apply]
-**Pytanie:** Implementuj approval workflow dla price exception (rabat > 15% wymaga manager approval).
-**Modelowa odpowiedź:**
+**Question:** Implementuj approval workflow dla price exception (rabat > 15% wymaga manager approval).
+**Model answer:**
 ```java
 public enum ApprovalLevel {
     AUTO,                  // < 5%
@@ -1632,12 +1632,12 @@ CREATE TABLE approval_audit (
 - Bulk approvals (whole quote) — single decision, multiple lines covered.
 - Re-submission after rejection — new request or revised existing?
 
-**Pułapka rozmowna:** Self-approval — requester == approver. Block in code, audit any attempt. Druga: approval expiry — request pending forever blocks deal. Auto-reject after timeout, force re-submit (with reasons).
-**Tagi:** approval-workflow, exception-management, pricing
+**Interview trap:** Self-approval — requester == approver. Block in code, audit any attempt. Druga: approval expiry — request pending forever blocks deal. Auto-reject after timeout, force re-submit (with reasons).
+**Tags:** approval-workflow, exception-management, pricing
 
 ## Q-PRC-024 [bloom: apply]
-**Pytanie:** Implementuj price calendar query — wszystkie zaplanowane zmiany cen na produkt w nadchodzących 6 miesiącach.
-**Modelowa odpowiedź:**
+**Question:** Implementuj price calendar query — wszystkie zaplanowane zmiany cen na produkt w nadchodzących 6 miesiącach.
+**Model answer:**
 ```java
 public class PriceCalendarService {
     private final PriceCalendarRepository repo;
@@ -1771,14 +1771,14 @@ Price Calendar: Phone XYZ in PL
 
 **Notifications:** when price about to change, notify subscribers (sales reps, customers via email, etc.).
 
-**Pułapka rozmowna:** Timezone in `valid_from` — UTC vs local. Document. Druga: `effective_priority` dla overrides — promo z priority 100 może override base price z priority 10 nawet jeśli base ma later valid_from. Subtle, audit critical.
-**Tagi:** price-calendar, query, api, temporal
+**Interview trap:** Timezone in `valid_from` — UTC vs local. Document. Druga: `effective_priority` dla overrides — promo z priority 100 może override base price z priority 10 nawet jeśli base ma later valid_from. Subtle, audit critical.
+**Tags:** price-calendar, query, api, temporal
 
 ---
 
 ## Q-PRC-025 [bloom: analyze]
-**Pytanie:** Jako engineer pricing platformy, jaki design pattern wybierasz dla complex pricing rules: hardcoded if-else, rule engine (Drools), DSL (Groovy), albo data-driven config?
-**Modelowa odpowiedź:** Trade-offy każdego:
+**Question:** Jako engineer pricing platformy, jaki design pattern wybierasz dla complex pricing rules: hardcoded if-else, rule engine (Drools), DSL (Groovy), albo data-driven config?
+**Model answer:** Trade-offy każdego:
 
 **1. Hardcoded if-else (Java/Groovy logic):**
 - ✓ Performance: native code, fastest.
@@ -1872,12 +1872,12 @@ When complexity grows (after PMF) → **add Groovy DSL or Drools** for the 20% c
 
 For massive enterprise → **commercial pricing platforms** (Pricefx, Vendavo) which combine all approaches with workflow, audit, simulations.
 
-**Pułapka rozmowna:** „Drools jest standard" — was. Many companies migrate away from Drools (heavy, complex). Modern alternatives: simpler libraries (RuleBook, Easy Rules), or custom DSL. Druga: „Config-driven jest enough" — for stable small business yes; for evolving complex pricing, programmable rules become necessity.
-**Tagi:** rule-engine, dsl, architecture, decision
+**Interview trap:** „Drools jest standard" — was. Many companies migrate away from Drools (heavy, complex). Modern alternatives: simpler libraries (RuleBook, Easy Rules), or custom DSL. Druga: „Config-driven jest enough" — for stable small business yes; for evolving complex pricing, programmable rules become necessity.
+**Tags:** rule-engine, dsl, architecture, decision
 
 ## Q-PRC-026 [bloom: analyze]
-**Pytanie:** Pricing platform ma zostać udostępniona partnerom (white-label / multi-tenant). Jakie wyzwania pricingowe?
-**Modelowa odpowiedź:** Multi-tenant pricing platform — każdy partner customer-tenant ma własne dane, własne reguły, ale shared infrastructure. **Wyzwania:**
+**Question:** Pricing platform ma zostać udostępniona partnerom (white-label / multi-tenant). Jakie wyzwania pricingowe?
+**Model answer:** Multi-tenant pricing platform — każdy partner customer-tenant ma własne dane, własne reguły, ale shared infrastructure. **Wyzwania:**
 
 **1. Data isolation:**
 - **Schema-per-tenant** — każdy tenant own DB schema. Plus: strict isolation, per-tenant backup. Minus: schema migrations skalują N×.
@@ -1965,12 +1965,12 @@ For massive enterprise → **commercial pricing platforms** (Pricefx, Vendavo) w
 
 **Real-world examples:** Stripe (payments), Shopify (e-commerce), Vendavo (B2B pricing), all are multi-tenant pricing-related platforms.
 
-**Pułapka rozmowna:** Data isolation by app-level alone (without DB-level RLS) — if app code has bug, leaks. Defense in depth: app filtering + DB RLS + audit. Druga: assuming all tenants are similar — sales pitches everything; reality is each tenant has unique edge cases. Build in flexibility.
-**Tagi:** multi-tenant, platform, architecture, decision
+**Interview trap:** Data isolation by app-level alone (without DB-level RLS) — if app code has bug, leaks. Defense in depth: app filtering + DB RLS + audit. Druga: assuming all tenants are similar — sales pitches everything; reality is each tenant has unique edge cases. Build in flexibility.
+**Tags:** multi-tenant, platform, architecture, decision
 
 ## Q-PRC-027 [bloom: analyze]
-**Pytanie:** Twój pricing engine został dotknięty incidentem: wszystkie ceny zwracały 0 przez 30 minut. Jak prowadzisz post-mortem?
-**Modelowa odpowiedź:** Post-mortem template (blameless, focused on systemic improvements):
+**Question:** Twój pricing engine został dotknięty incidentem: wszystkie ceny zwracały 0 przez 30 minut. Jak prowadzisz post-mortem?
+**Model answer:** Post-mortem template (blameless, focused on systemic improvements):
 
 **1. Incident summary:**
 - **Title:** "Pricing API zwracało 0 PLN dla 30 minut, 2026-05-06 14:30 - 15:00 UTC"
@@ -2054,12 +2054,12 @@ For massive enterprise → **commercial pricing platforms** (Pricefx, Vendavo) w
 - Communication with sales team (some quotes might've gone out at wrong prices — recall).
 - Compliance — depending on jurisdiction, big pricing errors might need regulatory disclosure.
 
-**Pułapka rozmowna:** „Find who broke it and fire them" — antipattern. Punishing individuals discourages reporting, kills psychological safety, doesn't fix systemic causes. Druga: „Add more tests" alone — without process changes (canary, monitoring), more tests still miss edge cases. Defense in depth: tests + canary + monitoring + safeguards.
-**Tagi:** post-mortem, incident-response, reliability
+**Interview trap:** „Find who broke it and fire them" — antipattern. Punishing individuals discourages reporting, kills psychological safety, doesn't fix systemic causes. Druga: „Add more tests" alone — without process changes (canary, monitoring), more tests still miss edge cases. Defense in depth: tests + canary + monitoring + safeguards.
+**Tags:** post-mortem, incident-response, reliability
 
 ## Q-PRC-028 [bloom: analyze]
-**Pytanie:** Twój zespół rozważa migracji starego pricing engine (Java EE, monolit, 15 lat) do nowego stack (Spring Boot microservices). Strategia?
-**Modelowa odpowiedź:** Klasyczny strangler fig pattern. Big-bang rewrite = wszystko może rozjebać.
+**Question:** Twój zespół rozważa migracji starego pricing engine (Java EE, monolit, 15 lat) do nowego stack (Spring Boot microservices). Strategia?
+**Model answer:** Klasyczny strangler fig pattern. Big-bang rewrite = wszystko może rozjebać.
 
 **Phase 0 — Discovery (1-2 miesiące):**
 - **Inventory** wszystkich features starego engine. Często zaskakuje ile rzeczy jest.
@@ -2145,12 +2145,12 @@ Pricing connects to ERP, CRM, e-commerce, CPQ. Each has its own quirks. Migrate 
 - Exception: very small systems, or new domain (existing system unsalvageable).
 - Joel Spolsky's classic "Things You Should Never Do, Part 1": rewrite is one of the worst strategic mistakes.
 
-**Pułapka rozmowna:** „We can't migrate piece by piece, everything is interconnected" — usually solvable with good API design + adapters. „Big bang in 3 months" — almost never works for legacy. Druga: „We'll just rewrite it on the side" — without strangler discipline, becomes vapor or replaces with the same kludges.
-**Tagi:** migration, legacy, strangler, architecture
+**Interview trap:** „We can't migrate piece by piece, everything is interconnected" — usually solvable with good API design + adapters. „Big bang in 3 months" — almost never works for legacy. Druga: „We'll just rewrite it on the side" — without strangler discipline, becomes vapor or replaces with the same kludges.
+**Tags:** migration, legacy, strangler, architecture
 
 ## Q-PRC-029 [bloom: analyze]
-**Pytanie:** Discount stacking — wybór: declarative rules (data-driven) vs imperative code. Co dla pricingu?
-**Modelowa odpowiedź:** **Declarative (rules in DB / config):**
+**Question:** Discount stacking — wybór: declarative rules (data-driven) vs imperative code. Co dla pricingu?
+**Model answer:** **Declarative (rules in DB / config):**
 - Plus: business team can edit (within bounds), no code change for new promo, audit-friendly, A/B testable.
 - Minus: limited to predefined rule types, hard to express conditional logic, performance overhead of rule engine, debugging trickier.
 
@@ -2288,12 +2288,12 @@ public List<AppliedPromotion> evaluateStacking(List<EligiblePromotion> eligible)
 - **Growing** — add imperative for special cases.
 - **Mature enterprise** — full hybrid with DSL.
 
-**Pułapka rozmowna:** „Pure declarative jest enough" — naïve. Real businesses always have „one weird rule" requiring imperative. Plan for it. Druga: „All in code" — sales/marketing can't iterate, you become bottleneck.
-**Tagi:** declarative, imperative, dsl, stacking, decision
+**Interview trap:** „Pure declarative jest enough" — naïve. Real businesses always have „one weird rule" requiring imperative. Plan for it. Druga: „All in code" — sales/marketing can't iterate, you become bottleneck.
+**Tags:** declarative, imperative, dsl, stacking, decision
 
 ## Q-PRC-030 [bloom: analyze]
-**Pytanie:** Sales rep żąda nowej funkcji w pricing engine: dla niektórych klientów cena mają być widoczna jako "Call for price" zamiast number. Twoja reakcja jako engineer?
-**Modelowa odpowiedź:** **Don't reject knee-jerk. Don't accept blindly.** Pytania pierwsze:
+**Question:** Sales rep żąda nowej funkcji w pricing engine: dla niektórych klientów cena mają być widoczna jako "Call for price" zamiast number. Twoja reakcja jako engineer?
+**Model answer:** **Don't reject knee-jerk. Don't accept blindly.** Pytania pierwsze:
 
 **1. Why?**
 - "Call for price" suggests price negotiable, custom quote needed. Why niektórzy klienci?
@@ -2383,12 +2383,12 @@ private boolean shouldHidePrice(PricingContext ctx) {
 - "Yes, easy" → goes off, builds tightly-coupled feature, sales rep finds it doesn't fit their workflow.
 - "No, that's not how pricing should work" → blocks business need without alternative.
 
-**Pułapka rozmowna:** „Sales asks for X, build X" — without questioning, builds the wrong thing. Real ask might be different. „Sales asks for X, build Y" — the engineer's idea — without alignment, builds something nobody uses. Right balance: understand intent, propose options, align, build.
-**Tagi:** product-thinking, requirements, decision, communication
+**Interview trap:** „Sales asks for X, build X" — without questioning, builds the wrong thing. Real ask might be different. „Sales asks for X, build Y" — the engineer's idea — without alignment, builds something nobody uses. Right balance: understand intent, propose options, align, build.
+**Tags:** product-thinking, requirements, decision, communication
 
 ## Q-PRC-031 [bloom: analyze]
-**Pytanie:** Twój pricing engine ma audit log dla każdej kalkulacji. Jak zarządzasz storage / cost dla logów które rosną do TB-ów?
-**Modelowa odpowiedź:** Audit logs scaling — common problem. Zaczyna się jako "save everything", kończy w TB i sluggish queries.
+**Question:** Twój pricing engine ma audit log dla każdej kalkulacji. Jak zarządzasz storage / cost dla logów które rosną do TB-ów?
+**Model answer:** Audit logs scaling — common problem. Zaczyna się jako "save everything", kończy w TB i sluggish queries.
 
 **Strategie:**
 
@@ -2489,12 +2489,12 @@ Old partitions:
 - After 7 days, export to S3 (Parquet compressed).
 - DROP partition (instant, vs DELETE which is slow).
 
-**Pułapka rozmowna:** „Save everything forever, just in case" — runaway cost. Define retention upfront. „Archive to S3 = no thinking about it" — when need to query archived data, retrieval cost + time can be brutal. Plan query patterns before archiving format.
-**Tagi:** audit, storage, scaling, cost, retention
+**Interview trap:** „Save everything forever, just in case" — runaway cost. Define retention upfront. „Archive to S3 = no thinking about it" — when need to query archived data, retrieval cost + time can be brutal. Plan query patterns before archiving format.
+**Tags:** audit, storage, scaling, cost, retention
 
 ## Q-PRC-032 [bloom: analyze]
-**Pytanie:** Rekruter pyta na rozmowie: "Widziałeś nasz pricing platform? Co byś poprawił?". Jak odpowiadasz?
-**Modelowa odpowiedź:** Pułapka. Cel: pokaż research i myślenie produktowe, ale nie rozjeb produktu rekrutera (insulting + nie wiesz constraints). 
+**Question:** Rekruter pyta na rozmowie: "Widziałeś nasz pricing platform? Co byś poprawił?". Jak odpowiadasz?
+**Model answer:** Pułapka. Cel: pokaż research i myślenie produktowe, ale nie rozjeb produktu rekrutera (insulting + nie wiesz constraints). 
 
 **Strategia odpowiedzi:**
 
@@ -2558,5 +2558,5 @@ Pokaż że umiesz dyskutować w nuance, nie pomawiać.
 - Otwarte na pushback.
 - Przykład: "Zaintrygowała mnie wasza approach do CPQ — czy myśleliście o cachingu wyników configuration validation? W dużych config trees może być expensive. Ale to spekulacja z zewnątrz."
 
-**Pułapka rozmowna:** Próba zrobić wrażenie wyzwaniem statu quo — często traktowane jako arrogant junior. Senior engineer pokazuje że szanuje complexity, pyta przed sądzeniem. Druga: nie powiedzieć nic substantywnie ("everything looks great") — flat affect, no engagement.
-**Tagi:** interview, soft-skills, communication, product-thinking
+**Interview trap:** Próba zrobić wrażenie wyzwaniem statu quo — często traktowane jako arrogant junior. Senior engineer pokazuje że szanuje complexity, pyta przed sądzeniem. Druga: nie powiedzieć nic substantywnie ("everything looks great") — flat affect, no engagement.
+**Tags:** interview, soft-skills, communication, product-thinking

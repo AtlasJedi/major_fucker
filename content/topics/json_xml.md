@@ -1,8 +1,8 @@
-# JSON / XML — bank pytań
+# JSON / XML — question bank
 
-> Kontekst: pricing engine konsumujący XML feedy z legacy ERP, eksponujący JSON dla nowoczesnych klientów. Parsowanie, walidacja, transformacja, performance.
+> Context: pricing engine consuming XML feeds from legacy ERP, exposing JSON for modern clients. Parsing, validation, transformation, performance.
 
-## Zakres
+## Scope
 
 - JSON: składnia, typy, ograniczenia (np. brak komentarzy, brak trailing commas standardowo)
 - JSON Schema: walidacja struktury, typów, constraints
@@ -20,14 +20,14 @@
 ---
 
 ## Q-JX-001 [bloom: recall]
-**Pytanie:** Jakie typy danych ma JSON?
-**Modelowa odpowiedź:** JSON ma 6 typów: 1) **string** w cudzysłowach `"foo"` — Unicode, escape sequences (`\n`, `\"`, `A`). 2) **number** — int lub float, bez prefiksów, bez NaN/Infinity (te są nielegalne w JSON, choć niektóre parsery akceptują). 3) **boolean** — `true` lub `false`. 4) **null**. 5) **array** — `[v1, v2, ...]`, mieszane typy dozwolone. 6) **object** — `{"key": value, ...}` z keys-stringami. Brak: dat, BigInteger, BigDecimal, undefined (to JS, nie JSON), komentarzy. Komentarze nielegalne w standardzie (ale JSONC, JSON5 to dorzucają jako rozszerzenia).
-**Pułapka rozmowna:** „JSON wspiera daty" — false. Daty są stringami w JSON, format umowny (ISO 8601). „BigInteger w JSON" — number nie ma rozmiaru gwarantowanego, parsery często gubią precyzję ponad 2^53. Dla precyzji — string z notacją (`"123456789012345.99"`).
-**Tagi:** json, types, basics
+**Question:** Jakie typy danych ma JSON?
+**Model answer:** JSON ma 6 typów: 1) **string** w cudzysłowach `"foo"` — Unicode, escape sequences (`\n`, `\"`, `A`). 2) **number** — int lub float, bez prefiksów, bez NaN/Infinity (te są nielegalne w JSON, choć niektóre parsery akceptują). 3) **boolean** — `true` lub `false`. 4) **null**. 5) **array** — `[v1, v2, ...]`, mieszane typy dozwolone. 6) **object** — `{"key": value, ...}` z keys-stringami. Brak: dat, BigInteger, BigDecimal, undefined (to JS, nie JSON), komentarzy. Komentarze nielegalne w standardzie (ale JSONC, JSON5 to dorzucają jako rozszerzenia).
+**Interview trap:** „JSON wspiera daty" — false. Daty są stringami w JSON, format umowny (ISO 8601). „BigInteger w JSON" — number nie ma rozmiaru gwarantowanego, parsery często gubią precyzję ponad 2^53. Dla precyzji — string z notacją (`"123456789012345.99"`).
+**Tags:** json, types, basics
 
 ## Q-JX-002 [bloom: recall]
-**Pytanie:** Co to jest JSON Schema?
-**Modelowa odpowiedź:** JSON Schema to standard opisu i walidacji dokumentów JSON. Sam jest dokumentem JSON — meta-schema. **Przykład:**
+**Question:** Co to jest JSON Schema?
+**Model answer:** JSON Schema to standard opisu i walidacji dokumentów JSON. Sam jest dokumentem JSON — meta-schema. **Przykład:**
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -43,12 +43,12 @@
 }
 ```
 **Co waliduje:** typ (string/number/array/...), wymagane pola, format (date, email, uri), constraints (min/max, minLength, pattern z regex), enum, oneOf/anyOf/allOf (logiczne kombinacje), conditional schemas (if/then/else). **Użycie:** OpenAPI używa JSON Schema do request/response bodies. Konsumenci dokumentacji + walidacja runtime. Generation modeli (TypeScript types z JSON Schema). **Tooling:** Ajv (Node.js), `jsonschema` (Python), `everit-org/json-schema` (Java), `networknt/json-schema-validator` (Java).
-**Pułapka rozmowna:** Drafts — JSON Schema ma wersje (draft-04, draft-06, draft-07, 2019-09, 2020-12). Różnice w składni (`$id` vs `id`, `$ref` semantyka). Walidator musi wspierać konkretną wersję podaną w `$schema`.
-**Tagi:** json-schema, validation
+**Interview trap:** Drafts — JSON Schema ma wersje (draft-04, draft-06, draft-07, 2019-09, 2020-12). Różnice w składni (`$id` vs `id`, `$ref` semantyka). Walidator musi wspierać konkretną wersję podaną w `$schema`.
+**Tags:** json-schema, validation
 
 ## Q-JX-003 [bloom: recall]
-**Pytanie:** Czym jest XML namespace?
-**Modelowa odpowiedź:** XML namespace pozwala uniknąć konfliktów nazw między dokumentami z różnych źródeł. Deklaracja: atrybut `xmlns="URI"` (default ns) lub `xmlns:prefix="URI"`. Przykład:
+**Question:** Czym jest XML namespace?
+**Model answer:** XML namespace pozwala uniknąć konfliktów nazw między dokumentami z różnych źródeł. Deklaracja: atrybut `xmlns="URI"` (default ns) lub `xmlns:prefix="URI"`. Przykład:
 ```xml
 <root xmlns:price="http://example.com/pricing" xmlns:cust="http://example.com/customer">
   <price:amount currency="PLN">100</price:amount>
@@ -56,18 +56,18 @@
 </root>
 ```
 URI to identyfikator namespace'u — nie musi prowadzić nigdzie, to globalnie unikalne ID. Prefix (`price`, `cust`) to lokalny alias. Domyślny namespace bez prefixu obowiązuje cały subtree dopóki nie redefinowany. **XPath musi uwzględniać namespace** — `//price:amount` (z bind-em prefix → URI w kontekście query).
-**Pułapka rozmowna:** „XML bez namespace działa tak samo z namespace" — false. Element `<amount>` (bez ns) ≠ `<amount>` (z default ns). Query bez deklaracji namespace nie znajdzie elementów z namespace. Druga: pomylenie URI z URL — URI nie musi być fetchable.
-**Tagi:** xml, namespaces
+**Interview trap:** „XML bez namespace działa tak samo z namespace" — false. Element `<amount>` (bez ns) ≠ `<amount>` (z default ns). Query bez deklaracji namespace nie znajdzie elementów z namespace. Druga: pomylenie URI z URL — URI nie musi być fetchable.
+**Tags:** xml, namespaces
 
 ## Q-JX-004 [bloom: recall]
-**Pytanie:** Wymień 3 modele parsowania XML i krótko opisz.
-**Modelowa odpowiedź:** 1) **DOM (Document Object Model)** — parser ładuje cały XML do drzewa obiektów w pamięci. Plus: full random access, łatwa modyfikacja, XPath. Minus: pamięć O(rozmiar dokumentu) — duże pliki = OOM. Java: `DocumentBuilder`, Groovy: `XmlParser`. 2) **SAX (Simple API for XML)** — push parser. Generuje events (`startElement`, `characters`, `endElement`) podczas streamowania. Aplikacja implementuje `DefaultHandler` i reaguje. Plus: O(1) pamięć, fast. Minus: aplikacja sama buduje state, brak random access, jednokierunkowy. Java: `SAXParser`. 3) **StAX (Streaming API for XML)** — pull parser. Aplikacja iteruje przez events (`reader.next()`). Plus: O(1) pamięć, control flow w aplikacji (łatwiej niż callback w SAX), bidirectional pomocniczne tools. Java: `XMLStreamReader`/`XMLEventReader`. 4) Bonus: **JAXB / data binding** — mapuje XML na POJOs (annotacje). Wygodne, ale memory-bound jak DOM (full unmarshal).
-**Pułapka rozmowna:** „SAX jest faster than DOM" — niekoniecznie speed-wise; często OOM-bound DOM jest wolniejszy ze względu na GC. SAX is memory-efficient. Druga: zarządzanie state w SAX jest złożone — łatwo zrobić bug w handlerze.
-**Tagi:** xml, parsing, dom, sax, stax
+**Question:** Wymień 3 modele parsowania XML i krótko opisz.
+**Model answer:** 1) **DOM (Document Object Model)** — parser ładuje cały XML do drzewa obiektów w pamięci. Plus: full random access, łatwa modyfikacja, XPath. Minus: pamięć O(rozmiar dokumentu) — duże pliki = OOM. Java: `DocumentBuilder`, Groovy: `XmlParser`. 2) **SAX (Simple API for XML)** — push parser. Generuje events (`startElement`, `characters`, `endElement`) podczas streamowania. Aplikacja implementuje `DefaultHandler` i reaguje. Plus: O(1) pamięć, fast. Minus: aplikacja sama buduje state, brak random access, jednokierunkowy. Java: `SAXParser`. 3) **StAX (Streaming API for XML)** — pull parser. Aplikacja iteruje przez events (`reader.next()`). Plus: O(1) pamięć, control flow w aplikacji (łatwiej niż callback w SAX), bidirectional pomocniczne tools. Java: `XMLStreamReader`/`XMLEventReader`. 4) Bonus: **JAXB / data binding** — mapuje XML na POJOs (annotacje). Wygodne, ale memory-bound jak DOM (full unmarshal).
+**Interview trap:** „SAX jest faster than DOM" — niekoniecznie speed-wise; często OOM-bound DOM jest wolniejszy ze względu na GC. SAX is memory-efficient. Druga: zarządzanie state w SAX jest złożone — łatwo zrobić bug w handlerze.
+**Tags:** xml, parsing, dom, sax, stax
 
 ## Q-JX-005 [bloom: recall]
-**Pytanie:** Co to jest XSD?
-**Modelowa odpowiedź:** XSD (XML Schema Definition) to standard W3C do opisu struktury XML — sam jest dokumentem XML. Następca DTD z bogatszymi możliwościami. **Definiuje:**
+**Question:** Co to jest XSD?
+**Model answer:** XSD (XML Schema Definition) to standard W3C do opisu struktury XML — sam jest dokumentem XML. Następca DTD z bogatszymi możliwościami. **Definiuje:**
 - Elementy i atrybuty z typami (`xs:string`, `xs:int`, `xs:date`, `xs:decimal`, custom types).
 - Hierarchię (`complexType`, `sequence`, `choice`, `all`).
 - Kardynalność (`minOccurs`, `maxOccurs`).
@@ -96,12 +96,12 @@ URI to identyfikator namespace'u — nie musi prowadzić nigdzie, to globalnie u
 
 **Użycie:** runtime validation (parser z `setSchema(schema)`) — wszystkie błędy schema reportowane. Plus: code generation (XJC w JAXB generuje POJOs z XSD). XSD jest expressive ale verbose.
 
-**Pułapka rozmowna:** „XSD vs DTD" — DTD jest old, ograniczone (brak typowania, brak namespaces). XSD wygrywa. „XSD vs JSON Schema" — różne ekosystemy, koncepcyjnie podobne. XSD bardziej verbose, ale ma typy z fixed semantyką (xs:dateTime to ISO 8601 z timezone).
-**Tagi:** xml, xsd, validation, schema
+**Interview trap:** „XSD vs DTD" — DTD jest old, ograniczone (brak typowania, brak namespaces). XSD wygrywa. „XSD vs JSON Schema" — różne ekosystemy, koncepcyjnie podobne. XSD bardziej verbose, ale ma typy z fixed semantyką (xs:dateTime to ISO 8601 z timezone).
+**Tags:** xml, xsd, validation, schema
 
 ## Q-JX-006 [bloom: recall]
-**Pytanie:** Czym jest XPath?
-**Modelowa odpowiedź:** XPath to język query'owania XML — wyrażenia wybierające zestawy nodów. **Składnia:**
+**Question:** Czym jest XPath?
+**Model answer:** XPath to język query'owania XML — wyrażenia wybierające zestawy nodów. **Składnia:**
 - `/root/element` — absolutna ścieżka.
 - `//element` — szukaj wszędzie w drzewie.
 - `element[@attr='value']` — predykat na atrybucie.
@@ -115,12 +115,12 @@ URI to identyfikator namespace'u — nie musi prowadzić nigdzie, to globalnie u
 - `element[contains(text(), "foo")]` — funkcje string.
 
 **Przykład:** `//product[price/@currency='PLN' and price > 100]/name/text()` — nazwy produktów w PLN drożysze niż 100. **Wersje:** XPath 1.0 (najczęściej wspierany), 2.0, 3.0, 3.1 (XQuery-related, więcej typów). Większość Java implementacji to 1.0; Saxon ma 3.0+. **Użycie:** w XSLT, w kodzie aplikacji (Java `XPath`/`XPathExpression`), w XmlSlurper Groovy implicit, w narzędziach (xmllint --xpath).
-**Pułapka rozmowna:** Namespace must be declared w XPath context. `//ns:product` wymaga binding `ns` → URI. Bez tego query zwraca pusty result.
-**Tagi:** xpath, xml, query
+**Interview trap:** Namespace must be declared w XPath context. `//ns:product` wymaga binding `ns` → URI. Bez tego query zwraca pusty result.
+**Tags:** xpath, xml, query
 
 ## Q-JX-007 [bloom: recall]
-**Pytanie:** Co to jest XXE attack?
-**Modelowa odpowiedź:** XML External Entity — ataków na parser XML, który po default rozwija external entities w DTD. **Atak**: złośliwy XML zawiera DTD z entity referencującym lokalny plik:
+**Question:** Co to jest XXE attack?
+**Model answer:** XML External Entity — ataków na parser XML, który po default rozwija external entities w DTD. **Atak**: złośliwy XML zawiera DTD z entity referencującym lokalny plik:
 ```xml
 <?xml version="1.0"?>
 <!DOCTYPE foo [
@@ -134,32 +134,32 @@ Parser bez ograniczeń wczytuje `/etc/passwd`, wstawia w `&xxe;`, aplikacja moż
 - Java: `XMLConstants.ACCESS_EXTERNAL_DTD = ""` i `ACCESS_EXTERNAL_SCHEMA = ""`.
 - Groovy `XmlSlurper`/`XmlParser` od 2.5.x mają secure defaults, ale verify per version.
 - Dla untrusted XML: użyj sandboxed parser, walidacja size limit, depth limit.
-**Pułapka rozmowna:** „SAX nie jest podatny" — false, każdy parser bez secure config. JAXB unmarshal też domyślnie podatny — `Source` przed unmarshal musi być sanitized. SOAP web services to klasyczny vector — XML body parsed by framework.
-**Tagi:** xml, security, xxe
+**Interview trap:** „SAX nie jest podatny" — false, każdy parser bez secure config. JAXB unmarshal też domyślnie podatny — `Source` przed unmarshal musi być sanitized. SOAP web services to klasyczny vector — XML body parsed by framework.
+**Tags:** xml, security, xxe
 
 ## Q-JX-008 [bloom: recall]
-**Pytanie:** Czym różni się Jackson od Gson?
-**Modelowa odpowiedź:** Oba to biblioteki Java do JSON ↔ Object mapping. **Jackson** — rozwijany przez FasterXML, najwięcej featurów. Annotations: `@JsonProperty`, `@JsonIgnore`, `@JsonFormat`, `@JsonSubTypes` (polymorfizm), custom serializers, streaming API (`JsonParser`/`JsonGenerator`), data binding (`ObjectMapper.readValue()`/`writeValueAsString()`), tree model (`JsonNode`). Spring Boot używa Jackson by default. **Gson** — Google. Mniejszy, prostszy. Annotations: `@SerializedName`, `@Expose`. Brak natywnego polymorfizmu (trzeba `RuntimeTypeAdapterFactory`). Brak streaming aż tak rozwiniętego. Mniej annotacji. **Decyzja:**
+**Question:** Czym różni się Jackson od Gson?
+**Model answer:** Oba to biblioteki Java do JSON ↔ Object mapping. **Jackson** — rozwijany przez FasterXML, najwięcej featurów. Annotations: `@JsonProperty`, `@JsonIgnore`, `@JsonFormat`, `@JsonSubTypes` (polymorfizm), custom serializers, streaming API (`JsonParser`/`JsonGenerator`), data binding (`ObjectMapper.readValue()`/`writeValueAsString()`), tree model (`JsonNode`). Spring Boot używa Jackson by default. **Gson** — Google. Mniejszy, prostszy. Annotations: `@SerializedName`, `@Expose`. Brak natywnego polymorfizmu (trzeba `RuntimeTypeAdapterFactory`). Brak streaming aż tak rozwiniętego. Mniej annotacji. **Decyzja:**
 - Jackson dla większości projektów Java (ekosystem, performance, integracje Spring).
 - Gson dla Android (mniejszy footprint), dla prostych use-cases bez polymorphism.
 - Inne: `kotlinx.serialization` (Kotlin native), Moshi (Square, mocniejsze niż Gson, KMP), JSON-B (standard Java EE/Jakarta).
-**Pułapka rozmowna:** Performance benchmarks — Jackson zazwyczaj wygrywa, ale Moshi/Gson są wystarczająco szybkie dla większości. Wymiar krytyczny zazwyczaj nie performance, tylko features (polymorfizm, custom types, mixins).
-**Tagi:** json, jackson, gson, java
+**Interview trap:** Performance benchmarks — Jackson zazwyczaj wygrywa, ale Moshi/Gson są wystarczająco szybkie dla większości. Wymiar krytyczny zazwyczaj nie performance, tylko features (polymorfizm, custom types, mixins).
+**Tags:** json, jackson, gson, java
 
 ---
 
 ## Q-JX-009 [bloom: understand]
-**Pytanie:** Wytłumacz różnicę między DOM a streaming dla XML 1 GB.
-**Modelowa odpowiedź:** **DOM** ładuje cały dokument do drzewa w pamięci. Dla 1 GB XML w-RAM reprezentacja zazwyczaj 3-10x większa (pointer overhead, Object headers, char arrays per text node) — czyli 3-10 GB RAM. Heap niemożliwy w typowym serwerze, OOM. **Streaming (SAX/StAX)** — parser czyta dokument liniowo. Aplikacja przetwarza event-po-event, w danym momencie trzyma tylko fragment (np. aktualny rekord). 1 GB plik można sparsować w 100 MB RAM albo mniej. **Trade-offy:** DOM łatwy w użyciu (XPath, modyfikacja), streaming wymaga ręcznego state managementu — wiesz że jesteś w `<product>` ale nie masz contextu poza nim. **Hybrid:** parser streamuje do levelu rekordu (np. `<product>`), dla każdego rekordu robi mały DOM (1 produkt to kilkadziesiąt nodów), przekazuje do business logic. Java `JAXB unmarshaller` z `XMLEventReader` source umie tak. **Konkretne wybory dla pricingu:**
+**Question:** Wytłumacz różnicę między DOM a streaming dla XML 1 GB.
+**Model answer:** **DOM** ładuje cały dokument do drzewa w pamięci. Dla 1 GB XML w-RAM reprezentacja zazwyczaj 3-10x większa (pointer overhead, Object headers, char arrays per text node) — czyli 3-10 GB RAM. Heap niemożliwy w typowym serwerze, OOM. **Streaming (SAX/StAX)** — parser czyta dokument liniowo. Aplikacja przetwarza event-po-event, w danym momencie trzyma tylko fragment (np. aktualny rekord). 1 GB plik można sparsować w 100 MB RAM albo mniej. **Trade-offy:** DOM łatwy w użyciu (XPath, modyfikacja), streaming wymaga ręcznego state managementu — wiesz że jesteś w `<product>` ale nie masz contextu poza nim. **Hybrid:** parser streamuje do levelu rekordu (np. `<product>`), dla każdego rekordu robi mały DOM (1 produkt to kilkadziesiąt nodów), przekazuje do business logic. Java `JAXB unmarshaller` z `XMLEventReader` source umie tak. **Konkretne wybory dla pricingu:**
 - 1 GB ERP feed → StAX scanowanie do `<product>`, na każdym JAXB unmarshal pojedynczego produktu, batch insert do DB. 200 MB heap wystarczy.
 - 100 MB wciąż często DOM jest szybszy (mniej overhead na event dispatch).
 - 10 MB+ — DOM bezpieczny.
-**Pułapka rozmowna:** „Async parser" — XML parsery są generalnie sync I/O (read-then-process). Dla async streaming z network input — wrap w reactive (Project Reactor) i pull events.
-**Tagi:** xml, streaming, performance, scaling
+**Interview trap:** „Async parser" — XML parsery są generalnie sync I/O (read-then-process). Dla async streaming z network input — wrap w reactive (Project Reactor) i pull events.
+**Tags:** xml, streaming, performance, scaling
 
 ## Q-JX-010 [bloom: understand]
-**Pytanie:** Jak Jackson obsługuje polymorfizm? Pokaż na przykładzie hierarchii `Promotion`/`PercentDiscount`/`FixedDiscount`.
-**Modelowa odpowiedź:** Jackson wspiera kilka strategii. **`@JsonTypeInfo` + `@JsonSubTypes`** to klasyk:
+**Question:** Jak Jackson obsługuje polymorfizm? Pokaż na przykładzie hierarchii `Promotion`/`PercentDiscount`/`FixedDiscount`.
+**Model answer:** Jackson wspiera kilka strategii. **`@JsonTypeInfo` + `@JsonSubTypes`** to klasyk:
 ```java
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -189,12 +189,12 @@ Serializacja:
 ```
 Jackson czyta `type` field, decyduje którą subklasę zinstancjować. Strategie: `Id.NAME` (string label), `Id.CLASS` (full class name — security risk: nie używaj dla untrusted JSON), `Id.MINIMAL_CLASS`, `Id.CUSTOM`. Include strategies: `As.PROPERTY` (top-level field), `As.WRAPPER_OBJECT` (`{"percent": {...}}`), `As.WRAPPER_ARRAY`, `As.EXISTING_PROPERTY`, `As.DEDUCTION` (zgadnij z fields).
 
-**Pułapka rozmowna:** `Id.CLASS` = security risk. Atakujący może podsunąć klasy systemowe (np. `org.springframework.context.support.ClassPathXmlApplicationContext` z konstruktorem URL → RCE). Wszystkie warianty automatycznego loadowania klas są niebezpieczne dla untrusted input. Whitelist subtypes via `@JsonSubTypes`. Druga: `@JsonSubTypes` musi pokryć wszystkie subklasy używane runtime — niedopisany typ → exception.
-**Tagi:** jackson, polymorphism, security
+**Interview trap:** `Id.CLASS` = security risk. Atakujący może podsunąć klasy systemowe (np. `org.springframework.context.support.ClassPathXmlApplicationContext` z konstruktorem URL → RCE). Wszystkie warianty automatycznego loadowania klas są niebezpieczne dla untrusted input. Whitelist subtypes via `@JsonSubTypes`. Druga: `@JsonSubTypes` musi pokryć wszystkie subklasy używane runtime — niedopisany typ → exception.
+**Tags:** jackson, polymorphism, security
 
 ## Q-JX-011 [bloom: understand]
-**Pytanie:** Co to jest XSLT i jakie jest typowe zastosowanie?
-**Modelowa odpowiedź:** XSLT (Extensible Stylesheet Language Transformations) to język transformacji XML → XML/HTML/text. Sam jest dokumentem XML. Działa przez **template matching** — definiujesz templates pasujące do węzłów XPath, każdy template generuje fragment outputu. Wersje 1.0, 2.0, 3.0. **Przykład — transformacja XML pricelist do HTML table:**
+**Question:** Co to jest XSLT i jakie jest typowe zastosowanie?
+**Model answer:** XSLT (Extensible Stylesheet Language Transformations) to język transformacji XML → XML/HTML/text. Sam jest dokumentem XML. Działa przez **template matching** — definiujesz templates pasujące do węzłów XPath, każdy template generuje fragment outputu. Wersje 1.0, 2.0, 3.0. **Przykład — transformacja XML pricelist do HTML table:**
 ```xml
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:template match="/pricelist">
@@ -220,12 +220,12 @@ Jackson czyta `type` field, decyduje którą subklasę zinstancjować. Strategie
 
 **Alternatywy:** w pricing engine zazwyczaj XSLT to legacy. Nowy kod to częściej imperative transformation w Javie/Groovym (więcej elastyczności, łatwiej testować). XSLT przeżywa gdzie business analysts pisali transformacje samodzielnie.
 
-**Pułapka rozmowna:** „XSLT jest zawsze deklaratywne" — w teorii. W praktyce ekspresywność zmusza do sztuczek (recursion zamiast loops, `xsl:variable` z workaroundem na immutability). XSLT 2.0+ z `xsl:function` jest cywilizowany.
-**Tagi:** xslt, xml, transformation
+**Interview trap:** „XSLT jest zawsze deklaratywne" — w teorii. W praktyce ekspresywność zmusza do sztuczek (recursion zamiast loops, `xsl:variable` z workaroundem na immutability). XSLT 2.0+ z `xsl:function` jest cywilizowany.
+**Tags:** xslt, xml, transformation
 
 ## Q-JX-012 [bloom: understand]
-**Pytanie:** Wyjaśnij co robi `@JsonInclude(JsonInclude.Include.NON_NULL)` i jakie są inne wartości.
-**Modelowa odpowiedź:** `@JsonInclude` kontroluje które pola są SERIALIZOWANE (deserializacja nieaffected). Wartości:
+**Question:** Wyjaśnij co robi `@JsonInclude(JsonInclude.Include.NON_NULL)` i jakie są inne wartości.
+**Model answer:** `@JsonInclude` kontroluje które pola są SERIALIZOWANE (deserializacja nieaffected). Wartości:
 - **`ALWAYS`** (default) — zawsze, włącznie z null.
 - **`NON_NULL`** — pomija pola null. Mniejszy JSON output, czytelniejszy.
 - **`NON_EMPTY`** — pomija null + empty (pusta lista, pusty string, pusta mapa, Optional.empty()).
@@ -251,12 +251,12 @@ new Product(name="Foo", price=100, description=null)
 
 **Trade-off:** mniejszy JSON (NON_NULL/NON_EMPTY) vs explicit kontrakt (klient widzi "null" zamiast nieistnienia pola). API design decision.
 
-**Pułapka rozmowna:** Dla collections — NON_EMPTY usuwa też pustą listę. Klient deserializing może oczekiwać empty list a dostaje brak pola → NPE w klientckim kodzie. Czasem ALWAYS lepiej niż NON_EMPTY dla kontraktu API.
-**Tagi:** jackson, serialization, annotations
+**Interview trap:** Dla collections — NON_EMPTY usuwa też pustą listę. Klient deserializing może oczekiwać empty list a dostaje brak pola → NPE w klientckim kodzie. Czasem ALWAYS lepiej niż NON_EMPTY dla kontraktu API.
+**Tags:** jackson, serialization, annotations
 
 ## Q-JX-013 [bloom: understand]
-**Pytanie:** Czym różni się `XmlSlurper` od `XmlParser` w Groovym? (Patrz Q-GRV-012 ale z fokusu JSON/XML.)
-**Modelowa odpowiedź:** **`XmlSlurper`** zwraca `GPathResult` — leniwy wrapper. Nawigacja `xml.product.name` zwraca proxy, dopiero `.text()` lub `.toString()` materializuje wartość. Pamięciowo tańszy dla query (parser leniwie buduje tylko to co potrzebne). Mutability: ograniczona — XML jest read-mostly. **`XmlParser`** zwraca pełne drzewo `Node`. Każdy element jest mutowalny. Pamięć większa (cały DOM). **Performance dla read-only:** Slurper często wygrywa. **Dla modify + serialize:** Parser. **Składnia:**
+**Question:** Czym różni się `XmlSlurper` od `XmlParser` w Groovym? (Patrz Q-GRV-012 ale z fokusu JSON/XML.)
+**Model answer:** **`XmlSlurper`** zwraca `GPathResult` — leniwy wrapper. Nawigacja `xml.product.name` zwraca proxy, dopiero `.text()` lub `.toString()` materializuje wartość. Pamięciowo tańszy dla query (parser leniwie buduje tylko to co potrzebne). Mutability: ograniczona — XML jest read-mostly. **`XmlParser`** zwraca pełne drzewo `Node`. Każdy element jest mutowalny. Pamięć większa (cały DOM). **Performance dla read-only:** Slurper często wygrywa. **Dla modify + serialize:** Parser. **Składnia:**
 - Slurper: `xml.product[0].@id` (atrybut przez `.@`), `xml.product*.name` (collect names of all products).
 - Parser: `xml.product[0].'@id'` (string-style atrybut), `xml.product.collect { it.name.text() }`.
 
@@ -264,12 +264,12 @@ new Product(name="Foo", price=100, description=null)
 
 **Bezpieczeństwo:** od Groovy 2.5+ oba mają secure defaults dla XXE — nie rozwijają external entities, `disallow-doctype-decl=true`. Pre-2.5 wymagało manual config.
 
-**Pułapka rozmowna:** „Slurper jest immutable" — nie do końca. Jest read-oriented, ale ma `.replaceNode { ... }` i podobne. Modyfikacja jest niewygodna, dlatego Parser preferowany do edycji.
-**Tagi:** groovy, xml, slurper, parser
+**Interview trap:** „Slurper jest immutable" — nie do końca. Jest read-oriented, ale ma `.replaceNode { ... }` i podobne. Modyfikacja jest niewygodna, dlatego Parser preferowany do edycji.
+**Tags:** groovy, xml, slurper, parser
 
 ## Q-JX-014 [bloom: understand]
-**Pytanie:** Jak Jackson radzi sobie z BigDecimal i czemu to ma znaczenie w pricingu?
-**Modelowa odpowiedź:** Jackson serializuje `BigDecimal` zachowując precyzję — domyślnie do JSON jako number bez naukowej notacji. Deserializacja: jeśli pole jest `BigDecimal`, Jackson używa `parseBigDecimal()`. Ale: **JSON number nie ma gwarantowanej precyzji**. Klient JS deserializujący `{"price": 99.99}` w JS dostaje float 99.99 — który jest faktycznie `99.98999999999999...` w binarnej reprezentacji.
+**Question:** Jak Jackson radzi sobie z BigDecimal i czemu to ma znaczenie w pricingu?
+**Model answer:** Jackson serializuje `BigDecimal` zachowując precyzję — domyślnie do JSON jako number bez naukowej notacji. Deserializacja: jeśli pole jest `BigDecimal`, Jackson używa `parseBigDecimal()`. Ale: **JSON number nie ma gwarantowanej precyzji**. Klient JS deserializujący `{"price": 99.99}` w JS dostaje float 99.99 — który jest faktycznie `99.98999999999999...` w binarnej reprezentacji.
 
 **W pricingu** musisz to rozwiązać. **Strategie:**
 1. **String w JSON dla wartości pieniężnych:** `{"price": "99.99"}`. Jackson custom serializer:
@@ -283,12 +283,12 @@ new Product(name="Foo", price=100, description=null)
 
 **Best practice w produkcyjnym pricingu:** pieniądze jako struktura `{amount: "99.99", currency: "PLN"}` z amount jako string. Jasny kontrakt, brak ambiguity.
 
-**Pułapka rozmowna:** `Float`/`Double` w pricingu = bug. `0.1 + 0.2 = 0.30000000000000004`. BigDecimal albo cents-int. `BigDecimal.ROUND_HALF_UP` vs `ROUND_HALF_EVEN` (banker's rounding) — wybierz ROUND_HALF_UP dla pricingu (intuicyjne dla biznesu).
-**Tagi:** jackson, bigdecimal, pricing, precision
+**Interview trap:** `Float`/`Double` w pricingu = bug. `0.1 + 0.2 = 0.30000000000000004`. BigDecimal albo cents-int. `BigDecimal.ROUND_HALF_UP` vs `ROUND_HALF_EVEN` (banker's rounding) — wybierz ROUND_HALF_UP dla pricingu (intuicyjne dla biznesu).
+**Tags:** jackson, bigdecimal, pricing, precision
 
 ## Q-JX-015 [bloom: understand]
-**Pytanie:** Co to jest "billion laughs attack"?
-**Modelowa odpowiedź:** XML denial-of-service przez rekurencyjne entity. Atakujący wysyła:
+**Question:** Co to jest "billion laughs attack"?
+**Model answer:** XML denial-of-service przez rekurencyjne entity. Atakujący wysyła:
 ```xml
 <?xml version="1.0"?>
 <!DOCTYPE lolz [
@@ -308,12 +308,12 @@ Każde entity jest 10x większe od poprzedniego. `&lol9;` = 10^9 = miliard razy 
 
 **Powiązane: XXE** (rozszerza external resource), **billion laughs** (rozszerza inline). Oba to klasy „entity expansion attacks". Java `secureProcessing` feature flagi blokuje większość.
 
-**Pułapka rozmowna:** „Disable DTD" wystarczy, jeśli aplikacja nie potrzebuje. Jeśli potrzebuje (legacy ERP feed z DTD) — limit expansion + size limit. Druga: „już blokuję XXE więc OK" — nie. Billion laughs nie wymaga external resource, atakuje rozwijanie wewnętrzne.
-**Tagi:** xml, security, dos
+**Interview trap:** „Disable DTD" wystarczy, jeśli aplikacja nie potrzebuje. Jeśli potrzebuje (legacy ERP feed z DTD) — limit expansion + size limit. Druga: „już blokuję XXE więc OK" — nie. Billion laughs nie wymaga external resource, atakuje rozwijanie wewnętrzne.
+**Tags:** xml, security, dos
 
 ## Q-JX-016 [bloom: understand]
-**Pytanie:** Gdy konwertujesz XML do JSON (lub odwrotnie), jakie są fundamentalne różnice które utrudniają mapowanie?
-**Modelowa odpowiedź:** **XML i JSON nie są izomorficzne.** Różnice:
+**Question:** Gdy konwertujesz XML do JSON (lub odwrotnie), jakie są fundamentalne różnice które utrudniają mapowanie?
+**Model answer:** **XML i JSON nie są izomorficzne.** Różnice:
 1. **Atrybuty vs zawartość:** XML ma `<elem attr="x">value</elem>`. JSON nie ma atrybutów. Konwencja: `{"elem": {"@attr": "x", "#text": "value"}}` lub flatten do `{"elem_attr": "x", "elem_text": "value"}`. Niejednoznaczne.
 2. **Mixed content:** XML pozwala na `<p>Text <b>bold</b> more text</p>` — text przeplatany elementami. JSON nie ma natywnego sposobu na zachowanie kolejności text+elements bez array of objects ze wskaźnikami typu.
 3. **Namespace:** XML ma `xmlns:foo="..."` z prefixami. JSON nie. Konwencje: prefiks w nazwie klucza (`"foo:price"`), albo separate `_namespaces` field.
@@ -325,14 +325,14 @@ Każde entity jest 10x większe od poprzedniego. `&lol9;` = 10^9 = miliard razy 
 
 **Praktyczne podejście:** nie próbuj generic XML↔JSON conversion. Map per use case — użyj data binding (JAXB dla XML, Jackson dla JSON) na wspólne POJOs, między nimi konwersja nie jest text-level ale model-level.
 
-**Pułapka rozmowna:** „Generic XML ↔ JSON converter" istnieje (org.json.XML.toJSONObject). Działa dla prostych przypadków, łamie się na atrybutach, mixed content, namespaces. Niewolno traktować jako universal solution.
-**Tagi:** xml, json, conversion, integration
+**Interview trap:** „Generic XML ↔ JSON converter" istnieje (org.json.XML.toJSONObject). Działa dla prostych przypadków, łamie się na atrybutach, mixed content, namespaces. Niewolno traktować jako universal solution.
+**Tags:** xml, json, conversion, integration
 
 ---
 
 ## Q-JX-017 [bloom: apply]
-**Pytanie:** Sparsuj poniższy JSON w Javie z Jackson i zwróć Map<String, BigDecimal> (currency → max price). JSON: `{"products":[{"name":"A","price":100,"currency":"PLN"},{"name":"B","price":50,"currency":"PLN"},{"name":"C","price":120,"currency":"EUR"}]}`.
-**Modelowa odpowiedź:**
+**Question:** Sparsuj poniższy JSON w Javie z Jackson i zwróć Map<String, BigDecimal> (currency → max price). JSON: `{"products":[{"name":"A","price":100,"currency":"PLN"},{"name":"B","price":50,"currency":"PLN"},{"name":"C","price":120,"currency":"EUR"}]}`.
+**Model answer:**
 ```java
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -375,12 +375,12 @@ Map<String, BigDecimal> maxPrices = resp.products.stream()
 
 **Tree model vs data binding:** tree model (JsonNode) elastyczny dla unknown structure, data binding type-safe i czytelniejszy dla known structure. **`USE_BIG_DECIMAL_FOR_FLOATS`** wymusza BigDecimal w deserialization JSON number → unika precision loss przez double.
 
-**Pułapka rozmowna:** `path()` vs `get()`. `path()` zwraca `MissingNode` dla brakujących pól (chain-friendly), `get()` zwraca `null` (NPE risk). Druga: `merge()` w `HashMap` jest atomic dla single-thread, ale dla concurrent `ConcurrentHashMap.merge()`.
-**Tagi:** jackson, json, parsing, java, pricing
+**Interview trap:** `path()` vs `get()`. `path()` zwraca `MissingNode` dla brakujących pól (chain-friendly), `get()` zwraca `null` (NPE risk). Druga: `merge()` w `HashMap` jest atomic dla single-thread, ale dla concurrent `ConcurrentHashMap.merge()`.
+**Tags:** jackson, json, parsing, java, pricing
 
 ## Q-JX-018 [bloom: apply]
-**Pytanie:** Wygeneruj XML cennika z mapy w Javie używając JAXB (lub bez biblioteki).
-**Modelowa odpowiedź:**
+**Question:** Wygeneruj XML cennika z mapy w Javie używając JAXB (lub bez biblioteki).
+**Model answer:**
 **Z JAXB:**
 ```java
 @XmlRootElement(name = "priceList")
@@ -433,12 +433,12 @@ writer.close();
 
 **JAXB plusy:** annotations-driven, mniej kodu, bidirectional (read+write). **JAXB minusy:** od Java 11+ jako osobna dependency (`jakarta.xml.bind`), warm-up overhead. **StAX plusy:** lekki, streaming-friendly dla wielkich plików, full control. **StAX minusy:** verbose kod.
 
-**Pułapka rozmowna:** JAXB w Java 11+ — usunięte z core JDK. Trzeba `javax.xml.bind:jaxb-api` lub `jakarta.xml.bind:jakarta.xml.bind-api` jako dep. Druga: `BigDecimal.toString()` może dawać scientific notation (`1E+2`); `toPlainString()` zawsze prosty zapis.
-**Tagi:** xml, jaxb, stax, java, pricing
+**Interview trap:** JAXB w Java 11+ — usunięte z core JDK. Trzeba `javax.xml.bind:jaxb-api` lub `jakarta.xml.bind:jakarta.xml.bind-api` jako dep. Druga: `BigDecimal.toString()` może dawać scientific notation (`1E+2`); `toPlainString()` zawsze prosty zapis.
+**Tags:** xml, jaxb, stax, java, pricing
 
 ## Q-JX-019 [bloom: apply]
-**Pytanie:** Dostajesz XML feed cennika, ale niektóre elementy mogą być null lub brakować. Pokaż jak bezpiecznie sparsować w Groovym (XmlSlurper).
-**Modelowa odpowiedź:**
+**Question:** Dostajesz XML feed cennika, ale niektóre elementy mogą być null lub brakować. Pokaż jak bezpiecznie sparsować w Groovym (XmlSlurper).
+**Model answer:**
 ```groovy
 import groovy.xml.XmlSlurper
 
@@ -487,12 +487,12 @@ def valid = products.findAll { it.id && it.name && it.price != null }
 
 **Alternative: XSD validation pre-parse:** zamiast defensive parsing, walidacja przeciw XSD przed parsowaniem. Wszystko co przejdzie ma znane elementy. Trade-off: XSD validation slower; missing fields w XSD muszą być `minOccurs=0`.
 
-**Pułapka rozmowna:** „Wartość 0 a brak" — `p.price.text()` zwraca pusty string dla brakującego elementu, ale `0` dla `<price>0</price>`. Subtle difference. Druga: `p.@nonexistent.toString()` zwraca `""` (Slurper zwraca empty Attribute), nie null. Stąd `?: null` na koniec.
-**Tagi:** xml, groovy, slurper, defensive, pricing
+**Interview trap:** „Wartość 0 a brak" — `p.price.text()` zwraca pusty string dla brakującego elementu, ale `0` dla `<price>0</price>`. Subtle difference. Druga: `p.@nonexistent.toString()` zwraca `""` (Slurper zwraca empty Attribute), nie null. Stąd `?: null` na koniec.
+**Tags:** xml, groovy, slurper, defensive, pricing
 
 ## Q-JX-020 [bloom: apply]
-**Pytanie:** Klient REST wysyła JSON z zagnieżdżoną strukturą zamówienia. Walidacja: każdy item musi mieć `quantity > 0`, `total = sum(items.price * quantity)` musi się zgadzać. Implementacja w Spring Boot z Jackson + Bean Validation.
-**Modelowa odpowiedź:**
+**Question:** Klient REST wysyła JSON z zagnieżdżoną strukturą zamówienia. Walidacja: każdy item musi mieć `quantity > 0`, `total = sum(items.price * quantity)` musi się zgadzać. Implementacja w Spring Boot z Jackson + Bean Validation.
+**Model answer:**
 ```java
 public class OrderDto {
     @NotNull
@@ -570,12 +570,12 @@ public class TotalConsistencyValidator implements ConstraintValidator<TotalConsi
 ```
 Bardziej reusable niż `@AssertTrue`.
 
-**Pułapka rozmowna:** `BigDecimal.equals()` ≠ `compareTo() == 0`. `new BigDecimal("1.00").equals(new BigDecimal("1.0"))` = false (różny scale), `compareTo() == 0` = true. Dla porównań wartości w pricingu — ZAWSZE `compareTo`. Druga: walidacja `total = sum` jest wrażliwa na precision; jeśli mnożenie generuje long decimal — porównaj z tolerancją albo zaokrąglij oba do scale 2.
-**Tagi:** json, validation, bean-validation, spring, pricing
+**Interview trap:** `BigDecimal.equals()` ≠ `compareTo() == 0`. `new BigDecimal("1.00").equals(new BigDecimal("1.0"))` = false (różny scale), `compareTo() == 0` = true. Dla porównań wartości w pricingu — ZAWSZE `compareTo`. Druga: walidacja `total = sum` jest wrażliwa na precision; jeśli mnożenie generuje long decimal — porównaj z tolerancją albo zaokrąglij oba do scale 2.
+**Tags:** json, validation, bean-validation, spring, pricing
 
 ## Q-JX-021 [bloom: apply]
-**Pytanie:** Użyj XmlSlurper i XPath-style do wyciągnięcia z XML feedu wszystkich produktów z kategorii "Electronics" i ceną w PLN > 500.
-**Modelowa odpowiedź:**
+**Question:** Użyj XmlSlurper i XPath-style do wyciągnięcia z XML feedu wszystkich produktów z kategorii "Electronics" i ceną w PLN > 500.
+**Model answer:**
 ```groovy
 def xml = '''
 <catalog>
@@ -634,12 +634,12 @@ def nodes = xpath.evaluate("//product[@category='Electronics']", domDoc, javax.x
 ```
 Verbose, ale prawdziwy XPath (jeśli zespół już go zna z Java).
 
-**Pułapka rozmowna:** `find` (Slurper) returns `GPathResult` (może być empty). Sprawdzenie `if (result)` w Groovy truth: empty GPathResult jest falsy, więc `find` zwraca empty → cała koniunkcja false. Działa, ale subtle. Druga: `toBigDecimal` na pustym text → NumberFormatException. Defense: `it.text() && it.toBigDecimal() > 500`.
-**Tagi:** xml, groovy, slurper, xpath, pricing
+**Interview trap:** `find` (Slurper) returns `GPathResult` (może być empty). Sprawdzenie `if (result)` w Groovy truth: empty GPathResult jest falsy, więc `find` zwraca empty → cała koniunkcja false. Działa, ale subtle. Druga: `toBigDecimal` na pustym text → NumberFormatException. Defense: `it.text() && it.toBigDecimal() > 500`.
+**Tags:** xml, groovy, slurper, xpath, pricing
 
 ## Q-JX-022 [bloom: apply]
-**Pytanie:** Twój system odbiera JSON z zewnętrznego ERP, gdzie pole `price` może przyjść jako number (`100.50`) albo string (`"100.50"`). Custom Jackson deserializer.
-**Modelowa odpowiedź:**
+**Question:** Twój system odbiera JSON z zewnętrznego ERP, gdzie pole `price` może przyjść jako number (`100.50`) albo string (`"100.50"`). Custom Jackson deserializer.
+**Model answer:**
 ```java
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -691,12 +691,12 @@ mapper.registerModule(module);
 
 **Trade-off:** elastyczność vs strict contract. **Strict** (reject malformed) jest preferred dla pricing (bug w ERP feedzie powinien być widoczny natychmiast, nie cicho akceptowany). Defensive deserialization zachowuje system działający kosztem invisible bugs.
 
-**Pułapka rozmowna:** `p.getDoubleValue()` zamiast `getDecimalValue()` — utrata precyzji. Już samo poproszenie Jacksona o decimal jest poprawne; alternatywa przez double rozwiewa precyzję.
-**Tagi:** jackson, deserialization, custom, pricing
+**Interview trap:** `p.getDoubleValue()` zamiast `getDecimalValue()` — utrata precyzji. Już samo poproszenie Jacksona o decimal jest poprawne; alternatywa przez double rozwiewa precyzję.
+**Tags:** jackson, deserialization, custom, pricing
 
 ## Q-JX-023 [bloom: apply]
-**Pytanie:** Zaimplementuj walidację dokumentu XML przeciw XSD w Javie.
-**Modelowa odpowiedź:**
+**Question:** Zaimplementuj walidację dokumentu XML przeciw XSD w Javie.
+**Model answer:**
 ```java
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -765,12 +765,12 @@ public class XmlValidator {
 
 **JAXB integration:** unmarshaller też może walidować przy unmarshal (`unmarshaller.setSchema(schema)`).
 
-**Pułapka rozmowna:** Schema bez disabled external resources → XXE risk. Druga: bez ErrorHandler validator throws na pierwszym błędzie — żeby zebrać wszystkie, custom handler.
-**Tagi:** xml, xsd, validation, java, security
+**Interview trap:** Schema bez disabled external resources → XXE risk. Druga: bez ErrorHandler validator throws na pierwszym błędzie — żeby zebrać wszystkie, custom handler.
+**Tags:** xml, xsd, validation, java, security
 
 ## Q-JX-024 [bloom: apply]
-**Pytanie:** Konwertuj duży XML feed (1 GB) z systemu ERP do bazy danych. Streaming approach.
-**Modelowa odpowiedź:**
+**Question:** Konwertuj duży XML feed (1 GB) z systemu ERP do bazy danych. Streaming approach.
+**Model answer:**
 ```java
 import javax.xml.stream.*;
 import javax.xml.bind.*;
@@ -836,14 +836,14 @@ conn.close();
 
 **Memory profile:** 1 GB XML na heap ~150-300 MB (zależnie od reader buffer size). Bez StAX/streaming → ~5 GB RAM (DOM).
 
-**Pułapka rozmowna:** „Commit po każdym insercie" → 1M COMMIT-ów = wolno (każdy fsync). „Commit raz na końcu" → transakcja na 1M wierszy może lockować, OOM, jeśli error → wszystko od początku. Compromise: batches of 1000-10000.
-**Tagi:** xml, streaming, jaxb, batch, pricing
+**Interview trap:** „Commit po każdym insercie" → 1M COMMIT-ów = wolno (każdy fsync). „Commit raz na końcu" → transakcja na 1M wierszy może lockować, OOM, jeśli error → wszystko od początku. Compromise: batches of 1000-10000.
+**Tags:** xml, streaming, jaxb, batch, pricing
 
 ---
 
 ## Q-JX-025 [bloom: analyze]
-**Pytanie:** Twój system konsumuje XML feed z ERP, ale jego format zmienia się raz na rok i każda zmiana wymaga 2-tygodniowego sprintu. Co byś zmienił?
-**Modelowa odpowiedź:** Diagnoza: tightly coupled XML schema z business logic. **Strategie poprawy:**
+**Question:** Twój system konsumuje XML feed z ERP, ale jego format zmienia się raz na rok i każda zmiana wymaga 2-tygodniowego sprintu. Co byś zmienił?
+**Model answer:** Diagnoza: tightly coupled XML schema z business logic. **Strategie poprawy:**
 
 1. **Anti-corruption layer (DDD pattern):** osobny moduł odpowiedzialny za parsing XML i konwersję na **kanoniczny model wewnętrzny**. Reszta systemu zna tylko canonical model. Zmiana XML → tylko ACL się zmienia, business logic intact. Plus: izolacja zmian. Minus: duplication kodu (XML schema + canonical schema).
 
@@ -859,12 +859,12 @@ conn.close();
 
 **Decyzja praktyczna:** ACL + tolerant reader + contract tests. To kombinacja chroni system przed coupling bez przepisywania architektury ERP. Schema versioning jeśli ERP wysyła version tag. XSLT jeśli zespół jest XSLT-friendly. Eventy jeśli ERP się otwiera na pub-sub.
 
-**Pułapka rozmowna:** „Po prostu update schemę XSD" — symptomatic fix, nie root cause. Problem to tight coupling. Druga: rebuilding everything from scratch — overengineering, gdy ACL może być dorzucony incrementally.
-**Tagi:** xml, integration, architecture, decision, ddd
+**Interview trap:** „Po prostu update schemę XSD" — symptomatic fix, nie root cause. Problem to tight coupling. Druga: rebuilding everything from scratch — overengineering, gdy ACL może być dorzucony incrementally.
+**Tags:** xml, integration, architecture, decision, ddd
 
 ## Q-JX-026 [bloom: analyze]
-**Pytanie:** JSON vs XML dla nowego API integracji z partnerami biznesowymi. Co wybierasz i dlaczego?
-**Modelowa odpowiedź:** **JSON** — domyślny wybór dla nowego API w 2026, chyba że specific reason for XML. Argumenty:
+**Question:** JSON vs XML dla nowego API integracji z partnerami biznesowymi. Co wybierasz i dlaczego?
+**Model answer:** **JSON** — domyślny wybór dla nowego API w 2026, chyba że specific reason for XML. Argumenty:
 
 **Za JSON:**
 - Lekki (mniejszy payload niż XML, brak `</closingTag>` overhead).
@@ -888,12 +888,12 @@ conn.close();
 
 **W pricingu specyficznie:** internal services (microservices) → JSON. Zewnętrzne ERP → cokolwiek partner ma. Nowi klienci → JSON-only zazwyczaj akceptują.
 
-**Pułapka rozmowna:** „XML jest standard B2B" — nie w 2026. Wiele branży ma JSON-first. „SOAP jest dead" — w niektórych branżach (banking, insurance) wciąż żyje. Nie generalizuj.
-**Tagi:** json, xml, integration, decision, b2b
+**Interview trap:** „XML jest standard B2B" — nie w 2026. Wiele branży ma JSON-first. „SOAP jest dead" — w niektórych branżach (banking, insurance) wciąż żyje. Nie generalizuj.
+**Tags:** json, xml, integration, decision, b2b
 
 ## Q-JX-027 [bloom: analyze]
-**Pytanie:** Twój API zwraca JSON 1 MB per request, klient narzeka na latency. Co zrobisz?
-**Modelowa odpowiedź:** Diagnoza first — czy 1 MB jest faktycznie potrzebny? Strategie redukcji:
+**Question:** Twój API zwraca JSON 1 MB per request, klient narzeka na latency. Co zrobisz?
+**Model answer:** Diagnoza first — czy 1 MB jest faktycznie potrzebny? Strategie redukcji:
 
 1. **Pagination** — zamiast całej listy, strony po 50-100. Klient pobiera incrementalnie. Plus: szybkie initial load. Minus: nie ma sensu jeśli klient i tak potrzebuje wszystkiego.
 
@@ -923,12 +923,12 @@ conn.close();
 
 **Pricing-specyficznie:** pricelist są często cache-able + sparse fields-friendly. CDN + gzip wykonują 90% pracy.
 
-**Pułapka rozmowna:** „Microbenchmark Jackson vs Gson" — to są pico-second differences. Real wins: gzip + caching + pagination. Drugi błąd: „zmień wszystko na Protobuf" — overkill jeśli problem jest 5MB JSON sending without compression.
-**Tagi:** json, performance, compression, optimization
+**Interview trap:** „Microbenchmark Jackson vs Gson" — to są pico-second differences. Real wins: gzip + caching + pagination. Drugi błąd: „zmień wszystko na Protobuf" — overkill jeśli problem jest 5MB JSON sending without compression.
+**Tags:** json, performance, compression, optimization
 
 ## Q-JX-028 [bloom: analyze]
-**Pytanie:** Pricing platforma używa XML feedów. Zespół chce przejść na JSON. Migration strategy?
-**Modelowa odpowiedź:** **Phase'd migration with parallel support.**
+**Question:** Pricing platforma używa XML feedów. Zespół chce przejść na JSON. Migration strategy?
+**Model answer:** **Phase'd migration with parallel support.**
 
 **Faza 1 — assessment (1-2 sprinty):**
 - Inventaryzacja: które XML feedy, jakie schemas, kto jest konsumentem/producentem.
@@ -969,12 +969,12 @@ conn.close();
 
 **Decyzja krytyczna:** zachować XML support tam gdzie partnerzy nie migrują (industries: banking, ERP integrations). Forced migration ZE strony pricing engine może popsuć relacje biznesowe.
 
-**Pułapka rozmowna:** „Big bang migration" — disaster. Partnerzy mają własne timeline'y, tooling, regulacje. Phased approach z parallel support to standard approach.
-**Tagi:** migration, json, xml, architecture, decision
+**Interview trap:** „Big bang migration" — disaster. Partnerzy mają własne timeline'y, tooling, regulacje. Phased approach z parallel support to standard approach.
+**Tags:** migration, json, xml, architecture, decision
 
 ## Q-JX-029 [bloom: analyze]
-**Pytanie:** Strict vs lenient parsing JSON — kiedy które?
-**Modelowa odpowiedź:** **Strict** — odrzucaj wszystko co nie pasuje do schematu. **Lenient** — akceptuj wariacje, defaulty dla missing, ignoruj unknown.
+**Question:** Strict vs lenient parsing JSON — kiedy które?
+**Model answer:** **Strict** — odrzucaj wszystko co nie pasuje do schematu. **Lenient** — akceptuj wariacje, defaulty dla missing, ignoruj unknown.
 
 **Strict plusy:**
 - **Bug detection** — zmiana w producencie (np. `price` → `amount`) wybucha natychmiast, nie cicho.
@@ -1009,12 +1009,12 @@ conn.close();
 
 **Decyzja w pricingu:** strict dla outgoing API (klienci muszą respektować nasz kontrakt), lenient dla incoming z partnerów (anti-corruption layer absorbuje weirdness).
 
-**Pułapka rozmowna:** „Strict bo bezpieczniej" — niekoniecznie. Tight coupling jest też zagrożeniem dla dostępności (jedna zmiana w producencie kładzie konsumenta). Postel's law: liberal in input, conservative in output.
-**Tagi:** json, parsing, strict, lenient, robustness
+**Interview trap:** „Strict bo bezpieczniej" — niekoniecznie. Tight coupling jest też zagrożeniem dla dostępności (jedna zmiana w producencie kładzie konsumenta). Postel's law: liberal in input, conservative in output.
+**Tags:** json, parsing, strict, lenient, robustness
 
 ## Q-JX-030 [bloom: analyze]
-**Pytanie:** Twój monitoring pokazuje że parsowanie XML feedów zajmuje 80% CPU aplikacji. Diagnoza i poprawa.
-**Modelowa odpowiedź:** Diagnoza pierwsza:
+**Question:** Twój monitoring pokazuje że parsowanie XML feedów zajmuje 80% CPU aplikacji. Diagnoza i poprawa.
+**Model answer:** Diagnoza pierwsza:
 
 1. **Profiluj** — async-profiler, JFR. Zobacz exact stack trace top CPU consumers. Jackson? JAXB? StAX? Custom code?
 2. **Sample sizes** — jak duże są feedy? Ile per minutę? 80% CPU może być realnie konieczne dla volume, lub może być problem implementation.
@@ -1047,12 +1047,12 @@ conn.close();
 3. Switch DOM → StAX dla wielkich plików.
 4. Compress feed (gzip) — paradoksalnie ZMIENIEJSZA CPU bo less I/O wait.
 
-**Pułapka rozmowna:** „CPU 80% to znak że trzeba rewrite" — nie. Najpierw diagnose, potem fix najtańsze. Często 5-line config change daje 50% improvement. Drugi: ignorowanie I/O wait — XML parsing czasem czeka na disk/network, CPU% nie odzwierciedla wąskiego gardła.
-**Tagi:** xml, performance, profiling, optimization
+**Interview trap:** „CPU 80% to znak że trzeba rewrite" — nie. Najpierw diagnose, potem fix najtańsze. Często 5-line config change daje 50% improvement. Drugi: ignorowanie I/O wait — XML parsing czasem czeka na disk/network, CPU% nie odzwierciedla wąskiego gardła.
+**Tags:** xml, performance, profiling, optimization
 
 ## Q-JX-031 [bloom: analyze]
-**Pytanie:** Code review: programista parsuje JSON ręcznie regex-em zamiast używać Jacksona, mówiąc „Jackson to overhead". Reaguj.
-**Modelowa odpowiedź:** **Reaguj merytorycznie, nie persona-driven.** Argumenty przeciwko regex JSON parsing:
+**Question:** Code review: programista parsuje JSON ręcznie regex-em zamiast używać Jacksona, mówiąc „Jackson to overhead". Reaguj.
+**Model answer:** **Reaguj merytorycznie, nie persona-driven.** Argumenty przeciwko regex JSON parsing:
 
 1. **JSON nie jest regular language** — formalnie nie da się sparsować generic JSON regexem (zagnieżdżenia, escape sequences, edge cases). Każdy „regex parser" działa na ograniczonych input shapes — łamie się na nieoczekiwanych.
 
@@ -1084,12 +1084,12 @@ Ale nie dla generic JSON. To 30+ years solved problem.
 
 **Decyzja code review:** odrzuć patch. Sugeruj Jackson z konkretnym pattern (streaming jeśli memory-conscious, data binding jeśli strict types). Mierz performance jeśli faktycznie overhead jest worry — `JsonParser` (streaming) jest fastest, `ObjectMapper.readValue` jest middle, tree model najwolniejszy. Wybór per use case.
 
-**Pułapka rozmowna:** „Programista jest zdolny, niech robi po swojemu" — autorska klęska zaufania. Decyzje techniczne mają konsekwencje team-wide. Code review powinno być merytoryczne i twardogłowe.
-**Tagi:** code-review, json, jackson, antipatterns
+**Interview trap:** „Programista jest zdolny, niech robi po swojemu" — autorska klęska zaufania. Decyzje techniczne mają konsekwencje team-wide. Code review powinno być merytoryczne i twardogłowe.
+**Tags:** code-review, json, jackson, antipatterns
 
 ## Q-JX-032 [bloom: analyze]
-**Pytanie:** Pricing platforma używa Jackson do JSON. Programista mówi: „Mamy memory leak, podejrzewam Jacksona". Twoja diagnoza?
-**Modelowa odpowiedź:** Jackson **per se** rzadko ma memory leak — jest zaufany, mature. **Najprawdopodobniejsze przyczyny:**
+**Question:** Pricing platforma używa Jackson do JSON. Programista mówi: „Mamy memory leak, podejrzewam Jacksona". Twoja diagnoza?
+**Model answer:** Jackson **per se** rzadko ma memory leak — jest zaufany, mature. **Najprawdopodobniejsze przyczyny:**
 
 1. **Fresh `ObjectMapper` per request:** `new ObjectMapper()` jest expensive. Niektórzy tworzą per call myśląc że to lekkie. ObjectMapper trzyma cache deserializerów per type — jeśli per-request → leak rośnie linear (chaina cache się kasuje, ale crearion overhead jest też duży). Solution: jeden `ObjectMapper` per app, reused (thread-safe). Spring beans `@Bean` to OK.
 
@@ -1122,5 +1122,5 @@ Ale nie dla generic JSON. To 30+ years solved problem.
 
 **Decyzja:** zacznij od heap dump, nie od „obwiniania Jackson". Profile-driven debugging.
 
-**Pułapka rozmowna:** Obwinianie biblioteki przed diagnozą = unprofessional. Drugi: założenie że memory leak = bug w third-party, kiedy zazwyczaj to misuse w application code.
-**Tagi:** debugging, memory, jackson, profiling
+**Interview trap:** Obwinianie biblioteki przed diagnozą = unprofessional. Drugi: założenie że memory leak = bug w third-party, kiedy zazwyczaj to misuse w application code.
+**Tags:** debugging, memory, jackson, profiling

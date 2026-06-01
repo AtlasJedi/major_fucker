@@ -1,8 +1,8 @@
-# OOP / Java fundamentals — bank pytań
+# OOP / Java fundamentals — question bank
 
-> Kontekst: Groovy interop z Javą (oba kompilują do JVM bytecode), pricing engine używa wielu konwencji Java (Spring, Hibernate, Bean Validation). Solidne fundamenty Java są wymagane od Software Engineera, nawet gdy główny język to Groovy.
+> Context: Groovy interop with Java (both compile to JVM bytecode), pricing engine uses many Java conventions (Spring, Hibernate, Bean Validation). Solid Java fundamentals are required of a Software Engineer, even when the primary language is Groovy.
 
-## Zakres
+## Scope
 
 - SOLID principles
 - equals/hashCode contract, Comparable, Comparator
@@ -19,14 +19,14 @@
 ---
 
 ## Q-OOP-001 [bloom: recall]
-**Pytanie:** Wymień 5 zasad SOLID i krótko opisz każdą.
-**Modelowa odpowiedź:** **S — Single Responsibility:** klasa ma mieć jeden powód do zmiany, jedną odpowiedzialność. Klasa `Order` zarządza zamówieniem, ale `OrderRepository` zapisuje, `OrderEmailService` wysyła emaile. **O — Open/Closed:** otwarta na rozszerzenie, zamknięta na modyfikację. Nowy typ płatności nie wymaga edycji `PaymentProcessor` — tworzy nową implementację interfejsu. **L — Liskov Substitution:** podtyp musi działać tam gdzie typ bazowy bez psucia kontraktu. Jeśli `Square extends Rectangle` ma `setWidth` która zmienia też height — to łamie LSP (Rectangle nie miał tej semantyki). **I — Interface Segregation:** wiele małych interfejsów lepsze niż jeden duży. Klient nie powinien być zmuszony implementować metod których nie używa. **D — Dependency Inversion:** zależ od abstrakcji, nie od implementacji. `OrderService` zależy od `PaymentGateway` (interface), nie od `StripePaymentGateway` (concrete).
-**Pułapka rozmowna:** SOLID to guidelines, nie ścisłe prawa. Stosowanie SOLID dogmatycznie generuje over-engineering — abstrakcje za każdą rzecz, gdy konkretu by wystarczył. „Refactor when needed, not when clever".
-**Tagi:** solid, design, oop
+**Question:** Wymień 5 zasad SOLID i krótko opisz każdą.
+**Model answer:** **S — Single Responsibility:** klasa ma mieć jeden powód do zmiany, jedną odpowiedzialność. Klasa `Order` zarządza zamówieniem, ale `OrderRepository` zapisuje, `OrderEmailService` wysyła emaile. **O — Open/Closed:** otwarta na rozszerzenie, zamknięta na modyfikację. Nowy typ płatności nie wymaga edycji `PaymentProcessor` — tworzy nową implementację interfejsu. **L — Liskov Substitution:** podtyp musi działać tam gdzie typ bazowy bez psucia kontraktu. Jeśli `Square extends Rectangle` ma `setWidth` która zmienia też height — to łamie LSP (Rectangle nie miał tej semantyki). **I — Interface Segregation:** wiele małych interfejsów lepsze niż jeden duży. Klient nie powinien być zmuszony implementować metod których nie używa. **D — Dependency Inversion:** zależ od abstrakcji, nie od implementacji. `OrderService` zależy od `PaymentGateway` (interface), nie od `StripePaymentGateway` (concrete).
+**Interview trap:** SOLID to guidelines, nie ścisłe prawa. Stosowanie SOLID dogmatycznie generuje over-engineering — abstrakcje za każdą rzecz, gdy konkretu by wystarczył. „Refactor when needed, not when clever".
+**Tags:** solid, design, oop
 
 ## Q-OOP-002 [bloom: recall]
-**Pytanie:** Co to jest kontrakt equals/hashCode w Javie?
-**Modelowa odpowiedź:** Kontrakt `Object.equals(Object)` i `Object.hashCode()`:
+**Question:** Co to jest kontrakt equals/hashCode w Javie?
+**Model answer:** Kontrakt `Object.equals(Object)` i `Object.hashCode()`:
 1. **Reflexive:** `x.equals(x)` zwraca `true`.
 2. **Symmetric:** `x.equals(y)` ↔ `y.equals(x)`.
 3. **Transitive:** `x.equals(y) && y.equals(z) → x.equals(z)`.
@@ -61,12 +61,12 @@ Lub `record` (Java 14+) — auto-generated.
 - `equals` bez `hashCode` → HashMap/HashSet broken.
 - `equals` używa pola które zmieniają się w czasie życia → corruption hash structures.
 
-**Pułapka rozmowna:** „Mogę używać tylko equals" — false dla collections. HashMap, HashSet, ConcurrentHashMap wymagają hashCode. Druga: `instanceof` vs `getClass()` — `instanceof` pozwala subclasses być equal (czasem chcesz, czasem nie). Pattern Java 17+: `if (!(o instanceof Product p)) return false;` (pattern matching for instanceof).
-**Tagi:** equals, hashcode, contract
+**Interview trap:** „Mogę używać tylko equals" — false dla collections. HashMap, HashSet, ConcurrentHashMap wymagają hashCode. Druga: `instanceof` vs `getClass()` — `instanceof` pozwala subclasses być equal (czasem chcesz, czasem nie). Pattern Java 17+: `if (!(o instanceof Product p)) return false;` (pattern matching for instanceof).
+**Tags:** equals, hashcode, contract
 
 ## Q-OOP-003 [bloom: recall]
-**Pytanie:** Co to jest type erasure w generykach Java?
-**Modelowa odpowiedź:** Type erasure to JVM mechanism: w runtime informacja o type parameter `<T>` jest kasowana. Generic types istnieją tylko w compile time. Stąd:
+**Question:** Co to jest type erasure w generykach Java?
+**Model answer:** Type erasure to JVM mechanism: w runtime informacja o type parameter `<T>` jest kasowana. Generic types istnieją tylko w compile time. Stąd:
 - `List<String>` w runtime to po prostu `List`.
 - `List<Integer>` w runtime to też `List`.
 - `instanceof List<String>` nie jest legal — nie da się sprawdzić.
@@ -85,12 +85,12 @@ Lub `record` (Java 14+) — auto-generated.
 
 **Trade-off:** Java vs C# — C# generics są reified (zachowane w runtime). C# pozwala `typeof(T)`, `new T()`. Java nie.
 
-**Pułapka rozmowna:** „Generyki w Javie to syntax sugar" — częściowo. Erased w runtime, ale type checking compile-time jest realny. Druga: `List<Integer> + int` autoboxing — boxing daje koszt performance, nie zawsze widoczny w syntax.
-**Tagi:** generics, type-erasure, jvm
+**Interview trap:** „Generyki w Javie to syntax sugar" — częściowo. Erased w runtime, ale type checking compile-time jest realny. Druga: `List<Integer> + int` autoboxing — boxing daje koszt performance, nie zawsze widoczny w syntax.
+**Tags:** generics, type-erasure, jvm
 
 ## Q-OOP-004 [bloom: recall]
-**Pytanie:** Co to jest PECS w generykach?
-**Modelowa odpowiedź:** **PECS — Producer Extends, Consumer Super.** Reguła wyboru wildcards w generykach: 
+**Question:** Co to jest PECS w generykach?
+**Model answer:** **PECS — Producer Extends, Consumer Super.** Reguła wyboru wildcards w generykach: 
 - **`<? extends T>`** — bound wildcard, „producer". Czytasz z kolekcji T (lub subclass). Kolekcja "produkuje" T-ki dla ciebie. **Można tylko czytać** (read-only ze strony T-typed).
 - **`<? super T>`** — bound wildcard, „consumer". Wstawiasz T (lub subclass) do kolekcji. Kolekcja "konsumuje" twoje T-ki. **Można tylko pisać** (write-only ze strony T).
 
@@ -120,12 +120,12 @@ copy(ints, nums);  // OK: ints produkuje Integer (extends Number), nums konsumuj
 - `Function<? super T, ? extends R>` — przyjmuje T (consumer), zwraca R (producer).
 - `Comparator<? super T>` — porównuje T-ki.
 
-**Pułapka rozmowna:** Pomyłka extends/super — łatwo się pogubić. Reguła kciuka: jeśli czytasz z kolekcji → extends. Jeśli piszesz do kolekcji → super. Druga: nie mylić `T extends Number` (bound type parameter) z `<? extends Number>` (wildcard).
-**Tagi:** generics, wildcards, pecs
+**Interview trap:** Pomyłka extends/super — łatwo się pogubić. Reguła kciuka: jeśli czytasz z kolekcji → extends. Jeśli piszesz do kolekcji → super. Druga: nie mylić `T extends Number` (bound type parameter) z `<? extends Number>` (wildcard).
+**Tags:** generics, wildcards, pecs
 
 ## Q-OOP-005 [bloom: recall]
-**Pytanie:** Wymień główne klasy w Java Collections Framework.
-**Modelowa odpowiedź:** **List interface** (uporządkowane, duplikaty OK):
+**Question:** Wymień główne klasy w Java Collections Framework.
+**Model answer:** **List interface** (uporządkowane, duplikaty OK):
 - `ArrayList` — backed by array. O(1) random access, O(n) insert middle. Default choice.
 - `LinkedList` — doubly-linked list. O(1) insert anywhere (with reference), O(n) random access. Rzadko używane (w 99% ArrayList wygrywa cache locality).
 - `Vector` — legacy synchronized ArrayList. Use `Collections.synchronizedList` lub `CopyOnWriteArrayList` zamiast.
@@ -156,12 +156,12 @@ copy(ints, nums);  // OK: ints produkuje Integer (extends Number), nums konsumuj
 - `List.of(1,2,3)`, `Set.of()`, `Map.of()` — small immutable collections.
 - `Collections.unmodifiableList(...)` — wraps mutable as immutable view.
 
-**Pułapka rozmowna:** „LinkedList do random access" — antipattern, O(n). „Vector w nowym kodzie" — legacy. Druga: `null` w `ConcurrentHashMap` rzuca NPE (różnice z HashMap).
-**Tagi:** collections, java
+**Interview trap:** „LinkedList do random access" — antipattern, O(n). „Vector w nowym kodzie" — legacy. Druga: `null` w `ConcurrentHashMap` rzuca NPE (różnice z HashMap).
+**Tags:** collections, java
 
 ## Q-OOP-006 [bloom: recall]
-**Pytanie:** Co to jest immutable obiekt i jakie ma zasady tworzenia?
-**Modelowa odpowiedź:** Immutable obiekt to taki, którego stan po stworzeniu nie może się zmienić. **Reguły:**
+**Question:** Co to jest immutable obiekt i jakie ma zasady tworzenia?
+**Model answer:** Immutable obiekt to taki, którego stan po stworzeniu nie może się zmienić. **Reguły:**
 1. **Wszystkie pola `final`** — żaden setter, żadne re-assignment.
 2. **Wszystkie pola `private`** — brak direct access.
 3. **Klasa `final`** — brak subklas które mogłyby ominąć immutability (lub konstruktory `private` z factory methods).
@@ -211,12 +211,12 @@ public record Money(BigDecimal amount, String currency) {
 ```
 Auto-generated: konstruktor, accessors, equals, hashCode, toString. Immutable by design.
 
-**Pułapka rozmowna:** „Final field daje immutability" — częściowo. Jeśli field to mutable type (np. `final List<String> tags`), to lista ZE ŚRODKA może być modyfikowana. Trzeba defensive copy + unmodifiable view. Druga: `Date` jest mutable historycznie — używaj `LocalDate`/`Instant` (immutable from Java 8+).
-**Tagi:** immutability, records, design
+**Interview trap:** „Final field daje immutability" — częściowo. Jeśli field to mutable type (np. `final List<String> tags`), to lista ZE ŚRODKA może być modyfikowana. Trzeba defensive copy + unmodifiable view. Druga: `Date` jest mutable historycznie — używaj `LocalDate`/`Instant` (immutable from Java 8+).
+**Tags:** immutability, records, design
 
 ## Q-OOP-007 [bloom: recall]
-**Pytanie:** Co to jest `Optional<T>` i kiedy używać?
-**Modelowa odpowiedź:** `Optional<T>` to wrapper który może zawierać wartość lub być empty. Wprowadzony Java 8. Zastępca `null`-returning methods. **API:**
+**Question:** Co to jest `Optional<T>` i kiedy używać?
+**Model answer:** `Optional<T>` to wrapper który może zawierać wartość lub być empty. Wprowadzony Java 8. Zastępca `null`-returning methods. **API:**
 - `Optional.of(value)` — wrapuje non-null.
 - `Optional.ofNullable(value)` — wrapuje value (może być null).
 - `Optional.empty()` — empty.
@@ -253,12 +253,12 @@ findById(123)
 - ✗ **Collection** — `Optional<List<X>>` zamiast `List<X>` (pusta lista to też signal of „none").
 - ✗ **Throwaway** — `if (Optional.ofNullable(x).isPresent())` zamiast `if (x != null)` — zbędna alokacja.
 
-**Pułapka rozmowna:** Optional w polu serializowane przez Jackson — czasem działa dziwnie (default Optional jest serializowane jako `{empty: false}`, nie raw value). `jackson-datatype-jdk8` module rozwiązuje. Druga: `Optional` allocates (jest klasą) — w hot loop nie blast on every iteration.
-**Tagi:** optional, null-safety, java8
+**Interview trap:** Optional w polu serializowane przez Jackson — czasem działa dziwnie (default Optional jest serializowane jako `{empty: false}`, nie raw value). `jackson-datatype-jdk8` module rozwiązuje. Druga: `Optional` allocates (jest klasą) — w hot loop nie blast on every iteration.
+**Tags:** optional, null-safety, java8
 
 ## Q-OOP-008 [bloom: recall]
-**Pytanie:** Co to jest stream w Javie?
-**Modelowa odpowiedź:** Stream to abstrakcja sekwencji elementów wspierająca pipeline operacji (Java 8+). Style funkcyjny — operacje zwracają nowy stream, kompozycja przez chaining. **Operacje:**
+**Question:** Co to jest stream w Javie?
+**Model answer:** Stream to abstrakcja sekwencji elementów wspierająca pipeline operacji (Java 8+). Style funkcyjny — operacje zwracają nowy stream, kompozycja przez chaining. **Operacje:**
 - **Intermediate** (lazy, zwracają Stream): `filter`, `map`, `flatMap`, `distinct`, `sorted`, `peek`, `limit`, `skip`.
 - **Terminal** (eager, materialize): `collect`, `forEach`, `reduce`, `count`, `findFirst`, `findAny`, `allMatch`, `anyMatch`, `noneMatch`, `min`, `max`, `toArray`.
 
@@ -300,14 +300,14 @@ Map<String, BigDecimal> totalByCountry = products.stream()
 - Performance: stream overhead per call (lambda allocation, internal iteration). Dla micro-loops vanilla for jest szybszy.
 - No early break (chyba że findFirst/anyMatch).
 
-**Pułapka rozmowna:** „Parallel stream zawsze szybszy" — false. ForkJoin overhead, contention, ordering issues. Use parallel tylko gdy: data > ~10k elements, computation is heavy, no shared mutable state. Druga: `forEach` z stateful side effect — może łamać in parallel.
-**Tagi:** streams, java8, fp
+**Interview trap:** „Parallel stream zawsze szybszy" — false. ForkJoin overhead, contention, ordering issues. Use parallel tylko gdy: data > ~10k elements, computation is heavy, no shared mutable state. Druga: `forEach` z stateful side effect — może łamać in parallel.
+**Tags:** streams, java8, fp
 
 ---
 
 ## Q-OOP-009 [bloom: understand]
-**Pytanie:** Wytłumacz różnicę między `synchronized`, `volatile` i `Atomic*`.
-**Modelowa odpowiedź:** **`synchronized`** — blok kodu wykonywany atomowo per monitor (object). Jeden wątek może być wewnątrz, inni czekają. Daje:
+**Question:** Wytłumacz różnicę między `synchronized`, `volatile` i `Atomic*`.
+**Model answer:** **`synchronized`** — blok kodu wykonywany atomowo per monitor (object). Jeden wątek może być wewnątrz, inni czekają. Daje:
 - **Mutual exclusion** (atomicity dla compound operations).
 - **Happens-before** (visibility — zmiany przed `synchronized` block są widoczne dla następnego wątku wchodzącego w synchronized block na tym samym obiekcie).
 
@@ -344,12 +344,12 @@ void shutdown() { shutdownRequested = true; }
 while (!shutdownRequested) { processNext(); }
 ```
 
-**Pułapka rozmowna:** `synchronized(this)` — zewnętrzny code może też synchronizować na tej samej instancji → unintended contention. Lepiej private lock object: `private final Object lock = new Object(); synchronized(lock) { }`. Druga: `volatile` na reference — zmiana referencji widoczna, ale modyfikacje OBIEKTU pod referencją wymagają osobnej synchronization.
-**Tagi:** concurrency, synchronized, volatile, atomic
+**Interview trap:** `synchronized(this)` — zewnętrzny code może też synchronizować na tej samej instancji → unintended contention. Lepiej private lock object: `private final Object lock = new Object(); synchronized(lock) { }`. Druga: `volatile` na reference — zmiana referencji widoczna, ale modyfikacje OBIEKTU pod referencją wymagają osobnej synchronization.
+**Tags:** concurrency, synchronized, volatile, atomic
 
 ## Q-OOP-010 [bloom: understand]
-**Pytanie:** Wytłumacz pattern Singleton i jego pułapki.
-**Modelowa odpowiedź:** Singleton — pattern zapewniający że klasa ma tylko jedną instancję, dostępną globalnie. **Klasyczne implementacje w Javie:**
+**Question:** Wytłumacz pattern Singleton i jego pułapki.
+**Model answer:** Singleton — pattern zapewniający że klasa ma tylko jedną instancję, dostępną globalnie. **Klasyczne implementacje w Javie:**
 
 **1. Eager:**
 ```java
@@ -421,12 +421,12 @@ Plus: thread-safe by JVM, serialization-safe, prevents reflection abuse. Minus: 
 
 **Modern alternative — DI:** Spring `@Component` z scope singleton (default) daje single instance, ale managed by container, easily mockable in tests. **Preferred over manual Singleton w 99% przypadków.**
 
-**Pułapka rozmowna:** „Singleton to OK pattern" — w Spring rzadziej, w plain Java często anty. Test pain, hidden coupling. Druga: „static fields = Singleton" — częściowo. Cała klasa z static jest podobnym antywzorcem (utility class — czasem OK, czasem ukrywa coupling).
-**Tagi:** patterns, singleton, design
+**Interview trap:** „Singleton to OK pattern" — w Spring rzadziej, w plain Java często anty. Test pain, hidden coupling. Druga: „static fields = Singleton" — częściowo. Cała klasa z static jest podobnym antywzorcem (utility class — czasem OK, czasem ukrywa coupling).
+**Tags:** patterns, singleton, design
 
 ## Q-OOP-011 [bloom: understand]
-**Pytanie:** Co to jest CompletableFuture i jak go używać?
-**Modelowa odpowiedź:** `CompletableFuture<T>` (Java 8+) — async computation z chaining, error handling, composition. Następca `Future<T>` (który był prosty: get/cancel) z dużo bogatszym API.
+**Question:** Co to jest CompletableFuture i jak go używać?
+**Model answer:** `CompletableFuture<T>` (Java 8+) — async computation z chaining, error handling, composition. Następca `Future<T>` (który był prosty: get/cancel) z dużo bogatszym API.
 
 **Tworzenie:**
 ```java
@@ -491,12 +491,12 @@ ProductView view = viewF.get(5, TimeUnit.SECONDS); // timeout
 - **`thenApply` runs on completing thread** — może być wątek z executor, może być calling thread (dla synchronously completed future). Use `thenApplyAsync(fn, executor)` dla determinism.
 - **No automatic cancellation propagation** — anulowanie głównej future nie anuluje upstream tasks.
 
-**Pułapka rozmowna:** „CompletableFuture jest reactive" — częściowo. Ma async chaining, ale nie jest reactive streams (no backpressure, no Flux/Flowable semantics). Druga: `.get()` checked exception (`InterruptedException`, `ExecutionException`) — zazwyczaj wrap w runtime.
-**Tagi:** concurrency, completablefuture, async
+**Interview trap:** „CompletableFuture jest reactive" — częściowo. Ma async chaining, ale nie jest reactive streams (no backpressure, no Flux/Flowable semantics). Druga: `.get()` checked exception (`InterruptedException`, `ExecutionException`) — zazwyczaj wrap w runtime.
+**Tags:** concurrency, completablefuture, async
 
 ## Q-OOP-012 [bloom: understand]
-**Pytanie:** Wyjaśnij different design patterns: Factory vs Builder.
-**Modelowa odpowiedź:** **Factory pattern** — encapsulate object creation. Caller dostaje obiekt nie wiedząc dokładnie jakim konstruktorem był stworzony, ani konkretną klasą. **Warianty:**
+**Question:** Wyjaśnij different design patterns: Factory vs Builder.
+**Model answer:** **Factory pattern** — encapsulate object creation. Caller dostaje obiekt nie wiedząc dokładnie jakim konstruktorem był stworzony, ani konkretną klasą. **Warianty:**
 
 1. **Simple Factory (static method):**
 ```java
@@ -592,12 +592,12 @@ OrderRequest req = OrderRequest.builder()
 - Conditional creation logic, hidden type → Factory.
 - Both patterns can be combined.
 
-**Pułapka rozmowna:** „Builder to over-engineering" — dla 2 pól tak. Dla 5+ z optional — natural fit. Druga: mutable builder po `build()` — najlepiej zostawić builder usable (no reset), ale obiekt niemodifiable.
-**Tagi:** patterns, factory, builder, design
+**Interview trap:** „Builder to over-engineering" — dla 2 pól tak. Dla 5+ z optional — natural fit. Druga: mutable builder po `build()` — najlepiej zostawić builder usable (no reset), ale obiekt niemodifiable.
+**Tags:** patterns, factory, builder, design
 
 ## Q-OOP-013 [bloom: understand]
-**Pytanie:** Co to jest checked vs unchecked exception i kiedy które?
-**Modelowa odpowiedź:** **Checked exceptions** (extend `Exception` ale nie `RuntimeException`):
+**Question:** Co to jest checked vs unchecked exception i kiedy które?
+**Model answer:** **Checked exceptions** (extend `Exception` ale nie `RuntimeException`):
 - Compiler enforces handling: try/catch lub `throws` declaration.
 - Klasyczne: `IOException`, `SQLException`, `InterruptedException`.
 - Filozofia: caller MUSI być świadomy że ta operacja może failować.
@@ -645,12 +645,12 @@ try {
 ```
 Stack trace pokazuje cały łańcuch.
 
-**Pułapka rozmowna:** **Catching `Exception` lub `Throwable` to antipattern** w produkcyjnym kodzie. Zawsze konkret — `catch (IOException e)`. Druga: **swallow exceptions (`catch { ... }` empty)** — bug factory. Co najmniej `log.warn("...", e);`. Trzecia: `throws Exception` w sygnaturze metody — tells nothing, bad API.
-**Tagi:** exceptions, error-handling
+**Interview trap:** **Catching `Exception` lub `Throwable` to antipattern** w produkcyjnym kodzie. Zawsze konkret — `catch (IOException e)`. Druga: **swallow exceptions (`catch { ... }` empty)** — bug factory. Co najmniej `log.warn("...", e);`. Trzecia: `throws Exception` w sygnaturze metody — tells nothing, bad API.
+**Tags:** exceptions, error-handling
 
 ## Q-OOP-014 [bloom: understand]
-**Pytanie:** Co to są records i sealed classes (Java 14+ / 17+)?
-**Modelowa odpowiedź:** **Records (Java 16+)** — concise syntax dla immutable data classes. Auto-generuje:
+**Question:** Co to są records i sealed classes (Java 14+ / 17+)?
+**Model answer:** **Records (Java 16+)** — concise syntax dla immutable data classes. Auto-generuje:
 - Konstruktor canonical (z polami w kolejności deklaracji).
 - Akcesory (`name()`, nie `getName()`).
 - `equals()`, `hashCode()`, `toString()`.
@@ -736,12 +736,12 @@ BigDecimal apply(BigDecimal price, PriceModifier mod) {
 }
 ```
 
-**Pułapka rozmowna:** „Record = klasa z lombok @Data" — częściowo. Record ma immutability built-in, lombok @Data generuje setters. Druga: rekord nie zastępuje builders gdy masz wiele optional params — record konstruktor jest fixed.
-**Tagi:** records, sealed, java17, java21
+**Interview trap:** „Record = klasa z lombok @Data" — częściowo. Record ma immutability built-in, lombok @Data generuje setters. Druga: rekord nie zastępuje builders gdy masz wiele optional params — record konstruktor jest fixed.
+**Tags:** records, sealed, java17, java21
 
 ## Q-OOP-015 [bloom: understand]
-**Pytanie:** Co to są virtual threads (Java 21)?
-**Modelowa odpowiedź:** Virtual threads (Project Loom, GA Java 21) — lightweight threads managed by JVM zamiast OS. Cel: tysiące thousands threads bez problemów scaling.
+**Question:** Co to są virtual threads (Java 21)?
+**Model answer:** Virtual threads (Project Loom, GA Java 21) — lightweight threads managed by JVM zamiast OS. Cel: tysiące thousands threads bez problemów scaling.
 
 **Klasyczne (platform) threads:** mapowane 1:1 na OS threads. ~1 MB stack each. JVM może mieć tysiące, nie miliony.
 
@@ -774,12 +774,12 @@ try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
 **Pricing impact:** I/O-heavy services (call DB, call external APIs, wait for responses) — massive scaling improvement. Calculation-heavy — bez różnicy.
 
-**Pułapka rozmowna:** „Virtual thread = goroutine" — koncepcyjnie podobne. „Virtual thread zastąpi reactive (WebFlux)?" — częściowo. Reactive ma backpressure i composability. Virtual threads ma simpler programming model (sync code, scaled). Wybór zależy od preference i ecosystem.
-**Tagi:** virtual-threads, java21, concurrency
+**Interview trap:** „Virtual thread = goroutine" — koncepcyjnie podobne. „Virtual thread zastąpi reactive (WebFlux)?" — częściowo. Reactive ma backpressure i composability. Virtual threads ma simpler programming model (sync code, scaled). Wybór zależy od preference i ecosystem.
+**Tags:** virtual-threads, java21, concurrency
 
 ## Q-OOP-016 [bloom: understand]
-**Pytanie:** Co to jest Strategy pattern i jak go zastosować w pricingu?
-**Modelowa odpowiedź:** Strategy pattern — encapsulate algorithms, allow swapping at runtime. Klasyczna definicja: family of algorithms, each encapsulated in own class, klient wybiera/przekazuje który.
+**Question:** Co to jest Strategy pattern i jak go zastosować w pricingu?
+**Model answer:** Strategy pattern — encapsulate algorithms, allow swapping at runtime. Klasyczna definicja: family of algorithms, each encapsulated in own class, klient wybiera/przekazuje który.
 
 **Pricing example — różne strategie kalkulacji ceny per kraj:**
 ```java
@@ -872,14 +872,14 @@ priceService.setStrategy(costPlus);
 ```
 Dla simple strategies — mniej boilerplate. Dla complex — full classes lepsze (state, dependencies).
 
-**Pułapka rozmowna:** „Strategy ≠ Polymorphism" — Strategy USES polymorphism. Każda subklasa to konkretne polymorphic implementation. Drugi: nadmiar strategies dla prostych if-else — over-engineering. Dla 2 wariantów może być za dużo.
-**Tagi:** strategy, patterns, pricing, oop
+**Interview trap:** „Strategy ≠ Polymorphism" — Strategy USES polymorphism. Każda subklasa to konkretne polymorphic implementation. Drugi: nadmiar strategies dla prostych if-else — over-engineering. Dla 2 wariantów może być za dużo.
+**Tags:** strategy, patterns, pricing, oop
 
 ---
 
 ## Q-OOP-017 [bloom: apply]
-**Pytanie:** Zaimplementuj klasę `OrderTotal` immutable z polami `subtotal: BigDecimal`, `tax: BigDecimal`, `discount: BigDecimal`. Method `total()` zwraca `subtotal + tax - discount`. Method `withDiscount(BigDecimal newDiscount)` zwraca nowy `OrderTotal`.
-**Modelowa odpowiedź:**
+**Question:** Zaimplementuj klasę `OrderTotal` immutable z polami `subtotal: BigDecimal`, `tax: BigDecimal`, `discount: BigDecimal`. Method `total()` zwraca `subtotal + tax - discount`. Method `withDiscount(BigDecimal newDiscount)` zwraca nowy `OrderTotal`.
+**Model answer:**
 ```java
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -960,12 +960,12 @@ Record auto-generuje equals/hashCode (BUT default uses BigDecimal.equals which i
 - `Objects.hash` z stripTrailingZeros żeby spójne z equals.
 - `total()` calculated, nie cached (immutable, więc OK; cache miałby sens tylko jeśli compute jest expensive — tu nie).
 
-**Pułapka rozmowna:** Record's auto equals/hashCode używają BigDecimal.equals — jeśli przekażesz `new BigDecimal("100.00")` vs `new BigDecimal("100")`, są nie-equal. W pricing zazwyczaj chcesz value equality — override or normalize w konstruktorze. Druga: `add`, `subtract` na BigDecimal — bez `MathContext` może produkować duże scale (np. `1.0/3 = 0.3333333...`); dla pricing `setScale(2, RoundingMode.HALF_UP)` na końcu.
-**Tagi:** immutability, records, bigdecimal, pricing
+**Interview trap:** Record's auto equals/hashCode używają BigDecimal.equals — jeśli przekażesz `new BigDecimal("100.00")` vs `new BigDecimal("100")`, są nie-equal. W pricing zazwyczaj chcesz value equality — override or normalize w konstruktorze. Druga: `add`, `subtract` na BigDecimal — bez `MathContext` może produkować duże scale (np. `1.0/3 = 0.3333333...`); dla pricing `setScale(2, RoundingMode.HALF_UP)` na końcu.
+**Tags:** immutability, records, bigdecimal, pricing
 
 ## Q-OOP-018 [bloom: apply]
-**Pytanie:** Napisz `Comparator<Product>` który sortuje produkty: najpierw aktywne potem nieaktywne, w obrębie każdej grupy malejąco po cenie.
-**Modelowa odpowiedź:**
+**Question:** Napisz `Comparator<Product>` który sortuje produkty: najpierw aktywne potem nieaktywne, w obrębie każdej grupy malejąco po cenie.
+**Model answer:**
 ```java
 import java.util.*;
 import java.util.stream.*;
@@ -1023,12 +1023,12 @@ Comparator<Product> complex = Comparator
 
 **Pricing context:** Comparator dla różnych views — admin chce sort by status+price, customer chce sort by price asc, reporting chce sort by total revenue. Comparators są reusable, named.
 
-**Pułapka rozmowna:** `Comparator.comparing(p -> !p.isActive())` — `boolean::!` daje `false < true`, więc `false` (active) idzie pierwszy. Subtelne, sprawdź. Druga: type inference w Java z chained comparator czasem wymaga explicit `(Product p)` cast w pierwszym `comparing` żeby kompilator wiedział.
-**Tagi:** comparator, sorting, java8, fp
+**Interview trap:** `Comparator.comparing(p -> !p.isActive())` — `boolean::!` daje `false < true`, więc `false` (active) idzie pierwszy. Subtelne, sprawdź. Druga: type inference w Java z chained comparator czasem wymaga explicit `(Product p)` cast w pierwszym `comparing` żeby kompilator wiedział.
+**Tags:** comparator, sorting, java8, fp
 
 ## Q-OOP-019 [bloom: apply]
-**Pytanie:** Zaimplementuj custom thread-safe cache (klucz → wartość) z TTL 5 minut. Hot path: `get(key, supplier)` zwraca cached lub computes.
-**Modelowa odpowiedź:**
+**Question:** Zaimplementuj custom thread-safe cache (klucz → wartość) z TTL 5 minut. Hot path: `get(key, supplier)` zwraca cached lub computes.
+**Model answer:**
 ```java
 import java.util.concurrent.*;
 import java.time.*;
@@ -1107,12 +1107,12 @@ BigDecimal price = priceCache.get("product-123-PL", () ->
 
 **Decyzja:** custom dla nauki / very specific needs. Caffeine dla 99% production. Caffeine ma tylko ~150 KB, mniej dependencies headache.
 
-**Pułapka rozmowna:** `ConcurrentHashMap.compute` blokuje per-key. Jeśli supplier jest slow + wiele wątków pyta o ten sam key — pierwszy lock-uje, reszta czeka. To jest `loading cache pattern` — Caffeine ma `LoadingCache` z built-in deduplication concurrent loads.
-**Tagi:** concurrency, cache, ttl, pricing
+**Interview trap:** `ConcurrentHashMap.compute` blokuje per-key. Jeśli supplier jest slow + wiele wątków pyta o ten sam key — pierwszy lock-uje, reszta czeka. To jest `loading cache pattern` — Caffeine ma `LoadingCache` z built-in deduplication concurrent loads.
+**Tags:** concurrency, cache, ttl, pricing
 
 ## Q-OOP-020 [bloom: apply]
-**Pytanie:** Napisz Strategy pattern dla calc commission salesman: `Bronze` 5%, `Silver` 7% z bonusem 100zł jeśli sales > 10000, `Gold` 10% z mnożnikiem 1.2 jeśli sales > 50000.
-**Modelowa odpowiedź:**
+**Question:** Napisz Strategy pattern dla calc commission salesman: `Bronze` 5%, `Silver` 7% z bonusem 100zł jeśli sales > 10000, `Gold` 10% z mnożnikiem 1.2 jeśli sales > 50000.
+**Model answer:**
 ```java
 import java.math.*;
 
@@ -1248,12 +1248,12 @@ public class CommissionStrategyResolver {
 }
 ```
 
-**Pułapka rozmowna:** `compareTo > 0` (strict) vs `>= 0` (inclusive) — sprawdź dokładnie wymaganie. „> 10000" znaczy 10001 i więcej. Druga: `BigDecimal.multiply` może produkować długie scale — zawsze `setScale` na końcu dla pricing.
-**Tagi:** strategy, pricing, bigdecimal, design
+**Interview trap:** `compareTo > 0` (strict) vs `>= 0` (inclusive) — sprawdź dokładnie wymaganie. „> 10000" znaczy 10001 i więcej. Druga: `BigDecimal.multiply` może produkować długie scale — zawsze `setScale` na końcu dla pricing.
+**Tags:** strategy, pricing, bigdecimal, design
 
 ## Q-OOP-021 [bloom: apply]
-**Pytanie:** Pokaż użycie `CompletableFuture` żeby zrównoleglić: pobierz produkt z DB, w międzyczasie pobierz cenę z external API. Aggreguj do `ProductView`.
-**Modelowa odpowiedź:**
+**Question:** Pokaż użycie `CompletableFuture` żeby zrównoleglić: pobierz produkt z DB, w międzyczasie pobierz cenę z external API. Aggreguj do `ProductView`.
+**Model answer:**
 ```java
 import java.util.concurrent.*;
 import java.math.BigDecimal;
@@ -1357,12 +1357,12 @@ public ProductView getProductView_VT(Long productId, String country) {
 ```
 Structured concurrency (Java 21 preview) — czytelniejszy niż CompletableFuture, automatic cancellation, error propagation.
 
-**Pułapka rozmowna:** `CompletableFuture.allOf` gdy jeden fail — `allOf` returns failed future. `.join` na każdej future-ce pojedynczo wyrzuci. Dla "all-or-nothing" OK, dla "best effort" trzeba per-future handling.
-**Tagi:** completablefuture, concurrency, async, pricing
+**Interview trap:** `CompletableFuture.allOf` gdy jeden fail — `allOf` returns failed future. `.join` na każdej future-ce pojedynczo wyrzuci. Dla "all-or-nothing" OK, dla "best effort" trzeba per-future handling.
+**Tags:** completablefuture, concurrency, async, pricing
 
 ## Q-OOP-022 [bloom: apply]
-**Pytanie:** Implementuj custom `RuntimeException` hierarchy dla pricing engine.
-**Modelowa odpowiedź:**
+**Question:** Implementuj custom `RuntimeException` hierarchy dla pricing engine.
+**Model answer:**
 ```java
 // Base exception — root hierarchii
 public class PricingException extends RuntimeException {
@@ -1453,12 +1453,12 @@ public record ErrorResponse(String code, String message) {}
 - **Error codes** for client-side handling — `errorCode` field stable contract, `message` może się zmieniać.
 - **Spring integration**: `@RestControllerAdvice` mapuje na HTTP responses.
 
-**Pułapka rozmowna:** „Wszystko jako runtime ex" — głównie OK. Rzadkie use case dla checked: gdy wymuszasz że caller MUSI handle (np. transaction commit failure with retry possible). Druga: catch-all `Exception` w handler — kasuje stack trace dla unrelated bugs. Always specific catches.
-**Tagi:** exceptions, error-handling, spring, design
+**Interview trap:** „Wszystko jako runtime ex" — głównie OK. Rzadkie use case dla checked: gdy wymuszasz że caller MUSI handle (np. transaction commit failure with retry possible). Druga: catch-all `Exception` w handler — kasuje stack trace dla unrelated bugs. Always specific catches.
+**Tags:** exceptions, error-handling, spring, design
 
 ## Q-OOP-023 [bloom: apply]
-**Pytanie:** Pokaż jak użyć Streams API do agregacji per kategorii: count, sum prices, avg price.
-**Modelowa odpowiedź:**
+**Question:** Pokaż jak użyć Streams API do agregacji per kategorii: count, sum prices, avg price.
+**Model answer:**
 ```java
 import java.math.*;
 import java.util.*;
@@ -1546,12 +1546,12 @@ products.parallelStream()
 ```
 Concurrent collectors dla parallel reduction. Ale: dla większości pricing data parallelStream overhead wins niż gain. Mierz przed parallelizacją.
 
-**Pułapka rozmowna:** `BigDecimal.divide` bez explicit scale + rounding rzuca `ArithmeticException` jeśli wynik nieskończony decimal (np. 10/3). ZAWSZE `divide(divisor, scale, roundingMode)`. Druga: `summingDouble` w pricingu = precision loss. Stick with BigDecimal aggregation.
-**Tagi:** streams, groupby, aggregation, bigdecimal
+**Interview trap:** `BigDecimal.divide` bez explicit scale + rounding rzuca `ArithmeticException` jeśli wynik nieskończony decimal (np. 10/3). ZAWSZE `divide(divisor, scale, roundingMode)`. Druga: `summingDouble` w pricingu = precision loss. Stick with BigDecimal aggregation.
+**Tags:** streams, groupby, aggregation, bigdecimal
 
 ## Q-OOP-024 [bloom: apply]
-**Pytanie:** Implement Java method `validatePromotion` że waliduje obiekt `Promotion` (start_date, end_date, discount_pct, customer_segments) i zwraca listę błędów.
-**Modelowa odpowiedź:**
+**Question:** Implement Java method `validatePromotion` że waliduje obiekt `Promotion` (start_date, end_date, discount_pct, customer_segments) i zwraca listę błędów.
+**Model answer:**
 ```java
 import java.time.*;
 import java.util.*;
@@ -1665,14 +1665,14 @@ public Promotion create(@Valid @RequestBody Promotion promo) {
 
 **Decision:** w Spring app preferuj Bean Validation. Custom validator dla complex rules nie wyrażalnych annotacjami (cross-field, conditional logic). Często mix: simple constraints przez annotations, complex via `@AssertTrue` method lub custom `ConstraintValidator`.
 
-**Pułapka rozmowna:** Bean Validation jest fail-fast lub fail-all? Default fail-all (zbiera wszystkie błędy). `@GroupSequence` dla fail-fast w stages. Druga: `@FutureOrPresent` + `LocalDate.now()` — timezone-aware? `@FutureOrPresent` w Bean Validation używa systemowego clock, bezpiecznie.
-**Tagi:** validation, bean-validation, pricing
+**Interview trap:** Bean Validation jest fail-fast lub fail-all? Default fail-all (zbiera wszystkie błędy). `@GroupSequence` dla fail-fast w stages. Druga: `@FutureOrPresent` + `LocalDate.now()` — timezone-aware? `@FutureOrPresent` w Bean Validation używa systemowego clock, bezpiecznie.
+**Tags:** validation, bean-validation, pricing
 
 ---
 
 ## Q-OOP-025 [bloom: analyze]
-**Pytanie:** Twój zespół rozważa przejście z Java 8 na Java 21. Argumenty?
-**Modelowa odpowiedź:** **Plusy migracji:**
+**Question:** Twój zespół rozważa przejście z Java 8 na Java 21. Argumenty?
+**Model answer:** **Plusy migracji:**
 
 1. **Performance:**
    - JIT improvements (Java 11+ ZGC, Java 21 generational ZGC).
@@ -1739,12 +1739,12 @@ public Promotion create(@Valid @RequestBody Promotion promo) {
 - Virtual threads — scaling boost dla pricing service z dużo I/O.
 - BigDecimal handling not changed — clean upgrade.
 
-**Pułapka rozmowna:** „Java 8 still works" — yes, ale technical debt. Każdy rok = więcej za sobą. Odkładanie migracji = większy boom kiedyś. Druga: „Java 17 vs 21" — 21 jest current LTS (jesień 2023). Dla nowego projektu — 21. Dla migration z 8 — może 17 jako step.
-**Tagi:** java-versions, migration, modernization, decision
+**Interview trap:** „Java 8 still works" — yes, ale technical debt. Każdy rok = więcej za sobą. Odkładanie migracji = większy boom kiedyś. Druga: „Java 17 vs 21" — 21 jest current LTS (jesień 2023). Dla nowego projektu — 21. Dla migration z 8 — może 17 jako step.
+**Tags:** java-versions, migration, modernization, decision
 
 ## Q-OOP-026 [bloom: analyze]
-**Pytanie:** Zespół debatuje: encje JPA z setters vs immutable z konstruktorem. Co wybierasz?
-**Modelowa odpowiedź:** Klasyczna dyskusja. **Argumenty obu stron:**
+**Question:** Zespół debatuje: encje JPA z setters vs immutable z konstruktorem. Co wybierasz?
+**Model answer:** Klasyczna dyskusja. **Argumenty obu stron:**
 
 **Mutable JPA encje (z setterami) — tradycyjny styl:**
 - ✓ JPA workhorse — większość przykładów, tutoriali.
@@ -1809,12 +1809,12 @@ public record CreateOrderCommand(Long customerId, List<ItemSpec> items) { }
 - `PriceCalculation` (immutable record) — output of calculation.
 - `PriceCalculationCommand` (immutable record) — input.
 
-**Pułapka rozmowna:** „Immutable entities = lepszy kod" — tak w abstrakcji, ale walka z JPA. Compromise: encapsulated mutability (no public setters) zamiast strict immutability. Druga: lombok `@Data` na encjach — generuje setters dla wszystkiego, robi domain anemic.
-**Tagi:** jpa, immutability, ddd, design, decision
+**Interview trap:** „Immutable entities = lepszy kod" — tak w abstrakcji, ale walka z JPA. Compromise: encapsulated mutability (no public setters) zamiast strict immutability. Druga: lombok `@Data` na encjach — generuje setters dla wszystkiego, robi domain anemic.
+**Tags:** jpa, immutability, ddd, design, decision
 
 ## Q-OOP-027 [bloom: analyze]
-**Pytanie:** Code review: kolega napisał `synchronized` block na 200 liniach kodu. Reaguj.
-**Modelowa odpowiedź:** **Czerwone flagi:**
+**Question:** Code review: kolega napisał `synchronized` block na 200 liniach kodu. Reaguj.
+**Model answer:** **Czerwone flagi:**
 
 1. **Long critical section** = poor concurrency. Wszystkie wątki czekają tak długo jak wykonuje się 200 lines. Throughput tyranniczne.
 
@@ -1883,12 +1883,12 @@ public void process(Order o) {
 - **Actor model** (Akka / Vert.x) — message-passing, no shared state.
 - **Database transactions** — przesunąć synchronization z kodu do DB (gdy to ma sens).
 
-**Pułapka rozmowna:** „Synchronized to safe" — tak, ale slow + deadlock-prone. „Synchronized na wszystkim — better safe than sorry" — paralyzed concurrency. Real pros: minimum critical sections, lock-free where possible, profile with JMH dla validation.
-**Tagi:** code-review, concurrency, synchronized, design
+**Interview trap:** „Synchronized to safe" — tak, ale slow + deadlock-prone. „Synchronized na wszystkim — better safe than sorry" — paralyzed concurrency. Real pros: minimum critical sections, lock-free where possible, profile with JMH dla validation.
+**Tags:** code-review, concurrency, synchronized, design
 
 ## Q-OOP-028 [bloom: analyze]
-**Pytanie:** Spring DI vs manual constructor injection — co i kiedy?
-**Modelowa odpowiedź:** Spring DI (Dependency Injection) container manages object creation, wiring, lifecycle. **Wariants:**
+**Question:** Spring DI vs manual constructor injection — co i kiedy?
+**Model answer:** Spring DI (Dependency Injection) container manages object creation, wiring, lifecycle. **Wariants:**
 
 **1. Constructor injection (preferred, modern):**
 ```java
@@ -1970,12 +1970,12 @@ Plus: explicit, no magic, easy to follow. Minus: lots of boilerplate as app grow
 - Pricing strategies registered as `@Component`, injected as `Map<String, PricingStrategy>` (Spring auto-collects).
 - Configuration via `@ConfigurationProperties("pricing.tax")`.
 
-**Pułapka rozmowna:** „Field injection convenient" — short term. Long term: hidden dependencies, hard tests, can't be `final`. Constructor injection becomes painful only when class has 7+ deps — that's a smell, refactor (split class).
-**Tagi:** spring, di, design, testing
+**Interview trap:** „Field injection convenient" — short term. Long term: hidden dependencies, hard tests, can't be `final`. Constructor injection becomes painful only when class has 7+ deps — that's a smell, refactor (split class).
+**Tags:** spring, di, design, testing
 
 ## Q-OOP-029 [bloom: analyze]
-**Pytanie:** Twój system rzuca `OutOfMemoryError` w produkcji. Jak diagnozujesz?
-**Modelowa odpowiedź:** **Step-by-step diagnostic:**
+**Question:** Twój system rzuca `OutOfMemoryError` w produkcji. Jak diagnozujesz?
+**Model answer:** **Step-by-step diagnostic:**
 
 **1. Check basics:**
 - Heap size: `-Xmx`. Czy zwiększony from default? Default 25% RAM, może być za mały.
@@ -2031,12 +2031,12 @@ Plus: explicit, no magic, easy to follow. Minus: lots of boilerplate as app grow
 - **Big batch processing** — load 1M products into List<Product> for batch operation. Solution: stream/cursor-based.
 - **Audit log buffered in memory** — flush to DB / queue async. Solution: bounded buffer + async flush.
 
-**Pułapka rozmowna:** „Add more RAM" without diagnosis — hides leak. App hits OOM later or at higher scale. Druga: ignorowanie GC logs. `-Xlog:gc*` w prod (rotated). Diagnoza często widoczna w GC behavior przed OOM.
-**Tagi:** memory, debugging, production, jvm
+**Interview trap:** „Add more RAM" without diagnosis — hides leak. App hits OOM later or at higher scale. Druga: ignorowanie GC logs. `-Xlog:gc*` w prod (rotated). Diagnoza często widoczna w GC behavior przed OOM.
+**Tags:** memory, debugging, production, jvm
 
 ## Q-OOP-030 [bloom: analyze]
-**Pytanie:** Builder pattern vs lombok `@Builder` vs records — kiedy które?
-**Modelowa odpowiedź:** **Manual Builder:**
+**Question:** Builder pattern vs lombok `@Builder` vs records — kiedy które?
+**Model answer:** **Manual Builder:**
 - Plus: full control, custom validation logic in `build()`, custom defaults logic, optional immutability.
 - Minus: boilerplate (~50+ lines for class with 5+ fields).
 
@@ -2111,12 +2111,12 @@ public record Order(Long customerId, String currency, List<Item> items, BigDecim
 - Lombok still common, but losing favor (records cover 80% use cases).
 - Manual builder still relevant for high-customization needs.
 
-**Pułapka rozmowna:** „Lombok wygodne więc lepsze" — dependency, magic w bytecode, czasem trudne do debug. Pure Java preferable when możliwe. Druga: Records bez named params — call site staje się `new Order(123L, "PLN", items, BigDecimal.ZERO, null, "promo123", true, false)` — nightmare. Add builder if 4+ fields with defaults/optional.
-**Tagi:** builder, records, lombok, design, decision
+**Interview trap:** „Lombok wygodne więc lepsze" — dependency, magic w bytecode, czasem trudne do debug. Pure Java preferable when możliwe. Druga: Records bez named params — call site staje się `new Order(123L, "PLN", items, BigDecimal.ZERO, null, "promo123", true, false)` — nightmare. Add builder if 4+ fields with defaults/optional.
+**Tags:** builder, records, lombok, design, decision
 
 ## Q-OOP-031 [bloom: analyze]
-**Pytanie:** Twój kolega kopiuje kod metody `calculatePrice` do 3 różnych miejsc. Nie chce wyciągnąć do shared, „bo każda wersja może się różnić". Reaguj.
-**Modelowa odpowiedź:** Klasyczne napięcie: **DRY (Don't Repeat Yourself)** vs **WET (Write Everything Twice / Don't Generalize Prematurely)**. Both have merit.
+**Question:** Twój kolega kopiuje kod metody `calculatePrice` do 3 różnych miejsc. Nie chce wyciągnąć do shared, „bo każda wersja może się różnić". Reaguj.
+**Model answer:** Klasyczne napięcie: **DRY (Don't Repeat Yourself)** vs **WET (Write Everything Twice / Don't Generalize Prematurely)**. Both have merit.
 
 **Argumenty za extraction (DRY):**
 - Single source of truth → bug fix raz, działa wszędzie.
@@ -2181,12 +2181,12 @@ class CartService {
 - Module boundaries (microservices) — service A i service B mogą mieć ten sam algorytm, ale extracting na shared library tworzy coupling. Better: each service own copy + shared spec/test.
 - Read-vs-write models in CQRS (intentionally different shapes).
 
-**Pułapka rozmowna:** „DRY zawsze prawidłowe" — sometimes wrong abstraction tworzy more debt than duplikacja. Knuth: rozsądek ponad dogmaty. Druga: extracted method z 12 boolean flags żeby pokryć wszystkie use cases — to znaczy że abstrakcja jest źle wybrana, refactor.
-**Tagi:** dry, refactoring, code-review, design
+**Interview trap:** „DRY zawsze prawidłowe" — sometimes wrong abstraction tworzy more debt than duplikacja. Knuth: rozsądek ponad dogmaty. Druga: extracted method z 12 boolean flags żeby pokryć wszystkie use cases — to znaczy że abstrakcja jest źle wybrana, refactor.
+**Tags:** dry, refactoring, code-review, design
 
 ## Q-OOP-032 [bloom: analyze]
-**Pytanie:** W pricing engine wybierasz: wykryć błędy walidacji input early (w controller) czy w service layer? Trade-offy.
-**Modelowa odpowiedź:** **Defense in depth** — typowo **OBA**, ale z różnymi rolami.
+**Question:** W pricing engine wybierasz: wykryć błędy walidacji input early (w controller) czy w service layer? Trade-offy.
+**Model answer:** **Defense in depth** — typowo **OBA**, ale z różnymi rolami.
 
 **Controller layer validation:**
 - **Format / structural:** JSON walidne, types correct, required fields present.
@@ -2266,5 +2266,5 @@ public class PromotionService {
 - Multiple sources of price data (input, config, base price) — each potentially malformed.
 - Audit invalid attempts — logs help find bad integrations / abuse.
 
-**Pułapka rozmowna:** „Controller validates everything, service trusts" — naïve. Service called from queue consumer, scheduled job, internal API — service must not assume valid input. Druga: redundant validation everywhere → maintenance burden, drift between layers. Define ownership: controller = format, service = business rules, domain = invariants. No overlap, complete coverage.
-**Tagi:** validation, architecture, layered, design
+**Interview trap:** „Controller validates everything, service trusts" — naïve. Service called from queue consumer, scheduled job, internal API — service must not assume valid input. Druga: redundant validation everywhere → maintenance burden, drift between layers. Define ownership: controller = format, service = business rules, domain = invariants. No overlap, complete coverage.
+**Tags:** validation, architecture, layered, design

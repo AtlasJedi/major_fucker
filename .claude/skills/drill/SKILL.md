@@ -1,21 +1,21 @@
 ---
 name: drill
-description: Use when the user wants intensive rapid-fire practice on the current topic. Triggers on "/drill", "drill", "szybkie pytania", "rapid fire", "seria pytań". Runs 10 quick questions with minimal feedback per question, then a consolidated review at the end.
+description: Use when the user wants intensive rapid-fire practice on the current topic. Triggers on "/drill", "drill", "rapid fire", "quick questions", "fire away". Runs 10 quick questions with minimal feedback per question, then a consolidated review at the end.
 ---
 
-# /drill — szybka seria 10 pytań
+# /drill — rapid-fire 10 questions
 
-## Cel
+## Goal
 
-Tryb intensywnego utrwalania. 10 pytań pod rząd z bieżącego tematu, krótka ocena per pytanie (✓/~/✗ + jedno-zdaniowa modelka), pełen feedback dopiero na końcu.
+Intensive reinforcement mode. 10 questions back-to-back on the current topic, short grade per question (pass/partial/fail + one-sentence model answer), full feedback only at the end.
 
-## Procedura
+## Procedure
 
-### Krok 1 — przygotuj sesję drill
+### Step 1 — prepare drill session
 
-Wczytaj `state/current.json`. Jeśli brak `active_topic` — uruchom `/start`.
+Read `state/current.json`. If no `active_topic` — run `/start`.
 
-Zapisz w `current.json`:
+Write to `current.json`:
 ```json
 {
   "drill_in_progress": true,
@@ -26,58 +26,58 @@ Zapisz w `current.json`:
 }
 ```
 
-Major komunikat:
+Major announcement:
 
-> „DRILL. 10 pytań. Krótka ocena, modelka jedno zdanie, lecimy. Po wszystkim feedback. Gotów? STRZELAM."
+> "DRILL. 10 questions. Short grade, one-sentence model answer, we go fast. Full feedback after. Ready? FIRING."
 
-### Krok 2 — pętla 10 pytań
+### Step 2 — loop of 10 questions
 
-Dla każdego pytania:
+For each question:
 
-1. **Wybór:** poziom Blooma rozłożony — kiedy `mastery < 0.5`, mix recall/understand 7:3. Kiedy `0.5 ≤ mastery < 0.8`, mix understand/apply 6:4. Kiedy `mastery ≥ 0.8`, mix apply/analyze 6:4.
-2. **Zadaj** — krótko, bez fraz Hartmana (oszczędzamy tempo). Tylko pytanie.
-3. **Czekaj na odpowiedź ucznia.**
-4. **Ocena natychmiastowa, bardzo krótka:**
-   - `correct`: „✓ — Modelka: $JEDNO_ZDANIE."
-   - `partial`: „~ — Brakuje: $LUKA. Modelka: $JEDNO_ZDANIE."
-   - `incorrect`: „✗ — Modelka: $JEDNO_ZDANIE."
+1. **Selection:** Bloom level distributed — when `mastery < 0.5`, mix recall/understand 7:3. When `0.5 <= mastery < 0.8`, mix understand/apply 6:4. When `mastery >= 0.8`, mix apply/analyze 6:4.
+2. **Ask** — brief, no Hartman phrases (saving tempo). Just the question.
+3. **Wait for the learner's answer.**
+4. **Immediate grade, very short:**
+   - `correct`: "pass — Model: $ONE_SENTENCE."
+   - `partial`: "~ — Missing: $GAP. Model: $ONE_SENTENCE."
+   - `incorrect`: "fail — Model: $ONE_SENTENCE."
 5. **Persistence:**
-   - Append do `state/answer_log.jsonl` (jak normalnie).
-   - Zaktualizuj `mastery` w `topics.json`.
-   - Doklej do `current.json:drill_results` rekord: `{"q": "<id>", "score": <0-1>, "bloom": "<level>"}`.
-   - Zwiększ `drill_questions_done`.
-6. **Bez pułapki rozmownej w drillu** — to dla zachowania tempa. Pułapka wraca w finalnym debriefie.
-7. **Następne pytanie natychmiast.** Bez „dalej?"-style przerywników.
+   - Append to `state/answer_log.jsonl` (as normal).
+   - Update `mastery` in `topics.json`.
+   - Append to `current.json:drill_results` record: `{"q": "<id>", "score": <0-1>, "bloom": "<level>"}`.
+   - Increment `drill_questions_done`.
+6. **No interview trap in drill** — to maintain tempo. Traps come back in the final debrief.
+7. **Next question immediately.** No "ready?"-style interruptions.
 
-### Krok 3 — finalny debrief drillu (po pytaniu 10)
+### Step 3 — final drill debrief (after question 10)
 
 ```
-DRILL ZAKOŃCZONY — $TOPIC
+DRILL COMPLETE — $TOPIC
 
-Wynik: $CORRECT/$TOTAL ($PCT%)
-Breakdown po Bloom: recall X✓/Y, understand X✓/Y, apply X✓/Y, analyze X✓/Y
+Score: $CORRECT/$TOTAL ($PCT%)
+Breakdown by Bloom: recall X pass/Y, understand X pass/Y, apply X pass/Y, analyze X pass/Y
 
-Mocne strony:
-- $obserwacja_1
-- $obserwacja_2
+Strengths:
+- $observation_1
+- $observation_2
 
-Słabe strony (do dorobienia):
-- $luka_1 — patrz Q-XXX-NNN
-- $luka_2
+Weaknesses (need work):
+- $gap_1 — see Q-XXX-NNN
+- $gap_2
 
-Następny krok:
-- $sugestia (np. „lesson na $podtemat" / „kolejny drill" / „następny temat" / „/pause")
+Next step:
+- $suggestion (e.g. "lesson on $subtopic" / "another drill" / "next topic" / "/pause")
 ```
 
-Update mastery delta — dorzuć do `current.json` finalny snapshot.
+Update mastery delta — add final snapshot to `current.json`.
 
-Wyłącz `drill_in_progress = false` w `current.json`.
+Set `drill_in_progress = false` in `current.json`.
 
-Ostatnia fraza Hartmana: „SPOCZNIJ NA SEKUNDĘ. NASTĘPNY ROZKAZ?"
+Final Hartman phrase: "AT EASE FOR A SECOND. NEXT ORDERS?"
 
-## Ważne
+## Important
 
-- Tempo > głębokość. Drill ma trenować recall pod presją, nie analitykę.
-- Modelka per pytanie MA BYĆ JEDNO-ZDANIOWA. Pełne tłumaczenia odkładamy na koniec.
-- Jeśli uczeń wpisze `/pause` w środku drillu — zapisz drill jako `incomplete`, daj zrobiony breakdown z dotychczasowych pytań.
-- Drill nie powinien skoczyć w analyze jeśli mastery jest niskie — to demoralizuje. Reguła z kroku 2.1 obowiązuje.
+- Tempo > depth. Drill trains recall under pressure, not analytics.
+- Model answer per question MUST BE ONE SENTENCE. Full explanations saved for the end.
+- If the learner types `/pause` mid-drill — save drill as `incomplete`, give breakdown from questions done so far.
+- Drill should NOT jump to analyze if mastery is low — that demoralizes. The rule from step 2.1 applies.

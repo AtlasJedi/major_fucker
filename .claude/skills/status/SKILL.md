@@ -1,63 +1,63 @@
 ---
 name: status
-description: Use when the user asks where they are right now in the session. Triggers on "/status", "gdzie jestem", "co teraz robimy", "ile zostało", "jak długo trwa". Quick 1-screen snapshot of current topic, question count, mastery delta this session, time elapsed.
+description: Use when the user asks where they are right now in the session. Triggers on "/status", "where am I", "what are we doing", "how long left", "how long has it been". Quick 1-screen snapshot of current topic, question count, mastery delta this session, time elapsed.
 ---
 
-# /status — szybki snapshot bieżącej sesji
+# /status — quick snapshot of current session
 
-## Cel
+## Goal
 
-Bardzo krótka informacja gdzie aktualnie jesteśmy. Bez krzyku, bez modelki, bez wykładu — same fakty.
+Very brief info on where we currently are. No screaming, no model answers, no lectures — just facts.
 
-## Procedura
+## Procedure
 
-### Krok 1 — wczytaj state
+### Step 1 — read state
 
 - `state/current.json` (active topic, mode, started_at, questions_in_session)
-- `state/topics.json` (mastery aktualnego tematu)
-- ostatnie wpisy `state/answer_log.jsonl` z `session_id == current` (filtruj po `ts >= started_at`)
+- `state/topics.json` (mastery of current topic)
+- latest entries from `state/answer_log.jsonl` with `session_id == current` (filter by `ts >= started_at`)
 
-### Krok 2 — policz metryki sesji
+### Step 2 — calculate session metrics
 
 - `time_elapsed` = `now - started_at`
-- `questions_this_session` = liczba wpisów answer_log z timestamp ≥ started_at
-- `correct_this_session` = ich wynik korzystny
-- `avg_score_this_session` = średnia score'ów
-- `mastery_now` = mastery aktualnego tematu z topics.json
-- `mastery_delta` = mastery_now - mastery na początku sesji (jeśli zapisane w `current.json:mastery_at_start`, inaczej `n/a`)
+- `questions_this_session` = count of answer_log entries with timestamp >= started_at
+- `correct_this_session` = favorable results
+- `avg_score_this_session` = mean of scores
+- `mastery_now` = mastery of current topic from topics.json
+- `mastery_delta` = mastery_now - mastery at session start (if saved in `current.json:mastery_at_start`, otherwise `n/a`)
 
-### Krok 3 — output (jeden ekran)
+### Step 3 — output (one screen)
 
 ```
 STATUS
 
-Tryb:           $MODE
-Aktywny temat:  $TOPIC
-Mastery:        $MASTERY_PCT%  (Δ tej sesji: +$DELTA_PCT%)
-Pytań w sesji:  $N  (✓ $CORRECT  ~ $PARTIAL  ✗ $INCORRECT)
-Średni score:   $AVG_PCT%
-Czas:           $H h $M min
+Mode:           $MODE
+Active topic:   $TOPIC
+Mastery:        $MASTERY_PCT%  (session delta: +$DELTA_PCT%)
+Questions:      $N  (pass $CORRECT  ~ $PARTIAL  fail $INCORRECT)
+Avg score:      $AVG_PCT%
+Time:           $H h $M min
 
-Następne pytanie: $BLOOM_LEVEL z banku $TOPIC.
+Next question: $BLOOM_LEVEL from $TOPIC bank.
 ```
 
-### Krok 4 — krótka fraza Hartmana, jedna
+### Step 4 — short Hartman phrase, one
 
-Dopasowana do trendu:
-- Jeśli `avg_score ≥ 0.75`: „Bez fajerwerków, ale działacie. Dalej."
-- Jeśli `0.5 ≤ avg_score < 0.75`: „Mogę z was zrobić Software Engineera, ale potrzeba więcej krwi."
-- Jeśli `avg_score < 0.5`: „Wracamy do podstaw, robaki. NASTĘPNE PYTANIE."
+Matched to trend:
+- If `avg_score >= 0.75`: "No fireworks, but you're holding. Moving on."
+- If `0.5 <= avg_score < 0.75`: "I can make a Software Engineer out of you, but it's gonna take more blood."
+- If `avg_score < 0.5`: "Back to basics, maggots. NEXT QUESTION."
 
-### Krok 5 — wracaj do trybu
+### Step 5 — return to mode
 
-Po wypisaniu statusu — jeśli `active_question_id` w `current.json` jest ustawiony i pytanie zadane, ale brak odpowiedzi — przypomnij o nim:
+After printing status — if `active_question_id` in `current.json` is set and question was asked but no answer yet — remind:
 
-> „Czekam na odpowiedź na: $QUESTION_TEXT"
+> "Waiting for your answer on: $QUESTION_TEXT"
 
-Jeśli `active_question_id` jest `null` i `mode == drill` — zadaj kolejne pytanie standardowo.
+If `active_question_id` is `null` and `mode == drill` — ask the next question as normal.
 
-## Ważne
+## Important
 
-- `/status` NIE zmienia stanu (poza odczytem). Nie wybiera nowego pytania, nie aktualizuje mastery.
-- Output ma być zwarty. Jeden ekran. Bez tabel z 10 kolumnami — to jest `/knowledge`.
-- Jeśli sesja jeszcze nie wystartowała (`current.json` puste) — Major: „Sesji nie ma. `/start`."
+- `/status` does NOT change state (apart from reading). Doesn't pick a new question, doesn't update mastery.
+- Output must be compact. One screen. No tables with 10 columns — that's `/knowledge`.
+- If session hasn't started yet (`current.json` empty) — Major: "No session running. `/start`."

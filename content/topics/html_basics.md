@@ -1,8 +1,8 @@
-# HTML basics — bank pytań
+# HTML basics — question bank
 
-> Kontekst: stanowisko nie jest frontend-heavy, ale rekruter sprawdza podstawy semantyki HTML5, formularzy, accessibility i interakcji z REST. Pytania ułożone do quick-warmup w mocku, nie do głębokiej ekspertyzy.
+> Context: the position isn't frontend-heavy, but the recruiter checks basics of HTML5 semantics, forms, accessibility, and REST interaction. Questions designed for quick warmup in a mock, not deep expertise.
 
-## Zakres
+## Scope
 
 - HTML5 semantyka: header/nav/main/section/article/aside/footer
 - block vs inline elementy
@@ -18,8 +18,8 @@
 ---
 
 ## Q-HTM-001 [bloom: recall]
-**Pytanie:** Co to jest semantic HTML i wymień 5 nowych semantic tagów z HTML5.
-**Modelowa odpowiedź:** Semantic HTML to używanie tagów których nazwa odpowiada znaczeniu zawartości — pomaga przeglądarkom, screen readerom, SEO i developerom. **HTML5 tagi:**
+**Question:** Co to jest semantic HTML i wymień 5 nowych semantic tagów z HTML5.
+**Model answer:** Semantic HTML to używanie tagów których nazwa odpowiada znaczeniu zawartości — pomaga przeglądarkom, screen readerom, SEO i developerom. **HTML5 tagi:**
 - `<header>` — nagłówek strony lub sekcji.
 - `<nav>` — nawigacja (linki menu).
 - `<main>` — główna zawartość (jedna na stronę).
@@ -31,30 +31,30 @@
 - `<time datetime="...">` — datowanie machine-readable.
 - `<mark>` — highlight.
 **Stary sposób:** `<div class="header">`, `<div class="nav">` — działało, ale brak semantyki. Screen reader nie wiedział że to nawigacja.
-**Pułapka rozmowna:** „W HTML5 nie używamy div" — false. Div wciąż używamy do styling/layout where no semantic meaning. Spans dla inline. Semantic tags mają znaczenie, divs są neutralne.
-**Tagi:** html5, semantics
+**Interview trap:** „W HTML5 nie używamy div" — false. Div wciąż używamy do styling/layout where no semantic meaning. Spans dla inline. Semantic tags mają znaczenie, divs są neutralne.
+**Tags:** html5, semantics
 
 ## Q-HTM-002 [bloom: recall]
-**Pytanie:** Czym różni się element block od inline?
-**Modelowa odpowiedź:** **Block** elementy zaczynają nowy wiersz, zajmują pełną dostępną szerokość, można im ustawić width/height (`<div>`, `<p>`, `<h1>-<h6>`, `<section>`, `<article>`, `<form>`, `<table>`). **Inline** są w linii z otaczającym tekstem, zajmują tylko tyle ile ich content, width/height domyślnie ignorowane (`<span>`, `<a>`, `<strong>`, `<em>`, `<img>`, `<input>`). **Inline-block** — w linii ale akceptuje width/height (`<button>` defaultowo, niektóre form elements). CSS `display` może to zmienić: `display: block` / `inline` / `inline-block` / `flex` / `grid` / `none`.
-**Pułapka rozmowna:** „img jest block bo ma width/height" — nie. `<img>` jest inline-block: w linii z tekstem (jak emoji), ale ma wymiary. „Float" zmienia behavior — float-owany inline staje się quasi-block.
-**Tagi:** html, css, layout
+**Question:** Czym różni się element block od inline?
+**Model answer:** **Block** elementy zaczynają nowy wiersz, zajmują pełną dostępną szerokość, można im ustawić width/height (`<div>`, `<p>`, `<h1>-<h6>`, `<section>`, `<article>`, `<form>`, `<table>`). **Inline** są w linii z otaczającym tekstem, zajmują tylko tyle ile ich content, width/height domyślnie ignorowane (`<span>`, `<a>`, `<strong>`, `<em>`, `<img>`, `<input>`). **Inline-block** — w linii ale akceptuje width/height (`<button>` defaultowo, niektóre form elements). CSS `display` może to zmienić: `display: block` / `inline` / `inline-block` / `flex` / `grid` / `none`.
+**Interview trap:** „img jest block bo ma width/height" — nie. `<img>` jest inline-block: w linii z tekstem (jak emoji), ale ma wymiary. „Float" zmienia behavior — float-owany inline staje się quasi-block.
+**Tags:** html, css, layout
 
 ## Q-HTM-003 [bloom: recall]
-**Pytanie:** Wymień 5 typów `<input>` w HTML5.
-**Modelowa odpowiedź:** HTML5 dorzuciło wiele typów ponad starsze `text`, `password`, `submit`. **Nowe:** `email` (walidacja format @), `tel` (wybór keyboard mobile), `url`, `number` (numeric keypad mobile, `min/max/step`), `date` (date picker), `time`, `datetime-local`, `month`, `week`, `range` (slider), `color` (color picker), `search`, `file`. **Poza tym (pre-HTML5):** `text`, `password`, `checkbox`, `radio`, `submit`, `button`, `hidden`, `image`, `reset`. Atrybuty: `required`, `pattern` (regex), `min`/`max`, `step`, `placeholder`, `autocomplete`, `autofocus`, `readonly`, `disabled`.
-**Pułapka rozmowna:** „type=email waliduje email" — tylko basic format check (zawiera @). Server-side validation zawsze konieczna. „type=number" — w niektórych przeglądarkach pozwala na wpisanie liter (mobile), wartość parsowana jako string.
-**Tagi:** forms, input, html5
+**Question:** Wymień 5 typów `<input>` w HTML5.
+**Model answer:** HTML5 dorzuciło wiele typów ponad starsze `text`, `password`, `submit`. **Nowe:** `email` (walidacja format @), `tel` (wybór keyboard mobile), `url`, `number` (numeric keypad mobile, `min/max/step`), `date` (date picker), `time`, `datetime-local`, `month`, `week`, `range` (slider), `color` (color picker), `search`, `file`. **Poza tym (pre-HTML5):** `text`, `password`, `checkbox`, `radio`, `submit`, `button`, `hidden`, `image`, `reset`. Atrybuty: `required`, `pattern` (regex), `min`/`max`, `step`, `placeholder`, `autocomplete`, `autofocus`, `readonly`, `disabled`.
+**Interview trap:** „type=email waliduje email" — tylko basic format check (zawiera @). Server-side validation zawsze konieczna. „type=number" — w niektórych przeglądarkach pozwala na wpisanie liter (mobile), wartość parsowana jako string.
+**Tags:** forms, input, html5
 
 ## Q-HTM-004 [bloom: recall]
-**Pytanie:** Co robi atrybut `<form action="..." method="...">`?
-**Modelowa odpowiedź:** `action` — URL gdzie formularz zostanie wysłany. `method` — metoda HTTP: `GET` lub `POST`. **GET:** parametry w URL query string (`?name=foo&email=bar`). Limity długości, widoczne w historii, idempotentne, cachowalne, OK dla search forms. **POST:** parametry w body request, bez limitu długości, niewidoczne w URL, OK dla mutation. Inne `method` (`PUT`, `DELETE`) standardowo nie są wspierane przez form HTML — wymagają JS (fetch/XHR). **Other attributes:** `enctype` — `application/x-www-form-urlencoded` (default), `multipart/form-data` (file upload), `text/plain` (debug only). `target` — gdzie się otworzy response (`_self`, `_blank`, named iframe). `novalidate` — wyłącz built-in HTML5 validation.
-**Pułapka rozmowna:** „REST API przez form" — można, ale ograniczone do GET/POST + standard form encoding. Modern apps i tak używają fetch z JSON body.
-**Tagi:** forms, http
+**Question:** Co robi atrybut `<form action="..." method="...">`?
+**Model answer:** `action` — URL gdzie formularz zostanie wysłany. `method` — metoda HTTP: `GET` lub `POST`. **GET:** parametry w URL query string (`?name=foo&email=bar`). Limity długości, widoczne w historii, idempotentne, cachowalne, OK dla search forms. **POST:** parametry w body request, bez limitu długości, niewidoczne w URL, OK dla mutation. Inne `method` (`PUT`, `DELETE`) standardowo nie są wspierane przez form HTML — wymagają JS (fetch/XHR). **Other attributes:** `enctype` — `application/x-www-form-urlencoded` (default), `multipart/form-data` (file upload), `text/plain` (debug only). `target` — gdzie się otworzy response (`_self`, `_blank`, named iframe). `novalidate` — wyłącz built-in HTML5 validation.
+**Interview trap:** „REST API przez form" — można, ale ograniczone do GET/POST + standard form encoding. Modern apps i tak używają fetch z JSON body.
+**Tags:** forms, http
 
 ## Q-HTM-005 [bloom: recall]
-**Pytanie:** Co to jest `alt` attribute na `<img>` i czemu jest ważny?
-**Modelowa odpowiedź:** `alt` to tekst alternatywny dla obrazu — pokazany gdy obraz się nie załaduje LUB czytany przez screen reader. Powinien opisywać znaczenie obrazu w kontekście. **Przykłady:**
+**Question:** Co to jest `alt` attribute na `<img>` i czemu jest ważny?
+**Model answer:** `alt` to tekst alternatywny dla obrazu — pokazany gdy obraz się nie załaduje LUB czytany przez screen reader. Powinien opisywać znaczenie obrazu w kontekście. **Przykłady:**
 - Decorative img (nic nie znaczy semantycznie): `alt=""` (pusty — screen reader pomija). Nigdy `alt` brak — wtedy reader czyta plik filename.
 - Logo firmy: `alt="Acme Corp logo"`.
 - Wykres: `alt="Sprzedaż wzrosła 30% w Q3 2025"` — opisuje INFORMACJĘ z wykresu.
@@ -65,41 +65,41 @@
 - **Slow connections** — alt text shown gdy image loading lub failed.
 - **SEO** — Google używa alt do image search.
 - **Walidacja** — WCAG wymaga alt na images.
-**Pułapka rozmowna:** „decorative images nie potrzebują alt" — potrzebują `alt=""` (explicitly empty), nie pominięcia. Bez alt-u screen reader czyta nazwy plików.
-**Tagi:** a11y, accessibility, images
+**Interview trap:** „decorative images nie potrzebują alt" — potrzebują `alt=""` (explicitly empty), nie pominięcia. Bez alt-u screen reader czyta nazwy plików.
+**Tags:** a11y, accessibility, images
 
 ## Q-HTM-006 [bloom: recall]
-**Pytanie:** Wytłumacz `<label for="...">` i `<input id="...">`.
-**Modelowa odpowiedź:** `<label for="email">Email</label> <input type="email" id="email">` — wiąże label z input przez ID. **Co to daje:**
+**Question:** Wytłumacz `<label for="...">` i `<input id="...">`.
+**Model answer:** `<label for="email">Email</label> <input type="email" id="email">` — wiąże label z input przez ID. **Co to daje:**
 1. **Click on label** focusuje input — większa interaktywność (np. checkboxy dużo łatwiej kliknąć).
 2. **Screen reader** czyta label gdy input focused — user wie co wpisać.
 3. **Form validation messages** mogą używać label do referencji.
 **Alternatywa: nesting** — `<label>Email <input type="email"></label>` — bez `for` i `id`. Działa jak wyżej, ale `for/id` daje większą elastyczność (label może być daleko od input w DOM).
 **ARIA fallback:** `<input aria-label="Email">` lub `aria-labelledby="elem-id"` — gdy label nie da się użyć (np. icon-only button).
-**Pułapka rozmowna:** Popularny błąd — placeholder zamiast labelu (`<input placeholder="Email">`). Placeholder znika gdy user zaczyna pisać → user zapomina co wpisać. Labels muszą być persistent. Drugi: ID musi być unique w dokumencie.
-**Tagi:** a11y, forms, labels
+**Interview trap:** Popularny błąd — placeholder zamiast labelu (`<input placeholder="Email">`). Placeholder znika gdy user zaczyna pisać → user zapomina co wpisać. Labels muszą być persistent. Drugi: ID musi być unique w dokumencie.
+**Tags:** a11y, forms, labels
 
 ## Q-HTM-007 [bloom: recall]
-**Pytanie:** Czym jest DOCTYPE i czemu się go używa?
-**Modelowa odpowiedź:** `<!DOCTYPE html>` na początku HTML deklaruje że dokument używa HTML5. Działa jak wskazówka dla przeglądarki: użyj **standards mode** parsing/rendering. Bez DOCTYPE przeglądarki domyślnie idą w **quirks mode** — emulacja zachowań starych IE (różne layout bugs, broken CSS). **Historycznie:** HTML4 i XHTML miały dłuższe DOCTYPE z DTD (`<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://...">`). HTML5 simplifies do `<!DOCTYPE html>` (case-insensitive). **Czemu wciąż się używa:** standards mode jest essential dla consistent rendering w modern przeglądarkach. Quirks mode = bugs.
-**Pułapka rozmowna:** „DOCTYPE jest częścią HTML" — false, jest meta-instrukcją parser (preprocessor directive). Druga: nie pominąć w PWA / SPA — nawet gdy generujesz HTML w JS, base template potrzebuje DOCTYPE.
-**Tagi:** html, doctype, browsers
+**Question:** Czym jest DOCTYPE i czemu się go używa?
+**Model answer:** `<!DOCTYPE html>` na początku HTML deklaruje że dokument używa HTML5. Działa jak wskazówka dla przeglądarki: użyj **standards mode** parsing/rendering. Bez DOCTYPE przeglądarki domyślnie idą w **quirks mode** — emulacja zachowań starych IE (różne layout bugs, broken CSS). **Historycznie:** HTML4 i XHTML miały dłuższe DOCTYPE z DTD (`<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://...">`). HTML5 simplifies do `<!DOCTYPE html>` (case-insensitive). **Czemu wciąż się używa:** standards mode jest essential dla consistent rendering w modern przeglądarkach. Quirks mode = bugs.
+**Interview trap:** „DOCTYPE jest częścią HTML" — false, jest meta-instrukcją parser (preprocessor directive). Druga: nie pominąć w PWA / SPA — nawet gdy generujesz HTML w JS, base template potrzebuje DOCTYPE.
+**Tags:** html, doctype, browsers
 
 ## Q-HTM-008 [bloom: recall]
-**Pytanie:** Co to jest `<meta name="viewport">`?
-**Modelowa odpowiedź:** Meta tag w `<head>` instruujący mobile browsers jak skalować i renderować stronę. Standardowy: `<meta name="viewport" content="width=device-width, initial-scale=1">`. **Co znaczy:**
+**Question:** Co to jest `<meta name="viewport">`?
+**Model answer:** Meta tag w `<head>` instruujący mobile browsers jak skalować i renderować stronę. Standardowy: `<meta name="viewport" content="width=device-width, initial-scale=1">`. **Co znaczy:**
 - `width=device-width` — szerokość viewport = szerokość ekranu device (np. 375px na iPhone).
 - `initial-scale=1` — początkowy zoom 1:1.
 - Inne (rzadziej): `maximum-scale=1` (zakaz zoom — zazwyczaj antypattern bo a11y), `user-scalable=no` (też zła praktyka).
 **Bez viewport meta** mobile browser renderuje stronę w 980px wide i scaluje down — strona wygląda jak desktop zminiaturyzowana, nieczytelna. Z viewport — strona dostosowuje layout do szerokości urządzenia (responsive design). **Modern web** zawsze ma viewport tag.
-**Pułapka rozmowna:** `user-scalable=no` blokuje zoom — to a11y violation. Users z słabym wzrokiem nie mogą powiększyć. WCAG to flaguje. Druga: viewport tylko dla mobile — desktop ignoruje (default rendering).
-**Tagi:** mobile, responsive, meta
+**Interview trap:** `user-scalable=no` blokuje zoom — to a11y violation. Users z słabym wzrokiem nie mogą powiększyć. WCAG to flaguje. Druga: viewport tylko dla mobile — desktop ignoruje (default rendering).
+**Tags:** mobile, responsive, meta
 
 ---
 
 ## Q-HTM-009 [bloom: understand]
-**Pytanie:** Wytłumacz różnicę między `<script>`, `<script async>`, i `<script defer>`.
-**Modelowa odpowiedź:** Wszystkie ładują JS. Różnica w **kiedy** i **w jakiej kolejności**:
+**Question:** Wytłumacz różnicę między `<script>`, `<script async>`, i `<script defer>`.
+**Model answer:** Wszystkie ładują JS. Różnica w **kiedy** i **w jakiej kolejności**:
 - **`<script>`** (no attribute) — synchroniczne. Browser zatrzymuje HTML parsing, fetch+execute scriptu, potem kontynuuje. Blokuje rendering. Dlatego klasycznie umieszcza się scripty na końcu `<body>`.
 - **`<script async>`** — fetch równolegle do parsing, execute natychmiast po pobraniu (przerywa parsing). Kolejność scriptów asynchronicznych: w jakiej zostały pobrane (NIE w kolejności w HTML). Dla niezależnych scriptów (analytics, ads).
 - **`<script defer>`** — fetch równolegle do parsing, execute DOPIERO PO parsing (w kolejności w HTML). Idealny dla scriptów które operują na DOM lub zależą od kolejności.
@@ -111,12 +111,12 @@
 - ES modules → `type="module"` (defer-like).
 - Legacy / blocking critical → no attribute (rare).
 
-**Pułapka rozmowna:** „defer = async + na końcu body" — nie do końca. Defer execution jest po DOMContentLoaded ALE PRZED `load`. Multiple defer-y zachowują kolejność, async nie. Druga: inline scripts nie wspierają async/defer (są zawsze sync).
-**Tagi:** scripts, performance, loading
+**Interview trap:** „defer = async + na końcu body" — nie do końca. Defer execution jest po DOMContentLoaded ALE PRZED `load`. Multiple defer-y zachowują kolejność, async nie. Druga: inline scripts nie wspierają async/defer (są zawsze sync).
+**Tags:** scripts, performance, loading
 
 ## Q-HTM-010 [bloom: understand]
-**Pytanie:** Co to jest event bubbling i event delegation?
-**Modelowa odpowiedź:** **Event bubbling** — gdy event (np. click) odpali się na elemencie, „bąbluje" w górę DOM tree, odpalając handlery na wszystkich rodzicach. Default behavior. Kolejność: target → parent → grandparent → ... → document. (Capture phase działa odwrotnie — od document w dół do target.) **Event delegation** — pattern: zamiast wieszania handlerów na 1000 elementach, wieszasz JEDEN handler na common parent, sprawdzasz `event.target` żeby zidentyfikować konkretny element. **Przykład:**
+**Question:** Co to jest event bubbling i event delegation?
+**Model answer:** **Event bubbling** — gdy event (np. click) odpali się na elemencie, „bąbluje" w górę DOM tree, odpalając handlery na wszystkich rodzicach. Default behavior. Kolejność: target → parent → grandparent → ... → document. (Capture phase działa odwrotnie — od document w dół do target.) **Event delegation** — pattern: zamiast wieszania handlerów na 1000 elementach, wieszasz JEDEN handler na common parent, sprawdzasz `event.target` żeby zidentyfikować konkretny element. **Przykład:**
 ```javascript
 // Bez delegation: każda komórka ma handler — wolno, dużo memory
 document.querySelectorAll('.item').forEach(el => {
@@ -135,12 +135,12 @@ document.getElementById('list').addEventListener('click', e => {
 - Mniej memory.
 **Minusy:** wszystkie events na parent muszą być filtrowane (overhead per non-matching event).
 **Stop bubbling:** `event.stopPropagation()` w handlerze — event nie idzie wyżej. `event.preventDefault()` — różne, anuluje default browser action (np. submit form). 
-**Pułapka rozmowna:** „stopPropagation zatrzymuje też capture phase" — false, tylko bubbling. `stopImmediatePropagation` zatrzymuje też inne handlery na tym samym elemencie. Druga: niektóre events nie bąblują (`focus`, `blur`, `mouseenter`, `mouseleave`) — do tego są bubbling alternatives (`focusin`, `focusout`).
-**Tagi:** events, dom, javascript
+**Interview trap:** „stopPropagation zatrzymuje też capture phase" — false, tylko bubbling. `stopImmediatePropagation` zatrzymuje też inne handlery na tym samym elemencie. Druga: niektóre events nie bąblują (`focus`, `blur`, `mouseenter`, `mouseleave`) — do tego są bubbling alternatives (`focusin`, `focusout`).
+**Tags:** events, dom, javascript
 
 ## Q-HTM-011 [bloom: understand]
-**Pytanie:** Co to są ARIA attributes i kiedy ich używać?
-**Modelowa odpowiedź:** ARIA (Accessible Rich Internet Applications) — atrybuty dodające semantykę dla a11y, gdy native HTML nie wystarczy. **Główne kategorie:**
+**Question:** Co to są ARIA attributes i kiedy ich używać?
+**Model answer:** ARIA (Accessible Rich Internet Applications) — atrybuty dodające semantykę dla a11y, gdy native HTML nie wystarczy. **Główne kategorie:**
 - **Roles:** `role="button"`, `role="dialog"`, `role="alert"`, `role="navigation"`. Mówią screen reader CO to jest.
 - **States:** `aria-checked`, `aria-expanded`, `aria-selected`, `aria-disabled`. Mówią CO obecny stan.
 - **Properties:** `aria-label` (text label gdy visual label brakuje), `aria-labelledby` (reference), `aria-describedby`, `aria-hidden="true"` (hide from screen readers).
@@ -153,12 +153,12 @@ document.getElementById('list').addEventListener('click', e => {
 **Kiedy NIE:**
 - Gdy native HTML wystarczy (`<button>`, `<a>`, `<input>` — używaj zamiast `<div>` z aria).
 - Redundancja: `<button role="button">` — niepotrzebne.
-**Pułapka rozmowna:** Custom dropdown z `<div>` zamiast `<select>` zazwyczaj kończy się a11y disaster. Native `<select>` wygląda nudnie ale jest accessible by default. Nowe (2024+): `<dialog>` HTML5 element + `popover` attribute redukują potrzebę ARIA dla overlays.
-**Tagi:** a11y, aria, accessibility
+**Interview trap:** Custom dropdown z `<div>` zamiast `<select>` zazwyczaj kończy się a11y disaster. Native `<select>` wygląda nudnie ale jest accessible by default. Nowe (2024+): `<dialog>` HTML5 element + `popover` attribute redukują potrzebę ARIA dla overlays.
+**Tags:** a11y, aria, accessibility
 
 ## Q-HTM-012 [bloom: understand]
-**Pytanie:** Wytłumacz Cross-Origin Resource Sharing (CORS) z perspektywy frontend.
-**Modelowa odpowiedź:** CORS chroni klientów (przeglądarki) przed wysyłaniem requestów do innych origins (= protokół + domena + port) bez zgody serwera. Przeglądarka: gdy JS robi `fetch('https://api.other.com')` z `https://app.com`, sprawdza czy serwer akceptuje cross-origin requests. **Flow:**
+**Question:** Wytłumacz Cross-Origin Resource Sharing (CORS) z perspektywy frontend.
+**Model answer:** CORS chroni klientów (przeglądarki) przed wysyłaniem requestów do innych origins (= protokół + domena + port) bez zgody serwera. Przeglądarka: gdy JS robi `fetch('https://api.other.com')` z `https://app.com`, sprawdza czy serwer akceptuje cross-origin requests. **Flow:**
 
 **Simple request** (GET/HEAD/POST z safe headers): browser wysyła request z `Origin: https://app.com`. Serwer odpowiada `Access-Control-Allow-Origin: https://app.com` (lub `*` dla public). Browser sprawdza match → jeśli OK, JS dostaje response. Jeśli nie → fetch promise rejects, console error.
 
@@ -181,12 +181,12 @@ Jeśli backend nie wystawi proper CORS headers — fetch fails, error w konsoli.
 - **JSONP** (legacy, deprecated): GET-only, security holes.
 - Mówienie partnerom „dodajcie CORS header".
 
-**Pułapka rozmowna:** CORS NIE chroni servera przed niczym (server-to-server requests ignoruje CORS — to jest browser-only mechanism). Druga: `*` z credentials nie działa — security spec.
-**Tagi:** cors, security, frontend
+**Interview trap:** CORS NIE chroni servera przed niczym (server-to-server requests ignoruje CORS — to jest browser-only mechanism). Druga: `*` z credentials nie działa — security spec.
+**Tags:** cors, security, frontend
 
 ## Q-HTM-013 [bloom: understand]
-**Pytanie:** Co to jest `fetch API` i jak go używać z REST endpointem?
-**Modelowa odpowiedź:** Fetch API to modern browser API do HTTP requests, zastąpienie XMLHttpRequest. Promise-based. **Basic GET:**
+**Question:** Co to jest `fetch API` i jak go używać z REST endpointem?
+**Model answer:** Fetch API to modern browser API do HTTP requests, zastąpienie XMLHttpRequest. Promise-based. **Basic GET:**
 ```javascript
 const response = await fetch('/api/products/123');
 if (!response.ok) {
@@ -239,12 +239,12 @@ controller.abort();
 
 **Alternatywy:** Axios (popularna libka — auto JSON, interceptors), Angular HttpClient (RxJS-based), browser fetch wystarczy w 90% przypadków.
 
-**Pułapka rozmowna:** „fetch rejects on 404" — false. Tylko sieć. 404 to legitimate response. „body w GET" — fetch nie pozwala body w GET (zgodnie ze specyfikacją HTTP).
-**Tagi:** fetch, api, javascript
+**Interview trap:** „fetch rejects on 404" — false. Tylko sieć. 404 to legitimate response. „body w GET" — fetch nie pozwala body w GET (zgodnie ze specyfikacją HTTP).
+**Tags:** fetch, api, javascript
 
 ## Q-HTM-014 [bloom: understand]
-**Pytanie:** Co to są Web Components / Custom Elements?
-**Modelowa odpowiedź:** Web Components to standard browser do tworzenia własnych HTML elements. **3 podstawowe API:**
+**Question:** Co to są Web Components / Custom Elements?
+**Model answer:** Web Components to standard browser do tworzenia własnych HTML elements. **3 podstawowe API:**
 1. **Custom Elements:** `class MyButton extends HTMLElement { ... } customElements.define('my-button', MyButton);`. Używasz jako `<my-button>` w HTML.
 2. **Shadow DOM:** ukryty DOM tree dla komponentu, izolowany od reszty strony (CSS/JS encapsulation). `this.attachShadow({mode: 'open'})`.
 3. **HTML Templates:** `<template id="my-tpl">...</template>` — niezrenderowany HTML do reuse.
@@ -277,12 +277,12 @@ Użycie: `<price-tag amount="99.99" currency="EUR"></price-tag>`.
 
 **Wartość w pricing platformie:** możesz wystawić `<price-tag>` do osadzenia przez partnerów na ich stronach — bez wymuszania ich frameworka.
 
-**Pułapka rozmowna:** „Web Components = React" — false. Web Components są lower-level (raw API). React/Angular dodają state management, lifecycle, JSX/template syntax. Można owrap React w Web Component (stencil, lit) ale to inny use case.
-**Tagi:** web-components, custom-elements, modern-html
+**Interview trap:** „Web Components = React" — false. Web Components są lower-level (raw API). React/Angular dodają state management, lifecycle, JSX/template syntax. Można owrap React w Web Component (stencil, lit) ale to inny use case.
+**Tags:** web-components, custom-elements, modern-html
 
 ## Q-HTM-015 [bloom: understand]
-**Pytanie:** Co to jest `localStorage` vs `sessionStorage` vs `cookie`?
-**Modelowa odpowiedź:** Storage mechanisms w browserze:
+**Question:** Co to jest `localStorage` vs `sessionStorage` vs `cookie`?
+**Model answer:** Storage mechanisms w browserze:
 
 **localStorage:**
 - Persistent (survive close/reopen).
@@ -313,12 +313,12 @@ Użycie: `<price-tag amount="99.99" currency="EUR"></price-tag>`.
 
 **IndexedDB:** powyżej powyższych — async, structured data, transactions, large quantities. Skomplikowany API; biblioteki Dexie, idb-keyval upraszczają.
 
-**Pułapka rozmowna:** „localStorage to bezpieczne miejsce na tokeny" — XSS-podatne. Real attack: malicious npm package, third-party widget, content injection. Token w localStorage = token wykradziony. HttpOnly cookie immune.
-**Tagi:** storage, cookies, security
+**Interview trap:** „localStorage to bezpieczne miejsce na tokeny" — XSS-podatne. Real attack: malicious npm package, third-party widget, content injection. Token w localStorage = token wykradziony. HttpOnly cookie immune.
+**Tags:** storage, cookies, security
 
 ## Q-HTM-016 [bloom: understand]
-**Pytanie:** Co robi `<form>` `enctype="multipart/form-data"`?
-**Modelowa odpowiedź:** `enctype` określa format encoding form data dla submission. Wartości:
+**Question:** Co robi `<form>` `enctype="multipart/form-data"`?
+**Model answer:** `enctype` określa format encoding form data dla submission. Wartości:
 - **`application/x-www-form-urlencoded`** (default) — pary `key=value` separowane `&`, URL-encoded. Idealne dla simple text fields.
 - **`multipart/form-data`** — każde pole jako separate part w body, z headers. **Wymagane dla file uploadu** (binary files, no encoding loss).
 - **`text/plain`** — debug only, niesensible dla prod.
@@ -347,20 +347,20 @@ Content-Type: image/jpeg
 - Java raw: `Part` z `HttpServletRequest.getPart()`.
 - Express.js: `multer` middleware.
 
-**Pułapka rozmowna:** Bez `multipart` upload pliku przez form nie zadziała — file będzie tylko nazwą jako string. Druga: client-side `<input type="file">` można JS-em wysłać przez `fetch` z `FormData`:
+**Interview trap:** Bez `multipart` upload pliku przez form nie zadziała — file będzie tylko nazwą jako string. Druga: client-side `<input type="file">` można JS-em wysłać przez `fetch` z `FormData`:
 ```javascript
 const formData = new FormData(form); // wszystkie pola form
 formData.append('file', fileInput.files[0]);
 fetch('/upload', {method: 'POST', body: formData}); // browser ustawia Content-Type sam
 ```
 Nie ustawiaj `Content-Type` ręcznie przy FormData — browser sam dorzuci boundary.
-**Tagi:** forms, file-upload, http
+**Tags:** forms, file-upload, http
 
 ---
 
 ## Q-HTM-017 [bloom: apply]
-**Pytanie:** Napisz HTML formularza tworzenia produktu z polami: name (required, min 3 znaki), price (required, > 0), category (select z 3 opcjami), description (textarea, opcjonalna).
-**Modelowa odpowiedź:**
+**Question:** Napisz HTML formularza tworzenia produktu z polami: name (required, min 3 znaki), price (required, > 0), category (select z 3 opcjami), description (textarea, opcjonalna).
+**Model answer:**
 ```html
 <form action="/api/products" method="POST" id="product-form">
   <div>
@@ -424,12 +424,12 @@ Nie ustawiaj `Content-Type` ręcznie przy FormData — browser sam dorzuci bound
 
 **Bez JS, native HTML5 walidacja:** browser zatrzyma submit jeśli `required` puste lub `minlength` nie spełnione, pokaże popup z błędem.
 
-**Pułapka rozmowna:** `type="number"` daje rozróżnienie 0,01 vs 0.01 zależnie od locale — niektóre browsery pozwalają comma, inne nie. Server-side musi obsłużyć oba lub zwrócić jasny error. `step="0.01"` ogranicza precision (dla pricingu często wystarczy).
-**Tagi:** forms, validation, html5, pricing
+**Interview trap:** `type="number"` daje rozróżnienie 0,01 vs 0.01 zależnie od locale — niektóre browsery pozwalają comma, inne nie. Server-side musi obsłużyć oba lub zwrócić jasny error. `step="0.01"` ogranicza precision (dla pricingu często wystarczy).
+**Tags:** forms, validation, html5, pricing
 
 ## Q-HTM-018 [bloom: apply]
-**Pytanie:** Pokaż jak narzucić w HTML responsive table dla cennika (mobile-friendly).
-**Modelowa odpowiedź:**
+**Question:** Pokaż jak narzucić w HTML responsive table dla cennika (mobile-friendly).
+**Model answer:**
 ```html
 <style>
   table { width: 100%; border-collapse: collapse; }
@@ -499,12 +499,12 @@ Nie ustawiaj `Content-Type` ręcznie przy FormData — browser sam dorzuci bound
 - `scope="col"` na `<th>` (col headers).
 - `aria-label` na buttonach interaktywnych w komórkach.
 
-**Pułapka rozmowna:** „display: block na td" łamie semantic HTML — screen reader może mieć problem. Solution: `role="presentation"` na table w mobile. Lub: nie używać `<table>` dla data tabular, tylko CSS Grid (ale wtedy stracone semantyka). Trade-off między a11y a responsive.
-**Tagi:** responsive, table, css, pricing
+**Interview trap:** „display: block na td" łamie semantic HTML — screen reader może mieć problem. Solution: `role="presentation"` na table w mobile. Lub: nie używać `<table>` dla data tabular, tylko CSS Grid (ale wtedy stracone semantyka). Trade-off między a11y a responsive.
+**Tags:** responsive, table, css, pricing
 
 ## Q-HTM-019 [bloom: apply]
-**Pytanie:** JavaScript pobiera listę produktów przez REST i renderuje do `<ul>`. Pokaż implementację.
-**Modelowa odpowiedź:**
+**Question:** JavaScript pobiera listę produktów przez REST i renderuje do `<ul>`. Pokaż implementację.
+**Model answer:**
 ```html
 <ul id="product-list">
   <li>Loading...</li>
@@ -567,12 +567,12 @@ list.innerHTML = data.items.map(p => `<li><strong>${escape(p.name)}</strong> —
 
 **Frameworks:** w prawdziwym SPA użyłbyś Angular/React/Vue z auto-escaping w templates. Ten przykład to vanilla dla nauki podstaw.
 
-**Pułapka rozmowna:** XSS via `innerHTML` z user/API content — KLASYK. Atakujący wstrzykuje `<img onerror=...>`. Default approach: textContent + createElement. innerHTML tylko ze sterowanym (przez ciebie) markupem.
-**Tagi:** dom, fetch, security, xss
+**Interview trap:** XSS via `innerHTML` z user/API content — KLASYK. Atakujący wstrzykuje `<img onerror=...>`. Default approach: textContent + createElement. innerHTML tylko ze sterowanym (przez ciebie) markupem.
+**Tags:** dom, fetch, security, xss
 
 ## Q-HTM-020 [bloom: apply]
-**Pytanie:** Dodaj live walidację formularza (real-time feedback przed submit) JS-em.
-**Modelowa odpowiedź:**
+**Question:** Dodaj live walidację formularza (real-time feedback przed submit) JS-em.
+**Model answer:**
 ```html
 <form id="product-form">
   <label for="name">Nazwa</label>
@@ -653,12 +653,12 @@ input.invalid { border-color: red; }
 
 **Frameworki (React/Angular/Vue) mają form libraries** — Formik, react-hook-form, Angular ReactiveForms — które abstraktują boilerplate.
 
-**Pułapka rozmowna:** „Live validate during typing dla email" — frustrujące, user dopiero pisze pierwszą literę a już error. Best UX: validate on blur, re-check on input gdy już błąd. Subtle ale ważne.
-**Tagi:** forms, validation, javascript, ux
+**Interview trap:** „Live validate during typing dla email" — frustrujące, user dopiero pisze pierwszą literę a już error. Best UX: validate on blur, re-check on input gdy już błąd. Subtle ale ważne.
+**Tags:** forms, validation, javascript, ux
 
 ## Q-HTM-021 [bloom: apply]
-**Pytanie:** Pokaż prosty Web Component `<price-display>` który formatuje BigDecimal z currency.
-**Modelowa odpowiedź:**
+**Question:** Pokaż prosty Web Component `<price-display>` który formatuje BigDecimal z currency.
+**Model answer:**
 ```html
 <script>
 class PriceDisplay extends HTMLElement {
@@ -724,12 +724,12 @@ customElements.define('price-display', PriceDisplay);
 <price-display amount="99.99" currency="PLN"></price-display>
 ```
 
-**Pułapka rozmowna:** Locale mismatch — `pl-PL` z USD daje `99,99 USD` (currency code, nie symbol $). Browser-specific. Druga: `Intl.NumberFormat` jest expensive — dla wielu instancji rozważ memoization (jeden formatter per locale+currency, reused).
-**Tagi:** web-components, intl, pricing, formatting
+**Interview trap:** Locale mismatch — `pl-PL` z USD daje `99,99 USD` (currency code, nie symbol $). Browser-specific. Druga: `Intl.NumberFormat` jest expensive — dla wielu instancji rozważ memoization (jeden formatter per locale+currency, reused).
+**Tags:** web-components, intl, pricing, formatting
 
 ## Q-HTM-022 [bloom: apply]
-**Pytanie:** Pokaż jak osadzić w stronie `<iframe>` widget od third-party (np. mapę Google Maps), z security best practices.
-**Modelowa odpowiedź:**
+**Question:** Pokaż jak osadzić w stronie `<iframe>` widget od third-party (np. mapę Google Maps), z security best practices.
+**Model answer:**
 ```html
 <iframe 
   src="https://www.google.com/maps/embed?pb=..." 
@@ -770,12 +770,12 @@ customElements.define('price-display', PriceDisplay);
 
 **Pricing-specific:** widgety partnerskie (np. checkout od third-party payment provider) często są iframe. Sandbox to MUST. PCI compliance często wymaga konkretnej konfiguracji.
 
-**Pułapka rozmowna:** „Sandbox z allow-same-origin + allow-scripts" jest pełen dostęp. Sandbox ma sens przy untrusted content (user-generated, ads). Druga: `loading=lazy` w iframe nie jest wszędzie wspierany — fallback IntersectionObserver jeśli krytyczne.
-**Tagi:** iframe, security, embed, third-party
+**Interview trap:** „Sandbox z allow-same-origin + allow-scripts" jest pełen dostęp. Sandbox ma sens przy untrusted content (user-generated, ads). Druga: `loading=lazy` w iframe nie jest wszędzie wspierany — fallback IntersectionObserver jeśli krytyczne.
+**Tags:** iframe, security, embed, third-party
 
 ## Q-HTM-023 [bloom: apply]
-**Pytanie:** Dodaj Open Graph meta tags do strony cennika produktu, żeby ładnie wyglądała udostępniana w social media.
-**Modelowa odpowiedź:**
+**Question:** Dodaj Open Graph meta tags do strony cennika produktu, żeby ładnie wyglądała udostępniana w social media.
+**Model answer:**
 ```html
 <head>
   <!-- Standard meta -->
@@ -839,12 +839,12 @@ customElements.define('price-display', PriceDisplay);
 
 **Pricing context:** dla pricing platformy publicznej, te tags = critical. Bez nich shared link wygląda goło. Z nimi — visibility w social, lepszy CTR.
 
-**Pułapka rozmowna:** „og:image musi być publiczny" — tak, dostępny bez auth. Druga: Facebook agresywnie cache-uje OG data — po update treści musisz re-scrape przez Facebook Debugger. Trzecia: locale, np. `pl_PL` (z underscore, nie hyphen jak w HTML lang).
-**Tagi:** seo, social-media, meta, structured-data
+**Interview trap:** „og:image musi być publiczny" — tak, dostępny bez auth. Druga: Facebook agresywnie cache-uje OG data — po update treści musisz re-scrape przez Facebook Debugger. Trzecia: locale, np. `pl_PL` (z underscore, nie hyphen jak w HTML lang).
+**Tags:** seo, social-media, meta, structured-data
 
 ## Q-HTM-024 [bloom: apply]
-**Pytanie:** Pokaż implementację infinite scroll dla listy produktów (paginacja z REST cursor-based).
-**Modelowa odpowiedź:**
+**Question:** Pokaż implementację infinite scroll dla listy produktów (paginacja z REST cursor-based).
+**Model answer:**
 ```html
 <ul id="products"></ul>
 <div id="loader" style="display:none;">Ładowanie...</div>
@@ -933,14 +933,14 @@ Działa, ale gorszy performance (event firing constantly), reflow risk. Intersec
 
 **A11y:** infinite scroll jest a11y-hostile dla keyboard users (nie da się dotrzeć do footera). Solutions: button „Pokaż więcej" zamiast/oprócz infinite scroll. Lub announce nowych elementów przez `aria-live`.
 
-**Pułapka rozmowna:** Browser back button + infinite scroll = scroll position lost. UX: zapisz position w sessionStorage, restore on navigation back. Druga: bardzo długie listy → DOM puchnie → wolniej. Virtual scrolling (np. Angular CDK Virtual Scroll) renderuje tylko widoczne elementy.
-**Tagi:** infinite-scroll, intersection-observer, pagination, javascript
+**Interview trap:** Browser back button + infinite scroll = scroll position lost. UX: zapisz position w sessionStorage, restore on navigation back. Druga: bardzo długie listy → DOM puchnie → wolniej. Virtual scrolling (np. Angular CDK Virtual Scroll) renderuje tylko widoczne elementy.
+**Tags:** infinite-scroll, intersection-observer, pagination, javascript
 
 ---
 
 ## Q-HTM-025 [bloom: analyze]
-**Pytanie:** Twój zespół rozważa SPA (Angular) vs MPA (klasyczne strony serwerowe z Thymeleaf) dla pricing admin panel. Argumenty?
-**Modelowa odpowiedź:**
+**Question:** Twój zespół rozważa SPA (Angular) vs MPA (klasyczne strony serwerowe z Thymeleaf) dla pricing admin panel. Argumenty?
+**Model answer:**
 
 **SPA (Single Page Application — Angular/React/Vue):**
 - **Plusy:** rich interactivity, smooth UX, pojedynczy bundle JS, route changes bez full reload, łatwiejsza integracja z REST API (frontend i backend osobno deployable), dev experience modern (TypeScript, hot reload), reusable components.
@@ -977,12 +977,12 @@ Działa, ale gorszy performance (event firing constantly), reflow risk. Intersec
 4. **Time to market:** prosty MPA ships faster.
 5. **Budget long-term:** SPA więcej inwestycji w infra (CI/CD, build optimization).
 
-**Pułapka rozmowna:** „SPA zawsze lepsze bo modern" — cargo cult. Wiele admin paneli żyje w stack Spring + Thymeleaf przez lata produktywnie. Druga: „MPA = old school" — Hotwire / HTMX to MPA renaissance, often simpler and lighter than SPA.
-**Tagi:** spa, mpa, architecture, frontend, decision
+**Interview trap:** „SPA zawsze lepsze bo modern" — cargo cult. Wiele admin paneli żyje w stack Spring + Thymeleaf przez lata produktywnie. Druga: „MPA = old school" — Hotwire / HTMX to MPA renaissance, often simpler and lighter than SPA.
+**Tags:** spa, mpa, architecture, frontend, decision
 
 ## Q-HTM-026 [bloom: analyze]
-**Pytanie:** Jak zapewnisz że twoja strona dobrze radzi sobie z wolnym połączeniem mobile (3G)?
-**Modelowa odpowiedź:** Performance budget + measurement. **Strategie:**
+**Question:** Jak zapewnisz że twoja strona dobrze radzi sobie z wolnym połączeniem mobile (3G)?
+**Model answer:** Performance budget + measurement. **Strategie:**
 
 **1. Bundle size:**
 - Code splitting (Angular: lazy modules, route-based chunks).
@@ -1042,12 +1042,12 @@ Działa, ale gorszy performance (event firing constantly), reflow risk. Intersec
 3. Measure improvement.
 4. Iterate.
 
-**Pułapka rozmowna:** Microoptymalizacje (which loop is faster) gdy bundle ma 1 MB obrazu. Optymalizacja kolejnościowa: największe wins first.
-**Tagi:** performance, mobile, web-vitals, optimization
+**Interview trap:** Microoptymalizacje (which loop is faster) gdy bundle ma 1 MB obrazu. Optymalizacja kolejnościowa: największe wins first.
+**Tags:** performance, mobile, web-vitals, optimization
 
 ## Q-HTM-027 [bloom: analyze]
-**Pytanie:** Jak zaprojektujesz a11y-friendly formularz zamówienia w pricing app?
-**Modelowa odpowiedź:** Pricing forms często mają complex validation, dynamic prices, multiple steps. A11y musi być part of design, not afterthought.
+**Question:** Jak zaprojektujesz a11y-friendly formularz zamówienia w pricing app?
+**Model answer:** Pricing forms często mają complex validation, dynamic prices, multiple steps. A11y musi być part of design, not afterthought.
 
 **Foundations:**
 1. **Semantic HTML** — `<form>`, `<label for>`, `<fieldset>`/`<legend>` dla grup, native `<button type="submit">`.
@@ -1096,12 +1096,12 @@ Działa, ale gorszy performance (event firing constantly), reflow risk. Intersec
 - @axe-core/playwright dla automated testów.
 - Storybook + a11y addon.
 
-**Pułapka rozmowna:** „A11y dorobimy później" — fixed scope, never gets done. Add to definition-of-done. Druga: passing axe ≠ usable. Real user testing reveals issues automation misses.
-**Tagi:** a11y, forms, pricing, validation
+**Interview trap:** „A11y dorobimy później" — fixed scope, never gets done. Add to definition-of-done. Druga: passing axe ≠ usable. Real user testing reveals issues automation misses.
+**Tags:** a11y, forms, pricing, validation
 
 ## Q-HTM-028 [bloom: analyze]
-**Pytanie:** Twoja landing page e-commerce ma Lighthouse score 50. Co byś zrobił first?
-**Modelowa odpowiedź:** **Audit first, fix systematically.**
+**Question:** Twoja landing page e-commerce ma Lighthouse score 50. Co byś zrobił first?
+**Model answer:** **Audit first, fix systematically.**
 
 **Krok 1 — uruchom Lighthouse na pełnej stronie z mobile + desktop modes.** Note breakdowns:
 - Performance (kluczowe dla 50 score)
@@ -1145,12 +1145,12 @@ Score 50 zazwyczaj oznacza issue w Performance. Sprawdź konkretne metryki:
 - Cookie banner — common LCP blocker — make it lightweight.
 - Video hero — MASSIVE; replace with optimized image + autoplay short clip on hover.
 
-**Pułapka rozmowna:** „Score 100 to cel" — perfectionism. Score 90+ jest already good. Diminishing returns above 90. Druga: Lighthouse jest snapshot, nie complete picture — RUM ujawnia różnice.
-**Tagi:** performance, lighthouse, web-vitals, optimization
+**Interview trap:** „Score 100 to cel" — perfectionism. Score 90+ jest already good. Diminishing returns above 90. Druga: Lighthouse jest snapshot, nie complete picture — RUM ujawnia różnice.
+**Tags:** performance, lighthouse, web-vitals, optimization
 
 ## Q-HTM-029 [bloom: analyze]
-**Pytanie:** Jak skonstruujesz HTML strony tak, żeby była indeksowana dobrze przez Google?
-**Modelowa odpowiedź:** SEO basics + technical SEO. **Stack:**
+**Question:** Jak skonstruujesz HTML strony tak, żeby była indeksowana dobrze przez Google?
+**Model answer:** SEO basics + technical SEO. **Stack:**
 
 **1. Crawlability:**
 - `robots.txt` w root — pozwala/zabrania konkretnym botom dostęp.
@@ -1213,12 +1213,12 @@ Score 50 zazwyczaj oznacza issue w Performance. Sprawdź konkretne metryki:
 - FAQ schema for product Q&A.
 - Sitemap with priority by importance.
 
-**Pułapka rozmowna:** „SEO = keywords stuffing" — gone. Modern SEO = quality content + technical excellence + UX. Druga: SPA bez SSR — Google rendering jest slower (waiting for JS to execute). For e-commerce — SSR or prerendering for SEO wins.
-**Tagi:** seo, html, technical-seo, structured-data
+**Interview trap:** „SEO = keywords stuffing" — gone. Modern SEO = quality content + technical excellence + UX. Druga: SPA bez SSR — Google rendering jest slower (waiting for JS to execute). For e-commerce — SSR or prerendering for SEO wins.
+**Tags:** seo, html, technical-seo, structured-data
 
 ## Q-HTM-030 [bloom: analyze]
-**Pytanie:** Jak HTML / frontend integruje się z REST backendem pricingu — typowe problemy?
-**Modelowa odpowiedź:** **Common integration issues:**
+**Question:** Jak HTML / frontend integruje się z REST backendem pricingu — typowe problemy?
+**Model answer:** **Common integration issues:**
 
 **1. Loading states:**
 - Problem: spinner forever / brak feedbacku.
@@ -1281,12 +1281,12 @@ Score 50 zazwyczaj oznacza issue w Performance. Sprawdź konkretne metryki:
 - Currency conversion — backend zwraca per requested currency, OR frontend converts używając rates fetched separately.
 - Permission gating — UI hides/disables features per user role, ALE backend ma authoritative check (user widzi disabled button, ale backend też odrzuci — defense in depth).
 
-**Pułapka rozmowna:** „Frontend trust nothing, validate everything po stronie clienta" — partial. Client validation is for UX. Server is authoritative. Don't duplicate logic — share validation rules przez schema (JSON Schema, OpenAPI), generate client + server validators.
-**Tagi:** integration, frontend, rest, common-issues
+**Interview trap:** „Frontend trust nothing, validate everything po stronie clienta" — partial. Client validation is for UX. Server is authoritative. Don't duplicate logic — share validation rules przez schema (JSON Schema, OpenAPI), generate client + server validators.
+**Tags:** integration, frontend, rest, common-issues
 
 ## Q-HTM-031 [bloom: analyze]
-**Pytanie:** Pricing platforma będzie konsumowana przez 3 frontendy (admin Angular, public Astro, mobile React Native). Co byś zaplanował na froncie API?
-**Modelowa odpowiedź:** Multi-client API design. **Strategie:**
+**Question:** Pricing platforma będzie konsumowana przez 3 frontendy (admin Angular, public Astro, mobile React Native). Co byś zaplanował na froncie API?
+**Model answer:** Multi-client API design. **Strategie:**
 
 **1. Single REST API, multiple clients:**
 - Plus: simple, jeden source of truth.
@@ -1349,12 +1349,12 @@ Score 50 zazwyczaj oznacza issue w Performance. Sprawdź konkretne metryki:
 - Admin: writes, audit, less traffic, behind auth.
 - Mobile: mobile-optimized (smaller payloads, cursor pagination).
 
-**Pułapka rozmowna:** „GraphQL dla wszystkich" — premature. Start simple, add complexity gdy potrzeba. Drugi: ignorowanie versioning na początku — później migration headache.
-**Tagi:** api-design, multi-client, bff, architecture, decision
+**Interview trap:** „GraphQL dla wszystkich" — premature. Start simple, add complexity gdy potrzeba. Drugi: ignorowanie versioning na początku — później migration headache.
+**Tags:** api-design, multi-client, bff, architecture, decision
 
 ## Q-HTM-032 [bloom: analyze]
-**Pytanie:** Pokaż jak by wyglądał typowy mock interview pytanie HTML-ish „pokaż jak wyświetlasz cennik" — jakich rzeczy szukałbyś gdybyś był rekruterem?
-**Modelowa odpowiedź:** Z perspektywy rekrutera — pytanie open-ended, sprawdza myślenie kandydata. **Sygnały które oceniam:**
+**Question:** Pokaż jak by wyglądał typowy mock interview pytanie HTML-ish „pokaż jak wyświetlasz cennik" — jakich rzeczy szukałbyś gdybyś był rekruterem?
+**Model answer:** Z perspektywy rekrutera — pytanie open-ended, sprawdza myślenie kandydata. **Sygnały które oceniam:**
 
 **Krok 1 — Czy zadaje pytania?**
 Dobry kandydat doprecyzowuje:
@@ -1454,5 +1454,5 @@ Dobry kandydat sam doda komentarz typu „w produkcji byłbym Angular Component 
 - Brak loading state.
 - jQuery (dla nowych projektów, antypattern).
 
-**Pułapka rozmowna:** Próba pokazania too much (full Angular app w 5 minut) — rzadko czas pozwala. Better: simple working solution + komentarze o decisions and trade-offs. To pokazuje senior thinking nawet gdy code jest prosty.
-**Tagi:** mock-interview, html, api, rest, pricing
+**Interview trap:** Próba pokazania too much (full Angular app w 5 minut) — rzadko czas pozwala. Better: simple working solution + komentarze o decisions and trade-offs. To pokazuje senior thinking nawet gdy code jest prosty.
+**Tags:** mock-interview, html, api, rest, pricing

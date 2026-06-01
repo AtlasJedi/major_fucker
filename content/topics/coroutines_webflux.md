@@ -2,7 +2,7 @@
 
 > Kotlin coroutines and Spring WebFlux are the two pillars of Allegro's high-RPS backend stack. This bank assumes you know blocking Spring MVC well and are learning the reactive + coroutine model from scratch. Every question targets the daily codebase of a recommendations-system developer: suspend functions at the HTTP edge, parallel feature fetching with async/await, streaming with Flow, WebClient configuration, and the threading model that makes 40ms p99 budgets achievable. Coverage spans definition (recall) through trade-off reasoning at scale (analyze).
 
-## Zakres
+## Scope
 
 - Coroutine fundamentals: definition, suspend, launch vs async, structured concurrency
 - CoroutineScope, Job, SupervisorJob, Dispatchers
@@ -19,9 +19,9 @@
 ---
 
 ## Q-CW-001 [bloom: recall]
-**Pytanie:** What is a coroutine? Define it in terms of a lightweight thread and explain what "suspension" means at the runtime level.
+**Question:** What is a coroutine? Define it in terms of a lightweight thread and explain what "suspension" means at the runtime level.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 A coroutine is a unit of concurrent work that can be suspended and resumed without blocking an OS thread. Unlike a thread (which occupies a native OS thread for its entire lifetime), a coroutine releases its thread when it suspends — the thread is free to execute other coroutines while this one waits.
 
 "Suspension" means the coroutine saves its local variables and the current execution point (the continuation) onto the heap, hands the thread back to the dispatcher, and later gets resumed — potentially on a different thread — by the dispatcher when the awaited work is done.
@@ -36,16 +36,16 @@ The OS thread was never blocked. From a developer's perspective the code reads s
 
 Key numbers: a coroutine takes ~a few hundred bytes on the heap vs ~1 MB stack per Java thread. You can launch millions of coroutines where launching a million threads would crash the JVM.
 
-**Pułapka rozmowna:** "Aren't coroutines just virtual threads?" — No. Virtual threads (Loom) still block a carrier thread during blocking I/O (they just park the carrier, not the OS thread). Coroutines cooperatively suspend and hand the underlying thread back entirely. Coroutines also compose with structured concurrency semantics that virtual threads do not provide out of the box.
+**Interview trap:** "Aren't coroutines just virtual threads?" — No. Virtual threads (Loom) still block a carrier thread during blocking I/O (they just park the carrier, not the OS thread). Coroutines cooperatively suspend and hand the underlying thread back entirely. Coroutines also compose with structured concurrency semantics that virtual threads do not provide out of the box.
 
-**Tagi:** coroutine-basics, suspension, threading
+**Tags:** coroutine-basics, suspension, threading
 
 ---
 
 ## Q-CW-002 [bloom: recall]
-**Pytanie:** What does the `suspend` modifier on a function mean? What can a `suspend` function do that a regular function cannot, and where can it be called from?
+**Question:** What does the `suspend` modifier on a function mean? What can a `suspend` function do that a regular function cannot, and where can it be called from?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 `suspend` marks a function as suspendable: it may pause execution without blocking the thread and resume later. The compiler transforms a `suspend fun` into a state machine that takes an implicit `Continuation<T>` parameter (the "what to do when I resume" callback). This is CPS (continuation-passing style) transformation — you don't write callbacks, the compiler generates them.
 
 What it CAN do that a regular function cannot:
@@ -71,16 +71,16 @@ fun main() = runBlocking {
 }
 ```
 
-**Pułapka rozmowna:** "Does `suspend` make my function non-blocking automatically?" — No. `suspend` is a capability marker. If the body calls blocking JDBC inside, it is still blocking. `suspend` just enables the compiler to transform the function into a state machine; what you put inside determines whether it actually suspends.
+**Interview trap:** "Does `suspend` make my function non-blocking automatically?" — No. `suspend` is a capability marker. If the body calls blocking JDBC inside, it is still blocking. `suspend` just enables the compiler to transform the function into a state machine; what you put inside determines whether it actually suspends.
 
-**Tagi:** suspend, coroutine-basics, CPS
+**Tags:** suspend, coroutine-basics, CPS
 
 ---
 
 ## Q-CW-003 [bloom: recall]
-**Pytanie:** What is the difference between `launch` and `async`? What do they return and when do you use each?
+**Question:** What is the difference between `launch` and `async`? What do they return and when do you use each?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Both are coroutine builders that start a new coroutine, but they differ in their return type and purpose:
 
 | Builder | Returns | Use when |
@@ -106,16 +106,16 @@ With `async`, exceptions are stored in the `Deferred` and rethrown on `.await()`
 
 Important: calling `async { }.await()` immediately is equivalent to just calling the suspend function directly — you gain nothing. The point of `async` is to start multiple coroutines before calling `await()`.
 
-**Pułapka rozmowna:** "Can I ignore the return value of `async`?" — You can, but then you lose the exception. If the coroutine throws and nobody calls `.await()`, the exception is silently swallowed (in a `supervisorScope`) or crashes the parent (in a regular `coroutineScope`). Never fire `async` and discard the `Deferred` unless you have a specific reason.
+**Interview trap:** "Can I ignore the return value of `async`?" — You can, but then you lose the exception. If the coroutine throws and nobody calls `.await()`, the exception is silently swallowed (in a `supervisorScope`) or crashes the parent (in a regular `coroutineScope`). Never fire `async` and discard the `Deferred` unless you have a specific reason.
 
-**Tagi:** launch, async, coroutine-builders
+**Tags:** launch, async, coroutine-builders
 
 ---
 
 ## Q-CW-004 [bloom: recall]
-**Pytanie:** What is structured concurrency? Define `coroutineScope { }` vs `supervisorScope { }` and explain why structured concurrency matters.
+**Question:** What is structured concurrency? Define `coroutineScope { }` vs `supervisorScope { }` and explain why structured concurrency matters.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Structured concurrency is the principle that every coroutine has a parent, and a parent does not complete until all its children complete. Coroutines form a tree of scopes; cancellation and exceptions propagate through this tree in predictable ways. You cannot "lose" a coroutine — if you started it in a scope, the scope tracks it.
 
 `coroutineScope { }`:
@@ -138,16 +138,16 @@ suspend fun fetchRecommendation(userId: Long): Reco = coroutineScope {
 
 Why it matters: without structured concurrency you'd need to manually track every background job and cancel them on cleanup. With it, cancelling the outer scope automatically cancels everything nested inside — zero leaks.
 
-**Pułapka rozmowna:** "Can I just use `GlobalScope.launch` everywhere to avoid scope boilerplate?" — This is the classic mistake. `GlobalScope` lives for the entire app lifetime, ignores structured concurrency, leaks coroutines on request cancellation, and makes testing hard. Never use it in production request handlers.
+**Interview trap:** "Can I just use `GlobalScope.launch` everywhere to avoid scope boilerplate?" — This is the classic mistake. `GlobalScope` lives for the entire app lifetime, ignores structured concurrency, leaks coroutines on request cancellation, and makes testing hard. Never use it in production request handlers.
 
-**Tagi:** structured-concurrency, coroutineScope, supervisorScope
+**Tags:** structured-concurrency, coroutineScope, supervisorScope
 
 ---
 
 ## Q-CW-005 [bloom: recall]
-**Pytanie:** Explain the relationship between `CoroutineScope`, `Job`, and `SupervisorJob`. How do they fit together?
+**Question:** Explain the relationship between `CoroutineScope`, `Job`, and `SupervisorJob`. How do they fit together?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 `CoroutineScope` is a context holder — it wraps a `CoroutineContext` and provides a namespace for launching coroutines. Every coroutine builder (`launch`, `async`) requires a scope and inherits the scope's context.
 
 `Job` is the handle to a coroutine's lifecycle. It has states: New → Active → Completing → Completed (or Cancelling → Cancelled). Jobs form a tree: a child job's parent is the `Job` in the scope from which it was launched. Cancelling a parent `Job` cancels all children.
@@ -168,16 +168,16 @@ class RecsService(private val client: WebClient) : CoroutineScope {
 
 Spring's `@Async` and coroutine integration in WebFlux controllers handle scope lifecycle automatically — you rarely create `CoroutineScope` manually in controller code, but you need to understand it for service-layer background work and testing.
 
-**Pułapka rozmowna:** "Does cancelling a `Job` kill the coroutine immediately?" — No. Cancellation is cooperative. The coroutine must reach a suspension point or check `isActive`. A tight CPU loop with no suspension points will not stop until it finishes or checks cancellation explicitly.
+**Interview trap:** "Does cancelling a `Job` kill the coroutine immediately?" — No. Cancellation is cooperative. The coroutine must reach a suspension point or check `isActive`. A tight CPU loop with no suspension points will not stop until it finishes or checks cancellation explicitly.
 
-**Tagi:** CoroutineScope, Job, SupervisorJob, lifecycle
+**Tags:** CoroutineScope, Job, SupervisorJob, lifecycle
 
 ---
 
 ## Q-CW-006 [bloom: recall]
-**Pytanie:** Describe the four standard Dispatchers: `Default`, `IO`, `Main`, `Unconfined`. When would you use each in a backend service?
+**Question:** Describe the four standard Dispatchers: `Default`, `IO`, `Main`, `Unconfined`. When would you use each in a backend service?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 `Dispatchers.Default`:
 - Backed by a thread pool sized to the number of CPU cores.
 - Use for: CPU-intensive work — JSON parsing, ranking/scoring, sorting candidates, compression.
@@ -208,16 +208,16 @@ withContext(Dispatchers.IO) { jdbcRepo.find(userId) }
 webClient.get(url).awaitBody<User>()
 ```
 
-**Pułapka rozmowna:** "Can I use `Dispatchers.Default` for everything to keep it simple?" — No. Blocking I/O on `Default` starves CPU-bound coroutines and causes latency spikes. `Default` has only ~8 threads on a modern machine; block even 2 of them with JDBC calls and throughput collapses.
+**Interview trap:** "Can I use `Dispatchers.Default` for everything to keep it simple?" — No. Blocking I/O on `Default` starves CPU-bound coroutines and causes latency spikes. `Default` has only ~8 threads on a modern machine; block even 2 of them with JDBC calls and throughput collapses.
 
-**Tagi:** dispatchers, threading, performance
+**Tags:** dispatchers, threading, performance
 
 ---
 
 ## Q-CW-007 [bloom: recall]
-**Pytanie:** What is `Flow<T>`? How does it differ from a cold stream vs a hot stream? What are `SharedFlow` and `StateFlow`?
+**Question:** What is `Flow<T>`? How does it differ from a cold stream vs a hot stream? What are `SharedFlow` and `StateFlow`?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 `Flow<T>` is Kotlin's cold reactive stream — an asynchronous sequence of values. "Cold" means the producer code does not run until a collector subscribes, and each collector gets its own independent execution of the producer.
 
 ```kotlin
@@ -248,16 +248,16 @@ state.value = ModelVersion.V2  // triggers all collectors
 
 In WebFlux/SSE context: `Flow<T>` maps naturally to `Flux<T>` via `.asFlux()` — each HTTP request gets its own cold stream execution.
 
-**Pułapka rozmowna:** "Is `Flow` the same as `RxJava Observable`?" — Cold semantics are similar, but `Flow` is built on coroutines: collection is a `suspend` operation, operators are inline functions (no wrapper objects per operator), and it integrates natively with structured cancellation. `RxJava` requires manual `dispose()` management.
+**Interview trap:** "Is `Flow` the same as `RxJava Observable`?" — Cold semantics are similar, but `Flow` is built on coroutines: collection is a `suspend` operation, operators are inline functions (no wrapper objects per operator), and it integrates natively with structured cancellation. `RxJava` requires manual `dispose()` management.
 
-**Tagi:** Flow, cold-stream, hot-stream, SharedFlow, StateFlow
+**Tags:** Flow, cold-stream, hot-stream, SharedFlow, StateFlow
 
 ---
 
 ## Q-CW-008 [bloom: recall]
-**Pytanie:** What does `withContext` do? When would you use it, and what does it NOT do?
+**Question:** What does `withContext` do? When would you use it, and what does it NOT do?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 `withContext(context) { ... }` switches the coroutine's context for the duration of the block and then switches back. It suspends the coroutine, moves work to the new context (e.g., different dispatcher), and resumes on the original context when done.
 
 ```kotlin
@@ -278,16 +278,16 @@ What `withContext` does NOT do:
 - It does not parallelize — the block runs sequentially. For parallelism use `async { }` inside `coroutineScope`.
 - It is not the same as `launch` — there is no new `Job` in the parent scope.
 
-**Pułapka rozmowna:** "If I wrap a blocking call in `withContext(Dispatchers.IO)`, is my controller now fully non-blocking?" — The controller coroutine suspends and does not occupy an event loop thread, so yes, the event loop is free. But you are still burning a thread from `Dispatchers.IO`'s pool for the duration of the blocking call. It's better than blocking the event loop, but not as scalable as a truly non-blocking solution (R2DBC, reactive WebClient).
+**Interview trap:** "If I wrap a blocking call in `withContext(Dispatchers.IO)`, is my controller now fully non-blocking?" — The controller coroutine suspends and does not occupy an event loop thread, so yes, the event loop is free. But you are still burning a thread from `Dispatchers.IO`'s pool for the duration of the blocking call. It's better than blocking the event loop, but not as scalable as a truly non-blocking solution (R2DBC, reactive WebClient).
 
-**Tagi:** withContext, dispatcher-switching, context
+**Tags:** withContext, dispatcher-switching, context
 
 ---
 
 ## Q-CW-009 [bloom: recall]
-**Pytanie:** How does cancellation work in Kotlin coroutines? What is cooperative cancellation, and what role do `isActive`, `ensureActive()`, and `CancellationException` play?
+**Question:** How does cancellation work in Kotlin coroutines? What is cooperative cancellation, and what role do `isActive`, `ensureActive()`, and `CancellationException` play?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Cancellation in coroutines is cooperative: calling `job.cancel()` sets a cancellation flag, but the coroutine itself must check for it. A coroutine that never yields will run to completion even after cancellation.
 
 Suspension points (any `suspend` call from `kotlinx.coroutines`) check cancellation automatically — `delay()`, `yield()`, `.await()`, `withContext()`, channel operations all throw `CancellationException` if the coroutine has been cancelled.
@@ -326,16 +326,16 @@ try {
 }
 ```
 
-**Pułapka rozmowna:** "What happens when a WebFlux request is cancelled (client disconnects)?" — The `ServerWebExchange` is cancelled, which propagates down to the coroutine scope handling that request. All child coroutines (parallel WebClient calls, DB queries) are cancelled via structured concurrency. This is one of the biggest practical wins of coroutines + WebFlux over thread-per-request: no dangling threads doing work nobody will consume.
+**Interview trap:** "What happens when a WebFlux request is cancelled (client disconnects)?" — The `ServerWebExchange` is cancelled, which propagates down to the coroutine scope handling that request. All child coroutines (parallel WebClient calls, DB queries) are cancelled via structured concurrency. This is one of the biggest practical wins of coroutines + WebFlux over thread-per-request: no dangling threads doing work nobody will consume.
 
-**Tagi:** cancellation, CancellationException, isActive, ensureActive
+**Tags:** cancellation, CancellationException, isActive, ensureActive
 
 ---
 
 ## Q-CW-010 [bloom: recall]
-**Pytanie:** Describe Spring WebFlux at a high level. What is the Reactor model, what are `Mono<T>` and `Flux<T>`, and how does it differ from Spring MVC?
+**Question:** Describe Spring WebFlux at a high level. What is the Reactor model, what are `Mono<T>` and `Flux<T>`, and how does it differ from Spring MVC?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Spring WebFlux is a reactive web framework built on Project Reactor and Netty. Instead of blocking one thread per request (Spring MVC + servlet model), it uses a small fixed pool of event loop threads that handle I/O events for thousands of concurrent requests.
 
 Core model:
@@ -368,16 +368,16 @@ suspend fun getUser(@PathVariable id: Long): User =
     userRepo.findById(id) // looks blocking, isn't
 ```
 
-**Pułapka rozmowna:** "Is WebFlux always faster than Spring MVC?" — No. For low concurrency, Spring MVC is simpler and often has lower latency per request (no subscription overhead). WebFlux wins under high concurrency (thousands of simultaneous connections), I/O-bound workloads, and streaming scenarios. Allegro's recsys serving qualifies: very high RPS, parallel outbound calls, tight latency budgets.
+**Interview trap:** "Is WebFlux always faster than Spring MVC?" — No. For low concurrency, Spring MVC is simpler and often has lower latency per request (no subscription overhead). WebFlux wins under high concurrency (thousands of simultaneous connections), I/O-bound workloads, and streaming scenarios. Allegro's recsys serving qualifies: very high RPS, parallel outbound calls, tight latency budgets.
 
-**Tagi:** WebFlux, Reactor, Mono, Flux, event-loop
+**Tags:** WebFlux, Reactor, Mono, Flux, event-loop
 
 ---
 
 ## Q-CW-011 [bloom: understand]
-**Pytanie:** Why use Kotlin coroutines + WebFlux together instead of (a) coroutines + virtual threads (Loom), or (b) just blocking Spring MVC + virtual threads?
+**Question:** Why use Kotlin coroutines + WebFlux together instead of (a) coroutines + virtual threads (Loom), or (b) just blocking Spring MVC + virtual threads?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Three viable options, different trade-offs:
 
 **Option A: WebFlux + Coroutines (Allegro's current approach)**
@@ -398,16 +398,16 @@ Three viable options, different trade-offs:
 
 Bottom line for a senior interview: WebFlux + coroutines is the best combination when you have (1) extremely high concurrency, (2) parallel outbound I/O (parallel feature fetching), (3) streaming requirements (SSE), and (4) an existing WebFlux ecosystem. Loom is a valid alternative for new greenfield services at moderate load — and Spring Boot 3.2+ makes it trivial to enable. For existing Kotlin + WebFlux code, migration to Loom is non-trivial.
 
-**Pułapka rozmowna:** "Spring Boot 3.2 supports virtual threads — should Allegro switch now?" — This is the Q-CW-022 analysis question. Short answer here: not without benchmarking. Reactive backpressure and the Netty event loop provide properties Loom alone cannot replicate.
+**Interview trap:** "Spring Boot 3.2 supports virtual threads — should Allegro switch now?" — This is the Q-CW-022 analysis question. Short answer here: not without benchmarking. Reactive backpressure and the Netty event loop provide properties Loom alone cannot replicate.
 
-**Tagi:** loom, virtual-threads, WebFlux, architecture, trade-offs
+**Tags:** loom, virtual-threads, WebFlux, architecture, trade-offs
 
 ---
 
 ## Q-CW-012 [bloom: understand]
-**Pytanie:** What is backpressure? How does Reactor handle it, and how does `Flow` handle it differently?
+**Question:** What is backpressure? How does Reactor handle it, and how does `Flow` handle it differently?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Backpressure is the mechanism by which a slow consumer signals to a fast producer to slow down, preventing unbounded buffering and memory exhaustion.
 
 In Reactor (Flux/Mono), backpressure is built into the Reactive Streams spec. A subscriber calls `request(n)` to ask for `n` elements; the publisher emits at most `n`. This demand signaling propagates up the operator chain. If you lose it (e.g., `subscribeOn` without proper operators), you can get `MissingBackpressureException`.
@@ -430,16 +430,16 @@ flow {
 
 When you convert a `Flow` to a `Flux` (via `.asFlux()`), the bridge handles the translation between coroutine suspension and Reactive Streams `request()` protocol.
 
-**Pułapka rozmowna:** "What happens to backpressure when you call `flow.buffer(100)`?" — The buffer decouples producer and consumer: the producer can emit up to 100 items ahead of the collector. This can improve throughput but risks OOM if the producer is much faster than the consumer long-term. Choose buffer size based on measured producer/consumer speed ratio.
+**Interview trap:** "What happens to backpressure when you call `flow.buffer(100)`?" — The buffer decouples producer and consumer: the producer can emit up to 100 items ahead of the collector. This can improve throughput but risks OOM if the producer is much faster than the consumer long-term. Choose buffer size based on measured producer/consumer speed ratio.
 
-**Tagi:** backpressure, Flow, Reactor, reactive-streams
+**Tags:** backpressure, Flow, Reactor, reactive-streams
 
 ---
 
 ## Q-CW-013 [bloom: understand]
-**Pytanie:** Explain the bridge between `Mono<T>`/`Flux<T>` and coroutines (`suspend fun` / `Flow<T>`). Which functions cross the bridge in each direction?
+**Question:** Explain the bridge between `Mono<T>`/`Flux<T>` and coroutines (`suspend fun` / `Flow<T>`). Which functions cross the bridge in each direction?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Kotlin coroutines and Project Reactor are separate worlds. The `kotlinx-coroutines-reactor` library (bundled with Spring Boot + Kotlin) provides the bridge.
 
 **Reactor → Coroutines:**
@@ -477,16 +477,16 @@ You need the bridge explicitly when:
 - Integrating with existing `Mono`-returning repository interfaces.
 - Writing interceptors, filters, or custom middleware that must return `Mono<Void>`.
 
-**Pułapka rozmowna:** "What does `Mono.block()` do inside a coroutine?" — It blocks the thread entirely, bypassing the coroutine suspension mechanism. This is the worst of both worlds: you're in a reactive pipeline, you block the event loop thread, and Reactor may deadlock if the thread pool is small. Never call `.block()` in production WebFlux code.
+**Interview trap:** "What does `Mono.block()` do inside a coroutine?" — It blocks the thread entirely, bypassing the coroutine suspension mechanism. This is the worst of both worlds: you're in a reactive pipeline, you block the event loop thread, and Reactor may deadlock if the thread pool is small. Never call `.block()` in production WebFlux code.
 
-**Tagi:** Mono, Flux, awaitSingle, asFlow, mono-builder, reactor-bridge
+**Tags:** Mono, Flux, awaitSingle, asFlow, mono-builder, reactor-bridge
 
 ---
 
 ## Q-CW-014 [bloom: understand]
-**Pytanie:** How do exceptions propagate in `coroutineScope` vs `supervisorScope`? What is `CoroutineExceptionHandler` for, and how do you handle exceptions from `async`?
+**Question:** How do exceptions propagate in `coroutineScope` vs `supervisorScope`? What is `CoroutineExceptionHandler` for, and how do you handle exceptions from `async`?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 **`coroutineScope` — fail-fast propagation:**
 If any child coroutine throws an unhandled exception, the scope cancels all sibling coroutines and the exception propagates to the caller of `coroutineScope`:
 ```kotlin
@@ -521,16 +521,16 @@ val scope = CoroutineScope(SupervisorJob() + handler)
 
 **Exceptions from `async`:** stored in the `Deferred`. They are NOT thrown until `.await()` is called. If you never call `.await()`, the exception is lost (in `supervisorScope`) or propagates when the `supervisorScope` sees the failed child.
 
-**Pułapka rozmowna:** "`CoroutineExceptionHandler` catches exceptions from `async`, right?" — Wrong. It only catches exceptions from `launch`. For `async`, you must catch exceptions at the `.await()` call site. This is a common interview gotcha.
+**Interview trap:** "`CoroutineExceptionHandler` catches exceptions from `async`, right?" — Wrong. It only catches exceptions from `launch`. For `async`, you must catch exceptions at the `.await()` call site. This is a common interview gotcha.
 
-**Tagi:** exception-handling, coroutineScope, supervisorScope, CoroutineExceptionHandler, async
+**Tags:** exception-handling, coroutineScope, supervisorScope, CoroutineExceptionHandler, async
 
 ---
 
 ## Q-CW-015 [bloom: understand]
-**Pytanie:** Why is calling a blocking function inside a `suspend` function a major bug in a WebFlux service? What actually happens at the runtime level, how do you detect it, and how do you fix it?
+**Question:** Why is calling a blocking function inside a `suspend` function a major bug in a WebFlux service? What actually happens at the runtime level, how do you detect it, and how do you fix it?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 WebFlux uses Netty with a small event loop thread pool (typically 2 × CPU cores, e.g., 16 threads on a 8-core machine). These threads process ALL I/O events for ALL concurrent connections.
 
 When a `suspend` function calls a blocking operation (e.g., JDBC, `Thread.sleep()`, `Files.readAllBytes()`), the coroutine does not suspend — it literally blocks the event loop thread. While that thread is blocked, it cannot process I/O events for ANY other connection. With 16 event loop threads and 16 concurrent blocking calls, the entire service is frozen. Every new incoming request sits in the accept queue going nowhere.
@@ -563,16 +563,16 @@ suspend fun getReco(@PathVariable userId: Long): Reco {
 ```
 Better fix for a recsys service: replace JDBC with R2DBC (non-blocking reactive DB driver) — then `withContext` is not needed at all.
 
-**Pułapka rozmowna:** "My `suspend` function just calls another `suspend` function that wraps the JDBC call — so it's fine, right?" — Only if that inner function uses `withContext(Dispatchers.IO)` itself. The `suspend` modifier does not magically make the call non-blocking; the actual blocking work must be dispatched to `Dispatchers.IO`.
+**Interview trap:** "My `suspend` function just calls another `suspend` function that wraps the JDBC call — so it's fine, right?" — Only if that inner function uses `withContext(Dispatchers.IO)` itself. The `suspend` modifier does not magically make the call non-blocking; the actual blocking work must be dispatched to `Dispatchers.IO`.
 
-**Tagi:** blocking-in-coroutine, event-loop, BlockHound, Dispatchers.IO, WebFlux
+**Tags:** blocking-in-coroutine, event-loop, BlockHound, Dispatchers.IO, WebFlux
 
 ---
 
 ## Q-CW-016 [bloom: understand]
-**Pytanie:** Describe the full threading model of a Spring WebFlux + coroutines service: which thread handles what, and at what point does work move between threads?
+**Question:** Describe the full threading model of a Spring WebFlux + coroutines service: which thread handles what, and at what point does work move between threads?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 A request journey through a Kotlin + WebFlux service:
 
 1. **Netty I/O thread** (event loop): accepts the TCP connection, reads bytes, decodes the HTTP request. This thread is precious — never block it.
@@ -589,16 +589,16 @@ A request journey through a Kotlin + WebFlux service:
 
 Key insight: the event loop threads only touch the coroutine at the edges (receive request, send response). The actual business logic runs on coroutine dispatcher threads or IO threads. Blocking on event loop threads is the only truly dangerous mistake.
 
-**Pułapka rozmowna:** "Does `Dispatchers.Unconfined` run on the event loop thread?" — After the first suspension, it resumes on whatever thread completed the suspension — which COULD be a Netty event loop thread if the suspension was inside a WebClient call. This is why `Unconfined` is dangerous in WebFlux services.
+**Interview trap:** "Does `Dispatchers.Unconfined` run on the event loop thread?" — After the first suspension, it resumes on whatever thread completed the suspension — which COULD be a Netty event loop thread if the suspension was inside a WebClient call. This is why `Unconfined` is dangerous in WebFlux services.
 
-**Tagi:** threading-model, Netty, event-loop, Dispatchers, WebFlux
+**Tags:** threading-model, Netty, event-loop, Dispatchers, WebFlux
 
 ---
 
 ## Q-CW-017 [bloom: apply]
-**Pytanie:** Write a Spring WebFlux Kotlin controller with a `suspend fun` handler that calls three `WebClient`s in parallel and combines results. Include per-call timeouts. Show idiomatic Kotlin.
+**Question:** Write a Spring WebFlux Kotlin controller with a `suspend fun` handler that calls three `WebClient`s in parallel and combines results. Include per-call timeouts. Show idiomatic Kotlin.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 ```kotlin
 @RestController
 @RequestMapping("/api/recommendations")
@@ -661,16 +661,16 @@ Key points:
 
 To add a global 400ms deadline across all three calls, wrap with `withTimeout(400)` outside `coroutineScope`.
 
-**Pułapka rozmowna:** "What if I call `await()` immediately after each `async` instead of at the end?" Then the three calls execute sequentially, not in parallel. Always start ALL `async` blocks before calling ANY `.await()`.
+**Interview trap:** "What if I call `await()` immediately after each `async` instead of at the end?" Then the three calls execute sequentially, not in parallel. Always start ALL `async` blocks before calling ANY `.await()`.
 
-**Tagi:** WebClient, parallel, async, coroutineScope, timeout, apply
+**Tags:** WebClient, parallel, async, coroutineScope, timeout, apply
 
 ---
 
 ## Q-CW-018 [bloom: apply]
-**Pytanie:** Write a `Flow<T>` that reads a paginated downstream endpoint via `WebClient`, filters results, and emits batched chunks of 10 items for an SSE endpoint.
+**Question:** Write a `Flow<T>` that reads a paginated downstream endpoint via `WebClient`, filters results, and emits batched chunks of 10 items for an SSE endpoint.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 ```kotlin
 data class Item(val id: Long, val score: Double, val active: Boolean)
 data class Batch(val items: List<Item>)
@@ -722,16 +722,16 @@ fun <T> Flow<T>.chunked(size: Int): Flow<List<T>> = flow {
 
 Spring WebFlux natively supports `Flow<T>` as a return type for SSE endpoints (no conversion needed when `kotlinx-coroutines-reactor` is on classpath).
 
-**Pułapka rozmowna:** "Do you need to call `.collect()` somewhere for this to work?" — Spring's `ResponseBodyResultHandler` subscribes to the `Flow` (via its Reactor bridge) when the HTTP response is being written. You never call `.collect()` manually in a controller — returning the `Flow` is enough.
+**Interview trap:** "Do you need to call `.collect()` somewhere for this to work?" — Spring's `ResponseBodyResultHandler` subscribes to the `Flow` (via its Reactor bridge) when the HTTP response is being written. You never call `.collect()` manually in a controller — returning the `Flow` is enough.
 
-**Tagi:** Flow, SSE, WebClient, pagination, batching, apply
+**Tags:** Flow, SSE, WebClient, pagination, batching, apply
 
 ---
 
 ## Q-CW-019 [bloom: apply]
-**Pytanie:** Configure a `WebClient` bean with: connection timeout 500ms, response timeout 2s, max in-memory buffer size 2MB, default `Authorization` header, and retry on 5xx with exponential backoff (3 attempts, initial 100ms, factor 2). Show idiomatic Kotlin.
+**Question:** Configure a `WebClient` bean with: connection timeout 500ms, response timeout 2s, max in-memory buffer size 2MB, default `Authorization` header, and retry on 5xx with exponential backoff (3 attempts, initial 100ms, factor 2). Show idiomatic Kotlin.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 ```kotlin
 @Configuration
 class WebClientConfig {
@@ -789,16 +789,16 @@ Notes:
 - `maxInMemorySize` prevents OOM when reading large response bodies into memory.
 - Retry logic belongs at the call site or via a filter — not at the bean level — so you can tune per-endpoint.
 
-**Pułapka rozmowna:** "Will `retryWhen` retry on timeout?" — Only if the timeout throws a retriable exception type you've included in the `filter`. `ReadTimeoutException` is not automatically included. Be explicit.
+**Interview trap:** "Will `retryWhen` retry on timeout?" — Only if the timeout throws a retriable exception type you've included in the `filter`. `ReadTimeoutException` is not automatically included. Be explicit.
 
-**Tagi:** WebClient, configuration, timeout, retry, exponential-backoff, apply
+**Tags:** WebClient, configuration, timeout, retry, exponential-backoff, apply
 
 ---
 
 ## Q-CW-020 [bloom: apply]
-**Pytanie:** Translate this blocking Spring MVC controller to coroutines + non-blocking: the endpoint calls `userService.findById()` (JDBC), then `pricingService.getPrice()` (HTTP), then assembles a response. Show the before and after.
+**Question:** Translate this blocking Spring MVC controller to coroutines + non-blocking: the endpoint calls `userService.findById()` (JDBC), then `pricingService.getPrice()` (HTTP), then assembles a response. Show the before and after.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 **BEFORE (blocking Spring MVC):**
 ```kotlin
 @RestController
@@ -856,16 +856,16 @@ Migration steps:
 
 Bonus: the original code called user then price sequentially (total time = T_user + T_price). The coroutine version runs them in parallel (total time ≈ max(T_user, T_price)). For recsys feature fetching with 3+ parallel calls, this multiplier matters.
 
-**Pułapka rozmowna:** "Can I keep JDBC and just wrap it in `withContext(Dispatchers.IO)`?" — Yes, as a migration step. It's not as scalable as R2DBC (you're still burning IO threads), but it's safe and avoids blocking the event loop. For a brownfield migration, `withContext(Dispatchers.IO)` around JDBC is a valid intermediate state.
+**Interview trap:** "Can I keep JDBC and just wrap it in `withContext(Dispatchers.IO)`?" — Yes, as a migration step. It's not as scalable as R2DBC (you're still burning IO threads), but it's safe and avoids blocking the event loop. For a brownfield migration, `withContext(Dispatchers.IO)` around JDBC is a valid intermediate state.
 
-**Tagi:** migration, MVC-to-WebFlux, R2DBC, WebClient, parallel, apply
+**Tags:** migration, MVC-to-WebFlux, R2DBC, WebClient, parallel, apply
 
 ---
 
 ## Q-CW-021 [bloom: apply]
-**Pytanie:** Write a test (JUnit 5 + `kotlinx-coroutines-test`) for a `suspend fun` that makes two parallel calls. The test should: use virtual time for `delay()`, verify both calls happened concurrently (not sequentially), and check the combined result.
+**Question:** Write a test (JUnit 5 + `kotlinx-coroutines-test`) for a `suspend fun` that makes two parallel calls. The test should: use virtual time for `delay()`, verify both calls happened concurrently (not sequentially), and check the combined result.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 ```kotlin
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -948,16 +948,16 @@ Key API:
 - `advanceTimeBy(n)` / `advanceUntilIdle()`: manually advance virtual time if needed.
 - No `runBlocking` in tests — it uses real time and can make tests slow or flaky.
 
-**Pułapka rozmowna:** "Why not just use `runBlocking` for coroutine tests?" — `runBlocking` runs with real time, so `delay(5000)` makes your test 5 seconds slow. It also doesn't give you `currentTime` to verify concurrency. `runTest` is the right tool for coroutine unit tests.
+**Interview trap:** "Why not just use `runBlocking` for coroutine tests?" — `runBlocking` runs with real time, so `delay(5000)` makes your test 5 seconds slow. It also doesn't give you `currentTime` to verify concurrency. `runTest` is the right tool for coroutine unit tests.
 
-**Tagi:** testing, runTest, virtual-time, coroutines-test, concurrency-verification, apply
+**Tags:** testing, runTest, virtual-time, coroutines-test, concurrency-verification, apply
 
 ---
 
 ## Q-CW-022 [bloom: analyze]
-**Pytanie:** "We should migrate our Kotlin + WebFlux recsys service to virtual threads now that Spring Boot 3.2 ships them." Analyze the trade-offs for an existing high-RPS Allegro service.
+**Question:** "We should migrate our Kotlin + WebFlux recsys service to virtual threads now that Spring Boot 3.2 ships them." Analyze the trade-offs for an existing high-RPS Allegro service.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 This is a legitimate engineering question, not a trick — the answer is nuanced.
 
 **Arguments FOR migrating to virtual threads:**
@@ -981,16 +981,16 @@ This is a legitimate engineering question, not a trick — the answer is nuanced
 - If the service uses reactive DB drivers and backpressure operators → stay on WebFlux + coroutines; the migration cost exceeds the benefit.
 - New services at Allegro in 2024+: virtual threads are a reasonable default unless streaming is required.
 
-**Pułapka rozmowna:** "Virtual threads are strictly better than event loops, right?" — No. An event loop is O(1) threads for I/O waiting; virtual threads are O(active requests) parked threads. Under extreme connection counts (10k+ concurrent slow connections), virtual threads use more memory. Netty's event loop remains superior for those scenarios.
+**Interview trap:** "Virtual threads are strictly better than event loops, right?" — No. An event loop is O(1) threads for I/O waiting; virtual threads are O(active requests) parked threads. Under extreme connection counts (10k+ concurrent slow connections), virtual threads use more memory. Netty's event loop remains superior for those scenarios.
 
-**Tagi:** loom, virtual-threads, migration, trade-offs, analyze
+**Tags:** loom, virtual-threads, migration, trade-offs, analyze
 
 ---
 
 ## Q-CW-023 [bloom: analyze]
-**Pytanie:** Compare error handling approaches in the reactive/coroutine stack: `Mono.onErrorResume`, coroutine `try/catch`, `Result<T>`, and Arrow's `Either<E, A>`. When would you reach for each?
+**Question:** Compare error handling approaches in the reactive/coroutine stack: `Mono.onErrorResume`, coroutine `try/catch`, `Result<T>`, and Arrow's `Either<E, A>`. When would you reach for each?
 
-**Modelowa odpowiedź:**
+**Model answer:**
 Four tools, four different points on the explicitness/composability spectrum:
 
 **`Mono.onErrorResume { ... }` (Reactor operator chain)**
@@ -1049,16 +1049,16 @@ findUser(id).fold(
 - Reactor pipeline fallback: `onErrorResume` only when already in a Reactor chain (e.g., library interop).
 - Domain-heavy services with many typed errors: Arrow `Either` is worth the investment.
 
-**Pułapka rozmowna:** "Should I never use exceptions in a coroutine service?" — Exceptions are fine for truly exceptional conditions (infrastructure failures, programming errors). The controversy is about using exceptions for expected business outcomes (user not found). Use typed returns (`Either`, `Result`) for expected failures; exceptions for unexpected ones.
+**Interview trap:** "Should I never use exceptions in a coroutine service?" — Exceptions are fine for truly exceptional conditions (infrastructure failures, programming errors). The controversy is about using exceptions for expected business outcomes (user not found). Use typed returns (`Either`, `Result`) for expected failures; exceptions for unexpected ones.
 
-**Tagi:** error-handling, Result, Either, Arrow, onErrorResume, analyze
+**Tags:** error-handling, Result, Either, Arrow, onErrorResume, analyze
 
 ---
 
 ## Q-CW-024 [bloom: analyze]
-**Pytanie:** A senior engineer reviews your code: "You're using `async` where `launch` would do — that allocates a `Deferred` unnecessarily, and you have to remember to `.await()`." Analyze when this critique is right vs when `async` is genuinely better.
+**Question:** A senior engineer reviews your code: "You're using `async` where `launch` would do — that allocates a `Deferred` unnecessarily, and you have to remember to `.await()`." Analyze when this critique is right vs when `async` is genuinely better.
 
-**Modelowa odpowiedź:**
+**Model answer:**
 The critique is correct about the mechanics: `async` returns a `Deferred<T>` (a heap-allocated object wrapping a `Job`), and every `.await()` call site is a place where you can forget to call it, accidentally swallow exceptions, or call it after cancellation.
 
 **When the critique is right:**
@@ -1109,6 +1109,6 @@ supervisorScope {
 **Summary for the interview:**
 The senior engineer's critique applies to `async` used for side effects or without parallelism. `async` is the RIGHT tool when you need a return value AND you're starting multiple coroutines before awaiting any of them. The smell to avoid: `async { }.await()` in sequence (just call the function) or fire-and-forget `async` (use `launch`).
 
-**Pułapka rozmowna:** "`async` is strictly more powerful than `launch`, so why not always use `async`?" — Power comes with responsibility. A forgotten `.await()` swallows exceptions. In `supervisorScope`, a failed `async` with no `.await()` call drops the exception silently. `launch` fails loudly. Use the weakest tool that fits the job.
+**Interview trap:** "`async` is strictly more powerful than `launch`, so why not always use `async`?" — Power comes with responsibility. A forgotten `.await()` swallows exceptions. In `supervisorScope`, a failed `async` with no `.await()` call drops the exception silently. `launch` fails loudly. Use the weakest tool that fits the job.
 
-**Tagi:** async, launch, Deferred, code-review, analyze
+**Tags:** async, launch, Deferred, code-review, analyze

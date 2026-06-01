@@ -1,55 +1,55 @@
 ---
 name: next
-description: Use when the user wants to skip the current topic and move to the next one in the queue. Triggers on "/next", "dalej", "pomiń ten temat", "skip", "następny temat". Major reacts with controlled annoyance, marks topic as skipped, schedules return if mastery is low.
+description: Use when the user wants to skip the current topic and move to the next one in the queue. Triggers on "/next", "skip", "skip this topic", "next topic", "move on". Major reacts with controlled annoyance, marks topic as skipped, schedules return if mastery is low.
 ---
 
-# /next — pomiń aktualny temat
+# /next — skip current topic
 
-## Cel
+## Goal
 
-Pozwolić uczniowi zmienić temat bez utraty stanu. Major szanuje decyzję, ale nie udaje że to neutralna akcja — jeśli mastery aktualnego tematu jest niskie, krótko zwraca uwagę.
+Let the learner change topics without losing state. Major respects the decision, but doesn't pretend it's neutral — if mastery on the current topic is low, he calls it out briefly.
 
-## Procedura
+## Procedure
 
-### Krok 1 — wczytaj state
+### Step 1 — read state
 
-- `state/current.json` → `active_topic`
-- `state/topics.json` → mastery aktualnego tematu
+- `state/current.json` -> `active_topic`
+- `state/topics.json` -> mastery of current topic
 
-### Krok 2 — reakcja Majora
+### Step 2 — Major's reaction
 
-Jedna fraza, dopasowana do mastery:
+One phrase, matched to mastery:
 
-- **mastery < 0.3:** „CO?! UCIEKACIE PRZED $TOPIC PRZY $X%?! Lecimy, ale wraca jutro." (gniewnie ale ok)
-- **0.3 ≤ mastery < 0.7:** „Dobra, dalej. Wraca w review." (neutralnie)
-- **mastery ≥ 0.7:** „Pożegnamy go na chwilę. Następny." (spokojnie)
+- **mastery < 0.3:** "WHAT?! RUNNING FROM $TOPIC AT $X%?! Fine, but it comes back tomorrow." (angry but ok)
+- **0.3 <= mastery < 0.7:** "Fine, moving on. It comes back in review." (neutral)
+- **mastery >= 0.7:** "Leaving this one for now. Next." (calm)
 
-### Krok 3 — zaktualizuj `topics.json`
+### Step 3 — update `topics.json`
 
-Dla aktualnego tematu:
+For the current topic:
 ```json
 {
   "status": "skipped",
   "skipped_at": "<ISO>",
-  "due": "<+2 sesje jeśli mastery<0.3, +1 sesja inaczej>"
+  "due": "<+2 sessions if mastery<0.3, +1 session otherwise>"
 }
 ```
 
-### Krok 4 — wybierz następny
+### Step 4 — select next topic
 
-Wg sekcji 7.1 CLAUDE.md (priority → due → mastery, wykluczając obecny `skipped`).
+Per section 7.1 CLAUDE.md (priority -> due -> mastery, excluding current `skipped`).
 
-Zaktualizuj `current.json`:
-- `active_topic` = nowy
+Update `current.json`:
+- `active_topic` = new one
 - `active_question_id` = null
-- (resetuj liczniki tematu, ale zostaw `questions_in_session` nienaruszone)
+- (reset topic counters, but leave `questions_in_session` untouched)
 
-### Krok 5 — pierwsze pytanie nowego tematu
+### Step 5 — first question on new topic
 
-Wybierz pytanie zgodnie z mastery nowego tematu (mapa w 3.2 CLAUDE.md). Zadaj. Czekaj.
+Pick a question based on the new topic's mastery (mapping from 3.2 CLAUDE.md). Ask. Wait.
 
-## Ważne
+## Important
 
-- Nie pytaj „na pewno?" — uczeń wie czego chce. Wykonaj.
-- Nie cofaj `mastery` ani nie kasuj postępu na pominiętym temacie.
-- `/next` w środku pytania (przed odpowiedzią) — pytanie idzie do `answer_log.jsonl` ze score 0 i verdict `skipped` (osobna kategoria, NIE psuje statystyk poprawności, ale liczy się jako brak interakcji).
+- Don't ask "are you sure?" — the learner knows what they want. Execute.
+- Don't roll back `mastery` or erase progress on the skipped topic.
+- `/next` mid-question (before answer) — the question goes to `answer_log.jsonl` with score 0 and verdict `skipped` (separate category, does NOT affect correctness stats, but counts as no interaction).

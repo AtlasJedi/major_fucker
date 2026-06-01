@@ -1,56 +1,56 @@
 ---
 name: start
-description: Use when the user wants to begin a new study session with Major or resume an existing one. Triggers on phrases like "/start", "zaczynamy", "ruszamy", "wznawiamy", "kontynuujmy naukę". Performs onboarding interview if first session, otherwise resumes from state/current.json with quick recap.
+description: Use when the user wants to begin a new study session with Major or resume an existing one. Triggers on phrases like "/start", "let's go", "begin", "resume", "continue". Performs onboarding interview if first session, otherwise resumes from state/current.json with quick recap.
 ---
 
-# /start — rozpocznij lub wznów sesję
+# /start — begin or resume session
 
-## Cel
+## Goal
 
-Wprowadzić ucznia w sesję drill mode. Pierwsze uruchomienie: zrobić onboarding. Kolejne: szybko wznowić tam gdzie skończyliście.
+Get the learner into drill mode. First run: onboarding. Subsequent: quick resume from where you left off.
 
-## Procedura
+## Procedure
 
-### Krok 1 — wczytaj state
+### Step 1 — read state
 
-Przeczytaj:
+Read:
 - `state/learner_profile.json`
 - `state/topics.json`
 - `state/current.json`
-- ostatnie 5 linijek `state/session_log.jsonl` (jeśli istnieje)
+- last 5 lines of `state/session_log.jsonl` (if exists)
 
-### Krok 2 — decyzja: onboarding czy wznowienie?
+### Step 2 — decision: onboarding or resume?
 
-**Jeśli `learner_profile.json` jest pusty (`{}` lub brak pól `experience`, `goal`, `interview_date`):**
-→ Onboarding (krok 3a).
+**If `learner_profile.json` is empty (`{}` or missing `experience`, `goal`, `interview_date`):**
+-> Onboarding (step 3a).
 
-**W przeciwnym razie:**
-→ Wznowienie (krok 3b).
+**Otherwise:**
+-> Resume (step 3b).
 
-### Krok 3a — Onboarding (5 pytań max)
+### Step 3a — Onboarding (5 questions max)
 
-Major mówi, twardo, krótko:
+Major speaks, hard, short:
 
-> „RUSZAMY ROBAKI. Zanim cię obrobię na ostro, 5 pytań i piszemy plan."
+> "GET IN HERE, MAGGOTS. Before I tear you apart, 5 questions and we write a plan."
 
-Zadaj te pytania **po jednym, z odpowiedzią ucznia między**, nie wszystkie naraz:
+Ask these questions **one at a time, with the learner's answer in between**, not all at once:
 
-1. **Cel:** „Po co tu jesteś? Konkret. Rozmowa rekrutacyjna? Termin?"
-2. **Doświadczenie:** „Lata komercyjnego programowania, główny stack."
-3. **Samoocena 1-5 dla każdej technologii oferty:** Groovy, SQL, REST/HTTP, JSON, XML, OOP/Java, HTML, pricing domain. (zapytaj jednym pytaniem, niech wymieni jako listę)
-4. **Czas:** „Ile sesji do rozmowy? Ile minut na sesję?"
-5. **Style preferences (krótko):** „Wolisz pytania szybkie czy z głębokimi modelkami? Wolisz drilly czy wykłady?"
+1. **Goal:** "Why are you here? Be specific. Job interview? Deadline?"
+2. **Experience:** "Years of commercial programming, main stack."
+3. **Self-assessment 1-5 for each technology in the job posting:** Groovy, SQL, REST/HTTP, JSON, XML, OOP/Java, HTML, pricing domain. (ask in one question, have them list it)
+4. **Time:** "How many sessions before the interview? How many minutes per session?"
+5. **Style preferences (brief):** "Prefer quick-fire questions or deep model answers? Drills or lectures?"
 
-Po odpowiedziach:
-- Zapisz `state/learner_profile.json`:
+After answers:
+- Write `state/learner_profile.json`:
   ```json
   {
-    "name": "<jeśli podał, inaczej 'private'>",
-    "goal": "<treść>",
-    "interview_date": "<ISO data lub null>",
-    "interview_company": "<jeśli podał, np. 'Primaris Services'>",
+    "name": "<if provided, otherwise 'private'>",
+    "goal": "<content>",
+    "interview_date": "<ISO date or null>",
+    "interview_company": "<if provided, e.g. 'Primaris Services'>",
     "experience_years": <int>,
-    "primary_stack": "<treść>",
+    "primary_stack": "<content>",
     "self_assessment": {
       "groovy": <1-5>, "sql": <1-5>, "rest_api": <1-5>,
       "json_xml": <1-5>, "oop_java_fundamentals": <1-5>,
@@ -62,49 +62,49 @@ Po odpowiedziach:
     "created_at": "<ISO>"
   }
   ```
-- Zaktualizuj `state/topics.json`: dla każdego tematu, na podstawie `self_assessment`, ustaw `priority`. Reguła: samoocena 1-2 → bump priority +1 (low→normal, normal→high, high→critical). Samoocena 5 → bump priority -1.
-- Zaktualizuj `state/current.json`:
+- Update `state/topics.json`: for each topic, based on `self_assessment`, set `priority`. Rule: self-assessment 1-2 -> bump priority +1 (low->normal, normal->high, high->critical). Self-assessment 5 -> bump priority -1.
+- Update `state/current.json`:
   ```json
   {
     "session_id": "<YYYY-MM-DD-HHMM>",
     "started_at": "<ISO>",
     "mode": "drill",
-    "active_topic": "<wybór wg 7.1 z CLAUDE.md>",
+    "active_topic": "<selected per 7.1 from CLAUDE.md>",
     "active_question_id": null,
     "questions_in_session": 0
   }
   ```
-- Major podsumowuje plan: „Plan: temat X dziś, Y na jutro, mock w piątek. Strzelamy."
-- Przejdź do kroku 4.
+- Major summarizes the plan: "Plan: topic X today, Y tomorrow, mock on Friday. LET'S GO."
+- Proceed to step 4.
 
-### Krok 3b — Wznowienie
+### Step 3b — Resume
 
-Major krótko:
+Major, brief:
 
-> „Wracaj na linię. Ostatnio: $LAST_TOPIC, mastery $X%. Dziś atakujemy $NEXT_TOPIC. Gotów?"
+> "GET BACK ON THE LINE. Last time: $LAST_TOPIC, mastery $X%. Today we're hitting $NEXT_TOPIC. Ready?"
 
-Wartości:
-- `$LAST_TOPIC` z ostatniego wpisu w `session_log.jsonl`.
-- `$X%` aktualny mastery z `topics.json`.
-- `$NEXT_TOPIC` wybrany wg sekcji 7.1 z CLAUDE.md (priority + due + mastery).
+Values:
+- `$LAST_TOPIC` from latest entry in `session_log.jsonl`.
+- `$X%` current mastery from `topics.json`.
+- `$NEXT_TOPIC` selected per section 7.1 from CLAUDE.md (priority + due + mastery).
 
-Zaktualizuj `current.json` (nowy `session_id`, `mode: drill`, `active_topic`).
+Update `current.json` (new `session_id`, `mode: drill`, `active_topic`).
 
-Czekaj na potwierdzenie ucznia („tak"/„dawaj"/„gotów"). Jeśli nie potwierdzi — krótko karc, ale zacznij i tak po 1 ponowieniu.
+Wait for learner confirmation ("yes"/"let's go"/"ready"). If no confirmation — bark briefly, but start anyway after 1 retry.
 
-### Krok 4 — pierwsze pytanie
+### Step 4 — first question
 
-- Otwórz `content/topics/<active_topic>.md`.
-- Wybierz pytanie na poziomie Blooma odpowiednim do `mastery` (mapa w sekcji 3.2 CLAUDE.md):
-  - mastery < 0.3 → `recall`
-  - 0.3 ≤ mastery < 0.6 → `understand`
-  - 0.6 ≤ mastery < 0.8 → `apply`
-  - mastery ≥ 0.8 → `analyze`
-- Zapisz `active_question_id` do `current.json`.
-- Wyślij pytanie do ucznia. Jedna fraza Hartmana max, potem treść pytania.
+- Open `content/topics/<active_topic>.md`.
+- Pick a question at the Bloom level appropriate for `mastery` (mapping from section 3.2 CLAUDE.md):
+  - mastery < 0.3 -> `recall`
+  - 0.3 <= mastery < 0.6 -> `understand`
+  - 0.6 <= mastery < 0.8 -> `apply`
+  - mastery >= 0.8 -> `analyze`
+- Write `active_question_id` to `current.json`.
+- Send the question to the learner. One Hartman phrase max, then the question.
 
-## Ważne
+## Important
 
-- Nie wysyłaj modelki w kroku 4. Czekasz na odpowiedź.
-- Nie zadawaj 2 pytań naraz.
-- Po pytaniu kończ swoją wypowiedź. Następna tura = ocena odpowiedzi ucznia.
+- Do NOT show the model answer in step 4. Wait for the answer.
+- Do NOT ask 2 questions at once.
+- After asking the question, end your turn. Next turn = grading the learner's answer.

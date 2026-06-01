@@ -1,51 +1,51 @@
-# Rozszerzanie Majora
+# Extending the Major
 
-Jak dodawać nowe technologie / domeny / funkcje. Najczęściej wystarczy `/more` — Major sam zbuduje topic. Ten dokument pokrywa przypadki gdy chcesz zrobić to ręcznie albo dorzucić coś bardziej fundamentalnego.
+How to add new technologies / domains / features. Most of the time `/more` is enough — Major builds the topic himself. This document covers cases when you want to do it manually or add something more fundamental.
 
 ---
 
-## 1. Dodawanie nowego tematu (domyślnie: `/more`)
+## 1. Adding a new topic (default: `/more`)
 
-Najprostsza ścieżka. W sesji wpisz:
+Simplest path. In a session type:
 
 ```
 /more
 ```
 
-Major przeprowadzi cię przez 4 pytania (nazwa, cel, samoocena, priorytet) i wygeneruje:
-- Plik `content/topics/<slug>.md` z bankiem pytań (min. 20 × 4 poziomy Bloom-a).
-- Wpis w `state/topics.json`.
+Major walks you through 4 questions (name, goal, self-assessment, priority) and generates:
+- File `content/topics/<slug>.md` with a question bank (min. 20 x 4 Bloom levels).
+- Entry in `state/topics.json`.
 
-Po `/more` możesz `/start` i Major włączy nowy temat do rotacji wg priorytetu.
+After `/more` you can `/start` and Major will include the new topic in rotation by priority.
 
 ---
 
-## 2. Dodawanie tematu ręcznie
+## 2. Adding a topic manually
 
-Gdy chcesz pełną kontrolę:
+When you want full control:
 
-### Krok 1 — wybierz slug
+### Step 1 — choose a slug
 
-Lowercase, snake_case, ASCII. Np. „React Hooks" → `react_hooks`.
+Lowercase, snake_case, ASCII. E.g. "React Hooks" -> `react_hooks`.
 
-### Krok 2 — utwórz `content/topics/<slug>.md`
+### Step 2 — create `content/topics/<slug>.md`
 
-Skopiuj strukturę z istniejącego pliku (np. `groovy.md`):
+Copy the structure from an existing file (e.g. `groovy.md`):
 
 ```markdown
-# <Nazwa> — bank pytań
+# <Name> — question bank
 
-> Krótki kontekst (1-2 zdania): kiedy ten temat się przydaje, jaka domena.
+> Brief context (1-2 sentences): when this topic is useful, what domain.
 
-## Zakres
+## Scope
 
-- bullet list 8-15 podtematów
+- bullet list of 8-15 subtopics
 
 ## Q-<SLUG>-001 [bloom: recall]
-**Pytanie:** ...
-**Modelowa odpowiedź:** ... (5-15 zdań)
-**Pułapka rozmowna:** ... (2-3 zdania, klasyczne gotchas)
-**Tagi:** tag1, tag2
+**Question:** ...
+**Model answer:** ... (5-15 sentences)
+**Interview trap:** ... (2-3 sentences, classic gotchas)
+**Tags:** tag1, tag2
 
 ## Q-<SLUG>-002 [bloom: recall]
 ...
@@ -60,31 +60,31 @@ Skopiuj strukturę z istniejącego pliku (np. `groovy.md`):
 ...
 ```
 
-**Konwencje:**
-- ID format: `Q-<SLUG_UPPER>-NNN` (3-cyfrowy zero-padded).
-- Bloom levels w kolejności: recall (1-8) → understand (9-16) → apply (17-24) → analyze (25-32).
-- Min. 32 pytania (8 per Bloom level) dla critical/high priority topics.
-- Min. 20 pytań (5 per Bloom level) dla normal/low priority.
+**Conventions:**
+- ID format: `Q-<SLUG_UPPER>-NNN` (3-digit zero-padded).
+- Bloom levels in order: recall (1-8) -> understand (9-16) -> apply (17-24) -> analyze (25-32).
+- Min. 32 questions (8 per Bloom level) for critical/high priority topics.
+- Min. 20 questions (5 per Bloom level) for normal/low priority.
 
-**Co stanowi dobre pytanie:**
-- **Recall:** „co to jest X?", „wymień Y typy", „co robi Z funkcja".
-- **Understand:** „wyjaśnij dlaczego X", „porównaj A i B", „co znaczy Y w kontekście Z".
-- **Apply:** „napisz kod X", „zaprojektuj Y dla Z", „rozwiąż problem A używając B".
-- **Analyze:** „porównaj trade-offy", „pokaż jak diagnozujesz problem X", „obroń decyzję Y vs Z".
+**What makes a good question:**
+- **Recall:** "what is X?", "list Y types", "what does Z function do".
+- **Understand:** "explain why X", "compare A and B", "what does Y mean in the context of Z".
+- **Apply:** "write code for X", "design Y for Z", "solve problem A using B".
+- **Analyze:** "compare trade-offs", "show how you diagnose problem X", "defend decision Y vs Z".
 
-**Co stanowi dobrą modelową odpowiedź:**
-- 5-15 zdań (chyba że pytanie code-heavy — wtedy więcej).
-- Zaczyna od klucza (point), potem detale.
-- Konkretne przykłady (kod, formuła, analogia).
-- Typowo zawiera punkt który rekruter chce usłyszeć.
+**What makes a good model answer:**
+- 5-15 sentences (unless the question is code-heavy — then more).
+- Starts with the key point, then details.
+- Concrete examples (code, formula, analogy).
+- Typically contains the point the recruiter wants to hear.
 
-**Co stanowi dobrą pułapkę rozmowną:**
-- Klasyczne pomyłki kandydatów (mylenie A z B).
-- Naïve odpowiedzi które brzmią dobrze ale są błędne.
-- Follow-up pytania jakie rekruter zazwyczaj zadaje.
-- 2-3 zdania, treściwie.
+**What makes a good interview trap:**
+- Classic candidate mistakes (confusing A with B).
+- Naive answers that sound right but are wrong.
+- Follow-up questions recruiters typically ask.
+- 2-3 sentences, concise.
 
-### Krok 3 — zarejestruj w `state/topics.json`
+### Step 3 — register in `state/topics.json`
 
 ```json
 {
@@ -92,7 +92,7 @@ Skopiuj strukturę z istniejącego pliku (np. `groovy.md`):
     ...,
     "react_hooks": {
       "priority": "high",      // critical | high | normal | low
-      "mastery": 0.0,
+      "mastery": {"theory": 0.0, "coding": {"junior": 0.0, "mid": 0.0, "senior": 0.0}},
       "status": "queued",
       "due": null,
       "questions_asked": 0,
@@ -102,17 +102,17 @@ Skopiuj strukturę z istniejącego pliku (np. `groovy.md`):
 }
 ```
 
-### Krok 4 — sprawdź że Major widzi temat
+### Step 4 — verify Major sees the topic
 
-Wpisz `/knowledge` — temat powinien się pojawić w tabeli ze 0% mastery.
+Type `/knowledge` — the topic should appear in the table at 0% mastery.
 
 ---
 
-## 3. Dodawanie nowej komendy (skill)
+## 3. Adding a new command (skill)
 
-Komendy to skille w `.claude/skills/<name>/SKILL.md`. Major automatycznie wykrywa.
+Commands are skills in `.claude/skills/<name>/SKILL.md`. Major auto-detects them.
 
-### Krok 1 — utwórz `.claude/skills/<command>/SKILL.md`
+### Step 1 — create `.claude/skills/<command>/SKILL.md`
 
 ```markdown
 ---
@@ -120,154 +120,154 @@ name: <command>
 description: Use when ... (specific trigger phrases). Performs ...
 ---
 
-# /<command> — krótki tytuł
+# /<command> — short title
 
-## Cel
+## Goal
 
-(1-2 zdania)
+(1-2 sentences)
 
-## Procedura
+## Procedure
 
-### Krok 1 — ...
-### Krok 2 — ...
+### Step 1 — ...
+### Step 2 — ...
 
-## Ważne
-(uwagi, pułapki, edge cases)
+## Important
+(notes, pitfalls, edge cases)
 ```
 
-**Wskazówki:**
-- `description` musi być ostry, z konkretnymi trigger phrases — Claude Code używa go do dispatching. Patrz istniejące skille jako wzór.
-- Sekcja „Ważne" zawiera anti-patterns i edge cases.
-- Skill może (i powinien) odwoływać się do `state/*` plików, `content/*` plików, oraz innych skili.
+**Tips:**
+- `description` must be sharp, with specific trigger phrases — Claude Code uses it for dispatching. See existing skills as reference.
+- "Important" section contains anti-patterns and edge cases.
+- A skill can (and should) reference `state/*` files, `content/*` files, and other skills.
 
-### Krok 2 — uaktualnij listę w README.md
+### Step 2 — update the command list in README.md
 
-Tabela komend w README — dodaj wiersz dla nowej komendy.
+Commands table in README — add a row for the new command.
 
-### Krok 3 — uaktualnij `CLAUDE.md` jeśli komenda zmienia behaviour core
+### Step 3 — update `CLAUDE.md` if the command changes core behavior
 
-Jeśli skill modyfikuje fundamental flow (np. nowy tryb obok drill/lesson/mock), aktualizuj sekcję 3.4 w `CLAUDE.md`.
-
----
-
-## 4. Dorzucanie fraz Hartmana
-
-`content/persona/hartman_voice.md` ma kategorie z 30+ frazami każda. Żeby dorzucić więcej:
-
-1. Otwórz plik.
-2. Znajdź odpowiednią kategorię (powitania, pochwały, zganiania, przejścia, pauzy, specjalne).
-3. Dorzuć nowe frazy zachowując numerację (lub przepisz numerację).
-4. **Pamiętaj o twardym zakazie:** żadnych żartów z prawdziwych ułomności. Tylko z lenistwa intelektualnego, niedouczenia, fluency illusion.
+If the skill modifies fundamental flow (e.g. a new mode alongside drill/lesson/mock), update section 3.4 in `CLAUDE.md`.
 
 ---
 
-## 5. Modyfikacja regułek pedagogicznych
+## 4. Adding Hartman phrases
 
-Główny regulamin Majora to `CLAUDE.md`. Sekcje krytyczne:
-- **Sekcja 2** — reguły pedagogiczne (mastery threshold, spaced repetition intervals, interleave ratio).
-- **Sekcja 7** — mastery i kolejkowanie tematów.
+`content/persona/hartman_voice.md` has categories with 30+ phrases each. To add more:
 
-**Przykładowa zmiana:** chcesz mniej agresywnego mastery threshold (z 0.85 na 0.80):
-
-W `CLAUDE.md`:
-- Sekcja 2.5 — zmień próg.
-- Sekcja 7.3 — zmień warunek transition.
-
-W skille:
-- `start`, `next`, `review` — sprawdź czy odwołują się do progu i zaktualizuj.
+1. Open the file.
+2. Find the appropriate category (greetings, praise, reprimands, transitions, pauses, special).
+3. Add new phrases maintaining numbering (or renumber).
+4. **Remember the hard ban:** no jokes about real disabilities. Only about intellectual laziness, ignorance, fluency illusion.
 
 ---
 
-## 6. Dorzucanie nowych poziomów Blooma
+## 5. Modifying pedagogical rules
 
-Domyślne poziomy: `recall`, `understand`, `apply`, `analyze`. Bloom 2001 ma jeszcze `evaluate` i `create`. Można dorzucić.
+The Major's main rulebook is `CLAUDE.md`. Critical sections:
+- **Section 2** — pedagogical rules (mastery threshold, spaced repetition intervals, interleave ratio).
+- **Section 7** — mastery and topic queuing.
 
-**Co trzeba zaktualizować:**
-1. `CLAUDE.md` sekcja 2.2 — lista poziomów.
-2. `CLAUDE.md` sekcja 3.2 — mapowanie mastery → poziom.
-3. Skille (`drill`, `lesson`, `start`) — gdzie wybierany poziom.
-4. Banki pytań — dodać pytania na nowych poziomach (lub oznaczyć istniejące).
+**Example change:** you want a less aggressive mastery threshold (from 0.85 to 0.80):
 
-**Praktycznie:** dla rozmów rekrutacyjnych 4 poziomy wystarczają. Evaluate/create przydatne dla creative roles, design interviews. Niekoniecznie Software Engineer.
+In `CLAUDE.md`:
+- Section 2.5 — change the threshold.
+- Section 7.3 — change the transition condition.
 
----
-
-## 7. Customization persona
-
-Major to Hartman by default. Inne wzorce możliwe:
-
-- **Profesor Snape** (zimny intelektualizm, sarcasm) — mniej krzyku, więcej cierpkich uwag.
-- **Yoda** (stylized speech, philosophical) — niezbyt praktyczne dla intensive drill.
-- **Spokojny mentor** (Mr. Miyagi style) — może być jak `/mock` mode permanent.
-
-**Żeby zmienić personę:**
-1. Przepisz `content/persona/hartman_voice.md` → `<persona_name>_voice.md`.
-2. Zaktualizuj `CLAUDE.md` sekcja 1 (Tożsamość) — kim jest Major.
-3. Skill plików zaktualizuj odwołania do persona file.
-
-**Lepsze:** zachować Hartmana jako default, dodać `mode: persona=<name>` w `state/learner_profile.json` i load odpowiedni voice file conditionally.
+In skills:
+- `start`, `next`, `review` — check if they reference the threshold and update.
 
 ---
 
-## 8. Integracja z external tools
+## 6. Adding new Bloom levels
 
-Major operuje wyłącznie na lokalnych plikach. Brak external API calls (poza opcjonalnym web search w `/more`). Jeśli chcesz integrować:
+Default levels: `recall`, `understand`, `apply`, `analyze`. Bloom 2001 also has `evaluate` and `create`. These can be added.
 
-**Anki / SuperMemo (export pytań):**
-- Wszystkie pytania w `content/topics/*.md` mogą być extracted skryptem (Markdown-aware parser) i export do CSV → Anki / Mochi.
-- Frontmatter `[bloom: ...]` mapuje na decks / tags.
+**What needs updating:**
+1. `CLAUDE.md` section 2.2 — level list.
+2. `CLAUDE.md` section 3.2 — mastery -> level mapping.
+3. Skills (`drill`, `lesson`, `start`) — where level is selected.
+4. Question banks — add questions at new levels (or relabel existing ones).
 
-**LMS (np. Coursera, custom platform):**
-- Skill może być rozszerzony o webhook do external LMS.
-- API call po `/debrief` żeby zapisać sesję w external system.
-
-**Speech-to-text (uczenie mówione):**
-- Mock mode szczególnie nadaje się do practice z głosem.
-- Whisper local + Major prompt → autentyczna mock interview experience.
-
-**Te integracje wymagają custom code poza Majora — out of scope dla podstawowego setupu.**
+**Practically:** for job interviews, 4 levels are enough. Evaluate/create are useful for creative roles, design interviews. Not necessarily Software Engineer.
 
 ---
 
-## 9. Testowanie nowych skili
+## 7. Customizing the persona
 
-Po dorzuceniu skila:
+Major is Hartman by default. Other patterns are possible:
 
-1. **Smoke test:** wpisz triggerujący phrase, sprawdź że Major użyje skila (a nie inny / żaden).
-2. **Edge cases:** brak danych (pusty `current.json`, no profile), invalid input, very large state files.
-3. **Persistence test:** wykonaj akcję, sprawdź że state files są poprawnie zaktualizowane (JSON valid, nie corrupted).
-4. **Persona test:** czy Major wciąż brzmi jak Hartman? Czy nie wszedł w meta-tryb?
+- **Professor Snape** (cold intellectualism, sarcasm) — less screaming, more biting remarks.
+- **Yoda** (stylized speech, philosophical) — not very practical for intensive drills.
+- **Calm mentor** (Mr. Miyagi style) — could be like `/mock` mode permanent.
 
----
+**To change the persona:**
+1. Rewrite `content/persona/hartman_voice.md` -> `<persona_name>_voice.md`.
+2. Update `CLAUDE.md` section 1 (Identity) — who the Major is.
+3. Update skill files' references to the persona file.
 
-## 10. Backup i versioning
-
-System zapisuje state w `state/*` files. Recommendations:
-- **Git** — `state/answer_log.jsonl` może być wzięty do gita (history nauki). Lub zaignorowany dla prywatności.
-- **Backup** — przed major refactor (zmiana CLAUDE.md, mastery threshold), backup `state/*` żeby nie stracić progress.
-- **Reset** — jeśli chcesz zacząć od zera: usuń `state/learner_profile.json` zawartość i `state/answer_log.jsonl` content. `state/topics.json` zresetuj do initial.
+**Better approach:** keep Hartman as default, add `mode: persona=<name>` in `state/learner_profile.json` and load the appropriate voice file conditionally.
 
 ---
 
-## 11. Najczęstsze problemy
+## 8. Integration with external tools
 
-**Major nie wybiera tematu:**
-- `state/topics.json` ma wszystkie status `mastered` z `due` w przyszłości → nic do roboty.
-- Solution: `/review` lub manualnie zresetuj statusy.
+Major operates exclusively on local files. No external API calls (apart from optional web search in `/more`). If you want to integrate:
 
-**Major powtarza te same pytania:**
-- Problem dedup w `current.json`.
-- Solution: sprawdź czy logika unikania ostatnich 30 z `answer_log.jsonl` działa.
+**Anki / SuperMemo (export questions):**
+- All questions in `content/topics/*.md` can be extracted by a script (Markdown-aware parser) and exported to CSV -> Anki / Mochi.
+- Frontmatter `[bloom: ...]` maps to decks / tags.
 
-**Mastery rośnie/spada za szybko:**
-- Formuła EWMA `new = 0.7×old + 0.3×score` z alpha=0.3.
-- Możesz przyjąć alpha=0.2 (bardziej smooth) edytując CLAUDE.md i skille.
+**LMS (e.g. Coursera, custom platform):**
+- Skills can be extended with webhooks to an external LMS.
+- API call after `/debrief` to save the session in an external system.
 
-**Persona wpływa na meritum:**
-- Sygnał że Major dryfuje. Re-check `CLAUDE.md` sekcja 6 (Limit persony) — 1 fraza per wymiana max.
+**Speech-to-text (spoken practice):**
+- Mock mode is particularly suited for voice practice.
+- Whisper local + Major prompt -> authentic mock interview experience.
+
+**These integrations require custom code outside of Major — out of scope for the basic setup.**
+
+---
+
+## 9. Testing new skills
+
+After adding a skill:
+
+1. **Smoke test:** type the triggering phrase, check that Major uses the skill (and not a different one / none).
+2. **Edge cases:** missing data (empty `current.json`, no profile), invalid input, very large state files.
+3. **Persistence test:** perform the action, verify state files are correctly updated (valid JSON, not corrupted).
+4. **Persona test:** does Major still sound like Hartman? Did he slip into meta-mode?
+
+---
+
+## 10. Backup and versioning
+
+The system saves state in `state/*` files. Recommendations:
+- **Git** — `state/answer_log.jsonl` can be added to git (learning history). Or gitignored for privacy.
+- **Backup** — before a major refactor (changing CLAUDE.md, mastery threshold), backup `state/*` to avoid losing progress.
+- **Reset** — to start from scratch: clear `state/learner_profile.json` contents and `state/answer_log.jsonl` content. Reset `state/topics.json` to initial values.
+
+---
+
+## 11. Common problems
+
+**Major doesn't pick a topic:**
+- `state/topics.json` has all statuses `mastered` with `due` in the future -> nothing to do.
+- Solution: `/review` or manually reset statuses.
+
+**Major repeats the same questions:**
+- Dedup problem in `current.json`.
+- Solution: check that the logic for avoiding the last 30 from `answer_log.jsonl` works.
+
+**Mastery rises/falls too fast:**
+- EWMA formula `new = 0.7 * old + 0.3 * score` with alpha=0.3.
+- You can use alpha=0.2 (smoother) by editing CLAUDE.md and skills.
+
+**Persona affects substance:**
+- Signal that Major is drifting. Re-check `CLAUDE.md` section 6 (Persona limits) — 1 phrase per exchange max.
 
 ---
 
 ## Bottom line
 
-System jest kompletny ale rozszerzalny. Najczęstszy use case (`/more`) załatwia 90% potrzeb. Bardziej zaawansowane modyfikacje (nowe komendy, persony, regulacje) wymagają edycji `CLAUDE.md` + skili, ale są w zasięgu — Major to ~3000 linii markdown total, czytalny ręcznie.
+The system is complete but extensible. The most common use case (`/more`) handles 90% of needs. More advanced modifications (new commands, personas, rule adjustments) require editing `CLAUDE.md` + skills, but they're within reach — Major is ~3000 lines of markdown total, human-readable.

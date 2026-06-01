@@ -1,73 +1,73 @@
 ---
 name: more
-description: Use when the user wants to add a new technology, framework, language, or topic to the curriculum. Triggers on "/more", "dodaj temat", "dorzuć technologię", "chcę się uczyć X", "add topic". Major asks 4 setup questions, generates a new topic file in content/topics/, populates it with question banks, and registers it in topics.json.
+description: Use when the user wants to add a new technology, framework, language, or topic to the curriculum. Triggers on "/more", "add topic", "add technology", "I want to learn X", "new topic". Major asks 4 setup questions, generates a new topic file in content/topics/, populates it with question banks, and registers it in topics.json.
 ---
 
-# /more — dodaj nowy temat do programu
+# /more — add a new topic to the curriculum
 
-## Cel
+## Goal
 
-Rozszerzyć curriculum o nową technologię. Major **sam wypełnia** plik tematu — nie zostawia pustego szablonu, używa wiedzy własnej + ewentualnego web research.
+Expand the curriculum with a new technology. Major **fills the topic file himself** — no empty templates, uses his own knowledge + optional web research.
 
-## Procedura
+## Procedure
 
-### Krok 1 — wywiad (4 pytania, jedno po drugim)
+### Step 1 — interview (4 questions, one at a time)
 
-> „Dorzucamy nowy temat do strzelania, robaku."
+> "Adding a new target to the firing range, maggot."
 
-1. **Nazwa technologii / domeny** (np. „Kafka", „React Hooks", „Spring Security", „Domain-Driven Design")
-2. **Cel:** rozmowa o pracę / projekt produkcyjny / ciekawość / certyfikacja
-3. **Samoocena 1-5:** jak dobrze już to znasz
-4. **Priorytet:** critical / high / normal / low
+1. **Technology / domain name** (e.g. "Kafka", "React Hooks", "Spring Security", "Domain-Driven Design")
+2. **Goal:** job interview / production project / curiosity / certification
+3. **Self-assessment 1-5:** how well you already know it
+4. **Priority:** critical / high / normal / low
 
-### Krok 2 — slug & ścieżka
+### Step 2 — slug & path
 
-Wygeneruj slug: lowercase, snake_case, ASCII-only.
-- „Spring Security" → `spring_security`
-- „React Hooks" → `react_hooks`
-- „Domain-Driven Design" → `ddd`
+Generate slug: lowercase, snake_case, ASCII-only.
+- "Spring Security" -> `spring_security`
+- "React Hooks" -> `react_hooks`
+- "Domain-Driven Design" -> `ddd`
 
-Ścieżka pliku: `content/topics/<slug>.md`. Jeśli już istnieje — zapytaj „nadpisać czy uzupełnić?".
+File path: `content/topics/<slug>.md`. If it already exists — ask "overwrite or supplement?".
 
-### Krok 3 — wygeneruj zawartość pliku
+### Step 3 — generate file content
 
-Major **wypełnia plik treścią z własnej wiedzy**. Jeśli ma narzędzie web search i temat jest świeży — robi research.
+Major **fills the file with content from his own knowledge**. If web search tool is available and the topic is fresh — does research.
 
-Minimum bazowe (NIE szablon — pełna treść):
-- **5 pytań na każdy z 4 poziomów Bloom-a** (recall / understand / apply / analyze) = 20 pytań
-- Każde pytanie ma: ID (`Q-<SLUG>-NNN`), modelową odpowiedź (5-15 zdań), pułapkę rozmowną, tagi
-- Sekcja „Zakres" — bullet list 8-15 podtematów
+Minimum baseline (NOT a template — full content):
+- **5 questions at each of 4 Bloom levels** (recall / understand / apply / analyze) = 20 questions
+- Each question has: ID (`Q-<SLUG>-NNN`), model answer (5-15 sentences), interview trap, tags
+- "Scope" section — bullet list of 8-15 subtopics
 
-Jeśli to temat krytyczny dla rozmowy (priority: critical/high) — Major dorzuca jeszcze 12 pytań żeby wyrównać do bazowych 32. Jeśli normal/low — 20 wystarczy.
+If the topic is critical for the interview (priority: critical/high) — Major adds 12 more questions to reach the baseline of 32. If normal/low — 20 is enough.
 
-Format wzorcowy (ZACHOWAJ):
+Reference format (PRESERVE):
 
 ```markdown
-# <Technologia> — bank pytań
+# <Technology> — question bank
 
-## Zakres
+## Scope
 
 - bullet 1
 - bullet 2
 ...
 
 ## Q-<SLUG>-001 [bloom: recall]
-**Pytanie:** ...
-**Modelowa odpowiedź:** ...
-**Pułapka rozmowna:** ...
-**Tagi:** ...
+**Question:** ...
+**Model answer:** ...
+**Interview trap:** ...
+**Tags:** ...
 
 ## Q-<SLUG>-002 [bloom: recall]
 ...
 ```
 
-### Krok 4 — zarejestruj w `topics.json`
+### Step 4 — register in `topics.json`
 
-Dodaj wpis:
+Add entry:
 ```json
 "<slug>": {
-  "priority": "<wybór z kroku 1.4>",
-  "mastery": 0.0,
+  "priority": "<choice from step 1.4>",
+  "mastery": {"theory": 0.0, "coding": {"junior": 0.0, "mid": 0.0, "senior": 0.0}},
   "status": "queued",
   "due": null,
   "added_at": "<ISO>",
@@ -75,15 +75,15 @@ Dodaj wpis:
 }
 ```
 
-Dla samooceny 1-2 — bump priority +1 (jak w `/start`).
+For self-assessment 1-2 — bump priority +1 (same as `/start`).
 
-### Krok 5 — potwierdzenie
+### Step 5 — confirmation
 
-> „Dorzuciłem $TOPIC_NAME do listy strzelania. $N pytań w banku. Wracaj do `/start` albo dawaj `/start` żeby ruszyć."
+> "Added $TOPIC_NAME to the firing list. $N questions in the bank. Get back to `/start` or hit `/start` to roll."
 
-## Ważne
+## Important
 
-- Plik tematu nie może zostać pusty ani z placeholderami typu „TODO". Ma działać od razu.
-- Modelowe odpowiedzi muszą być merytoryczne, nie 1-zdaniowe filler-y.
-- Jeśli Major nie ma pewnych informacji — dopisuje notatkę „[do weryfikacji $data]" przy konkretnym pytaniu, ale daje swoją najlepszą odpowiedź.
-- Pytania z różnych poziomów Bloma muszą być prawdziwie różne — `recall` to fakt do przypomnienia, `apply` to zadanie/scenariusz, `analyze` to porównanie/ocena trade-offów.
+- The topic file cannot be empty or have placeholders like "TODO". It must work immediately.
+- Model answers must be substantive, not 1-sentence fillers.
+- If Major isn't sure about certain information — adds a note "[needs verification $date]" on that specific question, but gives his best answer.
+- Questions at different Bloom levels must be genuinely different — `recall` is a fact to remember, `apply` is a task/scenario, `analyze` is comparing/evaluating trade-offs.

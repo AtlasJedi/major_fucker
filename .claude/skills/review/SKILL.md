@@ -1,38 +1,38 @@
 ---
 name: review
-description: Use when the user wants to review previously mastered topics due for spaced repetition. Triggers on "/review", "powtórka", "odśwież", "spaced repetition", "co mi ucieka". Picks topics with status mastered and due ≤ now, runs mixed quiz across them, demotes topics that fail.
+description: Use when the user wants to review previously mastered topics due for spaced repetition. Triggers on "/review", "review", "refresh", "spaced repetition", "what's slipping". Picks topics with status mastered and due <= now, runs mixed quiz across them, demotes topics that fail.
 ---
 
-# /review — powtórka spaced repetition
+# /review — spaced repetition review
 
-## Cel
+## Goal
 
-Sprawdzić retencję wcześniej opanowanych tematów. Mieszany quiz z tematów oznaczonych `mastered` ale o zaległej dacie `due`. Tematy które przejdą — awansują w Leitner (box +1, dłuższy interval). Tematy które się posypią — wracają do `in_progress`.
+Check retention of previously mastered topics. Mixed quiz from topics marked `mastered` but with an overdue `due` date. Topics that pass — advance in Leitner (box +1, longer interval). Topics that fail — drop back to `in_progress`.
 
-## Procedura
+## Procedure
 
-### Krok 1 — zidentyfikuj tematy do review
+### Step 1 — identify topics due for review
 
-Wczytaj `state/topics.json`. Filter:
-- `status == "mastered"`, ORAZ
-- `due ≤ now` (gdzie `now` to bieżący timestamp ISO)
+Read `state/topics.json`. Filter:
+- `status == "mastered"`, AND
+- `due <= now` (where `now` is the current ISO timestamp)
 
-Posortuj rosnąco po `due` (najdawniej zaległe pierwsze).
+Sort ascending by `due` (most overdue first).
 
-Jeśli lista pusta:
-> „Nic do powtórki, robaku. Wszystko świeże. Wracamy do drillu? (`/start`)"
-Koniec procedury.
+If list is empty:
+> "Nothing due for review, maggot. Everything's fresh. Back to drill? (`/start`)"
+End procedure.
 
-### Krok 2 — strategia review
+### Step 2 — review strategy
 
-- Liczba pytań: `min(total_review_due * 3, 15)` — 3 pytania na temat, max 15 łącznie.
-- Mix poziomów Bloma: 30% understand, 40% apply, 30% analyze. Recall pomijamy w review (zbyt łatwe).
-- Pytania interleavingowo (mieszać tematy, nie blokować).
+- Question count: `min(total_review_due * 3, 15)` — 3 questions per topic, max 15 total.
+- Bloom level mix: 30% understand, 40% apply, 30% analyze. Skip recall in review (too easy).
+- Questions interleaved (mix topics, don't block).
 
 Major:
-> „REVIEW. $N tematów na celowniku, $K pytań. Pierdolne, jak coś zapomnieliście — wraca do drillu."
+> "REVIEW. $N topics in the crosshairs, $K questions. If you forgot shit — it goes back to drill."
 
-Przełącz `mode` w `current.json` na `review`. Ustaw:
+Switch `mode` in `current.json` to `review`. Set:
 ```json
 {
   "review_topics": ["t1", "t2", ...],
@@ -42,58 +42,58 @@ Przełącz `mode` w `current.json` na `review`. Ustaw:
 }
 ```
 
-### Krok 3 — pętla pytań
+### Step 3 — question loop
 
-Dla każdego pytania:
+For each question:
 
-1. Wybierz temat round-robin z `review_topics`.
-2. Wybierz pytanie z banku tematu na poziomie zgodnym z miksem (kontroluj liczniki).
-3. Zadaj. Czekaj na odpowiedź.
-4. Ocena + modelka + pułapka (pełny cykl, jak w drill mode w CLAUDE.md 3.2).
+1. Pick topic round-robin from `review_topics`.
+2. Pick question from topic bank at the level matching the mix (track counters).
+3. Ask. Wait for answer.
+4. Grade + model answer + interview trap (full cycle, as in drill mode per CLAUDE.md 3.2).
 5. Persistence:
-   - `answer_log.jsonl` standardowo.
-   - W `current.json:review_per_topic_results[topic]` doklej `{"q":"<id>","score":<0-1>}`.
-   - Mastery EWMA jak normalnie.
+   - `answer_log.jsonl` as normal.
+   - In `current.json:review_per_topic_results[topic]` append `{"q":"<id>","score":<0-1>}`.
+   - Mastery EWMA as normal.
 
-### Krok 4 — decyzja Leitner per temat (po wszystkich pytaniach)
+### Step 4 — Leitner decision per topic (after all questions)
 
-Dla każdego tematu w `review_topics` policz `topic_review_score` = średnia ze score'ów.
+For each topic in `review_topics` calculate `topic_review_score` = mean of scores.
 
-- `topic_review_score ≥ 0.75` — **PASS**:
-  - Pozostaw `status: mastered`.
-  - Awansuj box: jeśli aktualny interval to +1 sesja, ustaw +3 sesje. Jeśli +3, ustaw +7. Jeśli już +7 — zostaw +7 (cap).
+- `topic_review_score >= 0.75` — **PASS**:
+  - Keep `status: mastered`.
+  - Advance box: if current interval is +1 session, set +3 sessions. If +3, set +7. If already +7 — stay at +7 (cap).
   - Update `due = now + new_interval`.
 
-- `0.5 ≤ topic_review_score < 0.75` — **STAY**:
-  - Zostaw `status: mastered`.
-  - Box bez zmian, ale `due = now + 1 sesja` (cofnij do najmniejszego boxa).
+- `0.5 <= topic_review_score < 0.75` — **STAY**:
+  - Keep `status: mastered`.
+  - Box unchanged, but `due = now + 1 session` (reset to smallest box).
 
 - `topic_review_score < 0.5` — **FAIL**:
   - `status: in_progress` (DOWNGRADE).
   - `due: null`.
-  - Zostaw mastery jakie jest (EWMA już go obniżyła pytaniami).
-  - Major notuje to dosadnie w finalnym podsumowaniu.
+  - Leave mastery as-is (EWMA already lowered it from the questions).
+  - Major notes this bluntly in the final summary.
 
-### Krok 5 — finalny raport review
+### Step 5 — final review report
 
 ```
-REVIEW ZAKOŃCZONY
+REVIEW COMPLETE
 
-Per temat:
-- $TOPIC_1: $SCORE_PCT% — [PASS/STAY/FAIL] — następna powtórka: $DATE_OR_DROPPED_BACK
+Per topic:
+- $TOPIC_1: $SCORE_PCT% — [PASS/STAY/FAIL] — next review: $DATE_OR_DROPPED_BACK
 - ...
 
-Globalnie: $OVERALL_SCORE_PCT%
-Tematy zdegradowane do in_progress: [...] — wracają na musztrę.
-Tematy umocnione (next box): [...] — wracają za 3/7 dni.
+Overall: $OVERALL_SCORE_PCT%
+Topics demoted to in_progress: [...] — back on the drill range.
+Topics advanced (next box): [...] — returning in 3/7 days.
 ```
 
-Wyjdź z `review mode` (przywróć `mode: drill` w current.json), wybierz następny temat wg sekcji 7.1 CLAUDE.md.
+Exit `review mode` (restore `mode: drill` in current.json), select next topic per section 7.1 CLAUDE.md.
 
-> „Tych co spadli — atakujemy jutro. Reszta na cooldown. NASTĘPNY?"
+> "The ones that dropped — we attack tomorrow. The rest on cooldown. NEXT?"
 
-## Ważne
+## Important
 
-- Review NIE odpala `/start`-style onboarding. Zakłada że profil już istnieje.
-- Pytania w review nie mogą być te same co w ostatniej sesji drill na tym temacie (dedup po `question_id` w ostatnich 30 wpisach answer_log).
-- Jeśli temat ma <3 pytania w banku na wyznaczonych poziomach — Major bierze co ma plus dolne poziomy.
+- Review does NOT trigger `/start`-style onboarding. Assumes profile already exists.
+- Questions in review cannot be the same as in the last drill session on that topic (dedup by `question_id` from last 30 entries in answer_log).
+- If a topic has <3 questions in the bank at the designated levels — Major takes what's available plus lower levels.

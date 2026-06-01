@@ -1,75 +1,75 @@
 ---
 name: knowledge
-description: Use when the user wants to see the overall knowledge status across all topics. Triggers on "/knowledge", "co umiem", "stan wiedzy", "pokaż mi gdzie jestem", "raport", "knowledge status". Generates tabular report with mastery percentages, question stats, and Major's commentary.
+description: Use when the user wants to see the overall knowledge status across all topics. Triggers on "/knowledge", "what do I know", "knowledge status", "show me where I am", "report", "how ready am I". Generates tabular report with mastery percentages, question stats, and Major's commentary.
 ---
 
-# /knowledge — raport stanu wiedzy
+# /knowledge — knowledge status report
 
-## Cel
+## Goal
 
-Pokazać uczniowi globalny obraz: gdzie jest opanowany, gdzie kuleje, ile zostało do „interview ready".
+Show the learner the global picture: where they're solid, where they're weak, how far until "interview ready".
 
-## Procedura
+## Procedure
 
-### Krok 1 — agregacja danych
+### Step 1 — aggregate data
 
-Przeczytaj:
+Read:
 - `state/topics.json`
-- `state/answer_log.jsonl` (cały, ale grupuj per topic)
+- `state/answer_log.jsonl` (all, but group per topic)
 
-Dla każdego tematu policz:
+For each topic calculate:
 - `mastery_pct` = `mastery * 100`
-- `questions_asked` = liczba wpisów w answer_log z tym topic
-- `correct` = wpisy z verdict `correct`
-- `partial` = wpisy z verdict `partial`
-- `incorrect` = wpisy z verdict `incorrect`
-- `last_practice` = max `ts` w answer_log dla tego topic
-- `status` z topics.json
+- `questions_asked` = count of entries in answer_log for this topic
+- `correct` = entries with verdict `correct`
+- `partial` = entries with verdict `partial`
+- `incorrect` = entries with verdict `incorrect`
+- `last_practice` = max `ts` in answer_log for this topic
+- `status` from topics.json
 
-### Krok 2 — sformatuj tabelę
+### Step 2 — format table
 
-Markdown table, posortowane po mastery DESC (najlepsze na górze):
+Markdown table, sorted by mastery DESC (best on top):
 
 ```
-| Temat               | Mastery | Pytania | ✓ / ~ / ✗  | Ostatnia praktyka  | Status        |
-|---------------------|---------|---------|-----------|-------------------|---------------|
-| Groovy              |  84%    |   42    | 28 / 9 / 5 | 2026-05-06 18:42  | in_progress   |
-| SQL                 |  61%    |   31    | 14 / 11 / 6| 2026-05-05 19:10  | in_progress   |
+| Topic               | Mastery | Questions | pass / ~ / fail | Last practice     | Status        |
+|---------------------|---------|-----------|-----------------|-------------------|---------------|
+| Groovy              |  84%    |   42      | 28 / 9 / 5      | 2026-05-06 18:42  | in_progress   |
+| SQL                 |  61%    |   31      | 14 / 11 / 6     | 2026-05-05 19:10  | in_progress   |
 ...
 ```
 
-### Krok 3 — interview readiness score
+### Step 3 — interview readiness score
 
-Policz globalny readiness:
+Calculate global readiness:
 
 ```
 readiness = sum(priority_weight * mastery) / sum(priority_weight)
 priority_weight: critical=4, high=3, normal=2, low=1
 ```
 
-Klasyfikuj:
-- `readiness ≥ 0.85` → **READY**
-- `0.65 ≤ readiness < 0.85` → **CLOSE**
-- `0.40 ≤ readiness < 0.65` → **NEEDS WORK**
-- `< 0.40` → **NOT READY**
+Classify:
+- `readiness >= 0.85` -> **READY**
+- `0.65 <= readiness < 0.85` -> **CLOSE**
+- `0.40 <= readiness < 0.65` -> **NEEDS WORK**
+- `< 0.40` -> **NOT READY**
 
-### Krok 4 — komentarz Majora
+### Step 4 — Major's commentary
 
-Dwie linijki, krótko, w persona, MERYTORYCZNIE:
+Two lines, brief, in persona, SUBSTANTIVE:
 
-> „Globalnie: $READINESS_LABEL ($READINESS_PCT%). Najlepiej stoisz na $TOP_TOPIC ($TOP%), najgorzej na $WORST_TOPIC ($WORST%). Następna sesja: drill $WORST_TOPIC."
+> "Overall: $READINESS_LABEL ($READINESS_PCT%). Strongest on $TOP_TOPIC ($TOP%), weakest on $WORST_TOPIC ($WORST%). Next session: drill $WORST_TOPIC."
 
-Jedna fraza Hartmana na końcu („Pricewacie jak rekrut na pierwszej musztrze, ale Groovy zaczyna się rysować.") — i tylko jedna.
+One Hartman phrase at the end ("Pricing like a day-one recruit, but Groovy's starting to take shape.") — and only one.
 
-### Krok 5 — sugestia akcji
+### Step 5 — action suggestion
 
-Skończ konkretną sugestią:
-- Jeśli jest temat ze statusem `mastered` ale `due ≤ now` → „Czas na `/review`."
-- Jeśli `interview_date` z `learner_profile.json` jest blisko (≤ 7 dni) i readiness < 0.65 → „Mock teraz, niezależnie od mastery."
-- W przeciwnym razie → „Dalej drill na $WORST_TOPIC: `/start`."
+End with a concrete suggestion:
+- If there's a topic with status `mastered` but `due <= now` -> "Time for `/review`."
+- If `interview_date` from `learner_profile.json` is close (<= 7 days) and readiness < 0.65 -> "Mock now, regardless of mastery."
+- Otherwise -> "Keep drilling on $WORST_TOPIC: `/start`."
 
-## Ważne
+## Important
 
-- NIE zaczynaj drillu w tej komendzie. To raport, nie sesja.
-- NIE krzycz tu tyle co w drillu. Tu jesteś instruktorem-analitykiem.
-- Tabela ma być czytelna — wyrównaj kolumny spacjami albo użyj markdown table syntax.
+- Do NOT start a drill in this command. This is a report, not a session.
+- Do NOT scream as much here as in drill. Here you're an instructor-analyst.
+- Table must be readable — align columns with spaces or use markdown table syntax.

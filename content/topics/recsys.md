@@ -2,7 +2,7 @@
 
 > Covers recommendation system fundamentals with a focus on the **serving/engineering path** — not model training from scratch. Context: Allegro's production Two-Tower DLRM system as described in arxiv 2508.03702 ("Suggest, Complement, Inspire: Story of Two Tower Recommendations at Allegro.com"). You will be on the **recommendations system team as a Kotlin Regular Developer**, meaning your job is to build and operate the infrastructure that encodes requests, calls Faiss, ranks results, logs telemetry, and keeps p99 latency under 40ms at ~20k RPS. ML literacy here means speaking the language of data scientists and understanding the system's constraints — not training models.
 
-## Zakres
+## Scope
 
 - Two-stage recommendation architecture: retrieval (candidate generation) vs ranking (re-ranking)
 - Two-Tower DLRM: query tower + item tower, dot product, weight tying, L2 normalization
@@ -20,36 +20,36 @@
 ---
 
 ## Q-REC-001 [bloom: recall]
-**Pytanie:** What is a recommendation system at a high level? Explain the two-stage architecture: retrieval vs ranking.
-**Modelowa odpowiedź:** A recommendation system selects items from a large catalog that are most relevant to a user or context at a given moment. At scale, doing this in a single step over millions of items is too slow, so systems are split into two stages.
+**Question:** What is a recommendation system at a high level? Explain the two-stage architecture: retrieval vs ranking.
+**Model answer:** A recommendation system selects items from a large catalog that are most relevant to a user or context at a given moment. At scale, doing this in a single step over millions of items is too slow, so systems are split into two stages.
 
 **Retrieval (candidate generation):** fast, coarse-grained. Narrows millions of items down to hundreds of candidates. Must be fast — ANN on dense embeddings, BM25 on text, or rules-based filters. Recall is the priority; it's OK to include some irrelevant items as long as relevant ones are not missed.
 
 **Ranking (re-ranking):** slower, fine-grained. Takes the ~100-500 candidates from retrieval and scores each with a heavier model (cross-encoder, gradient boosted trees, feature-rich DNN) that can consider interaction features between query and item. Precision is the priority here.
 
 At Allegro, the Two-Tower model (arxiv 2508.03702) serves the retrieval stage. It encodes query and item into dense vectors, then Faiss ANN finds nearest neighbors efficiently at ~20k RPS, p99 ~40ms. A downstream ranker then re-scores the returned candidates before final presentation.
-**Pułapka rozmowna:** Recruiters often ask "why not just run the full ranker over all items?" The answer is computational: a cross-encoder that jointly encodes a (query, item) pair is O(items) and takes milliseconds per item — at 10M items, that's hours per request. Two-tower pre-computes item embeddings offline, reducing retrieval to a single vector lookup + ANN.
-**Tagi:** architecture, retrieval, ranking, two-stage
+**Interview trap:** Recruiters often ask "why not just run the full ranker over all items?" The answer is computational: a cross-encoder that jointly encodes a (query, item) pair is O(items) and takes milliseconds per item — at 10M items, that's hours per request. Two-tower pre-computes item embeddings offline, reducing retrieval to a single vector lookup + ANN.
+**Tags:** architecture, retrieval, ranking, two-stage
 
 ---
 
 ## Q-REC-002 [bloom: recall]
-**Pytanie:** What is candidate generation and what is re-ranking? What does each layer do and what does it optimize?
-**Modelowa odpowiedź:** **Candidate generation** (retrieval layer): takes the incoming context (user query, viewed item, session) and retrieves a small set of plausible candidates from the full catalog. Optimizes for **recall** — do not miss relevant items. Techniques: ANN on embeddings, inverted indexes, collaborative filtering, popularity rules. The output is typically 100–1000 items.
+**Question:** What is candidate generation and what is re-ranking? What does each layer do and what does it optimize?
+**Model answer:** **Candidate generation** (retrieval layer): takes the incoming context (user query, viewed item, session) and retrieves a small set of plausible candidates from the full catalog. Optimizes for **recall** — do not miss relevant items. Techniques: ANN on embeddings, inverted indexes, collaborative filtering, popularity rules. The output is typically 100–1000 items.
 
 **Re-ranking**: takes those candidates and applies a heavier scoring model that considers richer features — personalization signals, business rules (margin, stock, seller quality), diversity constraints, and contextual factors. Optimizes for **precision** and business KPIs (GMV, CTR, CR). This layer can also apply business logic: filter out-of-stock items, boost promoted listings, apply diversity rules.
 
 The split exists because: (a) the retrieval model must be fast enough to query millions of items in milliseconds, so it uses a simplified scoring function (dot product of L2-normalized vectors); (b) the ranker can be expensive but only sees a small candidate set, so it can use more expressive feature crosses.
 
 At Allegro, after Two-Tower retrieval via Faiss, a downstream ranking layer (not detailed in the public paper) applies before final delivery.
-**Pułapka rozmowna:** "Can't you just use one model?" Yes, for small catalogs. At Allegro's catalog scale (millions of active listings with daily churn), the single-model approach breaks on latency and compute budget. The answer is always tied to scale.
-**Tagi:** candidate-generation, reranking, architecture, scale
+**Interview trap:** "Can't you just use one model?" Yes, for small catalogs. At Allegro's catalog scale (millions of active listings with daily churn), the single-model approach breaks on latency and compute budget. The answer is always tied to scale.
+**Tags:** candidate-generation, reranking, architecture, scale
 
 ---
 
 ## Q-REC-003 [bloom: recall]
-**Pytanie:** What is an embedding? Define it, describe its key properties, and explain why it's useful for recommendations.
-**Modelowa odpowiedź:** An **embedding** is a dense, fixed-dimensional vector representation of a discrete object (item, user, query). Key properties:
+**Question:** What is an embedding? Define it, describe its key properties, and explain why it's useful for recommendations.
+**Model answer:** An **embedding** is a dense, fixed-dimensional vector representation of a discrete object (item, user, query). Key properties:
 
 1. **Fixed dimensionality** — regardless of input complexity, output is a vector of d floats (e.g., d=128 or d=256).
 2. **Semantic proximity** — items with similar meaning or behavior are close in embedding space (typically measured by cosine similarity or dot product after L2 normalization).
@@ -58,28 +58,28 @@ At Allegro, after Two-Tower retrieval via Faiss, a downstream ranking layer (not
 In recommendations: instead of exact ID matching, you can retrieve items that are semantically similar to a query embedding, even if no exact match exists. This enables **generalization** — an embedding for a new product (cold start) can be computed from its features without needing historical interactions.
 
 At Allegro (arxiv 2508.03702), product embeddings are computed from features (title, price, category, seller) → embedding tables → concat → MLP → L2-normalize → dense vector. All three Two-Tower variants (Similarity, Complementary, Inspirational) share this content-based encoding approach.
-**Pułapka rozmowna:** "What's the difference between an embedding and a feature vector?" They're both vectors, but embeddings are *learned* dense representations optimized for a task. A hand-crafted feature vector (price, category_id, brand_id as raw numbers) is not an embedding. The learning is what produces the semantic proximity property.
-**Tagi:** embedding, representation-learning, dense-vector
+**Interview trap:** "What's the difference between an embedding and a feature vector?" They're both vectors, but embeddings are *learned* dense representations optimized for a task. A hand-crafted feature vector (price, category_id, brand_id as raw numbers) is not an embedding. The learning is what produces the semantic proximity property.
+**Tags:** embedding, representation-learning, dense-vector
 
 ---
 
 ## Q-REC-004 [bloom: recall]
-**Pytanie:** What is Approximate Nearest Neighbor (ANN) search and why use it instead of exact nearest neighbor search?
-**Modelowa odpowiedź:** **Exact nearest neighbor (exact NN)** finds the mathematically closest vectors to a query by comparing against every vector in the index. For d=128 and N=10M items: 10M dot products per query. At 20k RPS that's 200 billion operations per second — infeasible on CPU.
+**Question:** What is Approximate Nearest Neighbor (ANN) search and why use it instead of exact nearest neighbor search?
+**Model answer:** **Exact nearest neighbor (exact NN)** finds the mathematically closest vectors to a query by comparing against every vector in the index. For d=128 and N=10M items: 10M dot products per query. At 20k RPS that's 200 billion operations per second — infeasible on CPU.
 
 **Approximate nearest neighbor (ANN)** trades a small, controlled loss in recall for orders-of-magnitude speedup. It uses data structures (graphs, inverted files, tree partitions) to prune the search space so only a fraction of vectors are compared. The result is "probably" the nearest neighbors — configurable precision/recall trade-off.
 
 Why this matters for Allegro's serving path: they serve ~20k RPS at p99 ~40ms on CPU (NVIDIA T4 used only for training, not serving). Exact search over their full item catalog at that throughput would require GPU clusters just for dot products. ANN with Faiss on CPU achieves the target SLA.
 
 The recall loss from ANN is typically small (1-5%) and is acceptable because: (a) downstream ranker corrects ordering of candidates, (b) users don't notice if #47 vs #52 is slightly off.
-**Pułapka rozmowna:** "Why not just use exact search with enough CPUs?" You can, for small catalogs. But ANN is not just about speed — it's about serving latency *per request*, not throughput. You cannot parallelize a single request across 1000 CPUs to reduce p99. ANN reduces the work per single query.
-**Tagi:** ann, faiss, nearest-neighbor, latency
+**Interview trap:** "Why not just use exact search with enough CPUs?" You can, for small catalogs. But ANN is not just about speed — it's about serving latency *per request*, not throughput. You cannot parallelize a single request across 1000 CPUs to reduce p99. ANN reduces the work per single query.
+**Tags:** ann, faiss, nearest-neighbor, latency
 
 ---
 
 ## Q-REC-005 [bloom: recall]
-**Pytanie:** What is Faiss? Compare IVF, HNSW, and Flat index types — when would you use each?
-**Modelowa odpowiedź:** **Faiss** (Facebook AI Similarity Search) is an open-source library (C++/Python) for efficient similarity search over dense vectors. Supports billion-scale indexes, CPU and GPU, multiple index types.
+**Question:** What is Faiss? Compare IVF, HNSW, and Flat index types — when would you use each?
+**Model answer:** **Faiss** (Facebook AI Similarity Search) is an open-source library (C++/Python) for efficient similarity search over dense vectors. Supports billion-scale indexes, CPU and GPU, multiple index types.
 
 **Flat (IndexFlatL2 / IndexFlatIP):** brute-force exact search. No approximation. Slowest at query time, fastest to build. Use when: catalog is small (<1M items), or you need ground truth for evaluation, or index rebuild is trivial. Faiss Flat is still faster than naive Python loops due to BLAS-optimized batched matrix multiply.
 
@@ -88,14 +88,14 @@ The recall loss from ANN is typically small (1-5%) and is acceptable because: (a
 **HNSW (Hierarchical Navigable Small World — IndexHNSW):** graph-based. Builds a multi-layer proximity graph; query traverses from top (coarse) to bottom (fine) layer. Very fast queries, excellent recall, but higher RAM usage and slower build. Use when: query latency is critical, RAM budget is available, online (real-time) insert is needed (HNSW supports add without full rebuild; IVF does not).
 
 Allegro's paper mentions Faiss ANN with daily offline rebuild + blue/green swap — consistent with IVF or HNSW on a static index.
-**Pułapka rozmowna:** "HNSW is always better." Wrong — HNSW uses ~4-6x more RAM than IVF+PQ for the same corpus. At 10M items × 128 dims × float32, Flat = 5GB, HNSW = 20-30GB. For Allegro's catalog scale, the RAM budget and rebuild cost matter as much as query latency.
-**Tagi:** faiss, ivf, hnsw, ann, index
+**Interview trap:** "HNSW is always better." Wrong — HNSW uses ~4-6x more RAM than IVF+PQ for the same corpus. At 10M items × 128 dims × float32, Flat = 5GB, HNSW = 20-30GB. For Allegro's catalog scale, the RAM budget and rebuild cost matter as much as query latency.
+**Tags:** faiss, ivf, hnsw, ann, index
 
 ---
 
 ## Q-REC-006 [bloom: recall]
-**Pytanie:** Define the Two-Tower architecture. What are the query tower and item tower? How is the final score computed?
-**Modelowa odpowiedź:** A **Two-Tower model** has two independent neural networks (towers) that independently encode two objects into the same embedding space:
+**Question:** Define the Two-Tower architecture. What are the query tower and item tower? How is the final score computed?
+**Model answer:** A **Two-Tower model** has two independent neural networks (towers) that independently encode two objects into the same embedding space:
 
 - **Query tower** (also: user tower): encodes the request context — the user, the viewed item, the search query, or any contextual signal.
 - **Item tower** (also: candidate tower): encodes each candidate item from the catalog.
@@ -105,14 +105,14 @@ Both towers output a fixed-d vector, L2-normalized to the unit sphere. **Similar
 **Why two towers?** Item embeddings can be pre-computed offline for the entire catalog and stored in the ANN index. At serving time, only the query tower runs live (single forward pass for one query). The expensive O(N × d) matrix multiply is replaced by one ANN lookup. This is the architectural choice that makes the system scalable.
 
 At Allegro (arxiv 2508.03702), the towers share the same **Product Encoder** architecture (weight tying). For Similarity-TT: query tower = product encoder applied to the viewed item. For Complementary-TT: query tower has a modified head that maps the viewed item's category to a cross-category embedding space. For Inspirational-TT: a hierarchical ANN index is layered on top.
-**Pułapka rozmowna:** "The user tower encodes the user profile, right?" Not necessarily. At Allegro, the query tower encodes a *product* (the item the user is currently viewing) — making this a item-to-item similarity model, not a user-to-item personalization model. The distinction matters for cold-start and for what features are available at serving time.
-**Tagi:** two-tower, dlrm, architecture, dot-product
+**Interview trap:** "The user tower encodes the user profile, right?" Not necessarily. At Allegro, the query tower encodes a *product* (the item the user is currently viewing) — making this a item-to-item similarity model, not a user-to-item personalization model. The distinction matters for cold-start and for what features are available at serving time.
+**Tags:** two-tower, dlrm, architecture, dot-product
 
 ---
 
 ## Q-REC-007 [bloom: recall]
-**Pytanie:** Define content-based filtering vs collaborative filtering. When would you use each?
-**Modelowa odpowiedź:** **Collaborative filtering (CF):** recommendations based on behavioral patterns of many users — "users who interacted with item A also interacted with item B." Requires historical interaction data (clicks, purchases, views). Works well when: you have dense interaction data, you can tolerate cold-start issues, you want to capture latent preferences not visible in item features.
+**Question:** Define content-based filtering vs collaborative filtering. When would you use each?
+**Model answer:** **Collaborative filtering (CF):** recommendations based on behavioral patterns of many users — "users who interacted with item A also interacted with item B." Requires historical interaction data (clicks, purchases, views). Works well when: you have dense interaction data, you can tolerate cold-start issues, you want to capture latent preferences not visible in item features.
 
 Problems: **cold-start** — new items with no interactions cannot be recommended; new users with no history get no personalized recs. Also vulnerable to popularity bias (popular items dominate).
 
@@ -121,14 +121,14 @@ Problems: **cold-start** — new items with no interactions cannot be recommende
 Problems: limited serendipity (filter bubble — you only see items similar to what you've already seen); feature engineering effort; less able to capture non-obvious associations.
 
 **At Allegro (arxiv 2508.03702):** the Two-Tower model is **content-based**: product embeddings are computed from features (title, price, category, seller), not from ID-lookup tables. This is a deliberate choice to handle catalog churn (marketplace with millions of dynamic listings) and cold-start. Training signal uses co-view/co-purchase pairs (behavioral data), but serving inference depends only on product features — no interaction history needed per item.
-**Pułapka rozmowna:** "Content-based is worse than CF because it misses behavioral signals." Allegro's paper shows the opposite trade-off is sometimes better: their content-based approach handles cold-start *and* achieves competitive business metrics. "Better" depends on catalog churn rate and cold-start severity.
-**Tagi:** content-based, collaborative-filtering, cold-start, catalog
+**Interview trap:** "Content-based is worse than CF because it misses behavioral signals." Allegro's paper shows the opposite trade-off is sometimes better: their content-based approach handles cold-start *and* achieves competitive business metrics. "Better" depends on catalog churn rate and cold-start severity.
+**Tags:** content-based, collaborative-filtering, cold-start, catalog
 
 ---
 
 ## Q-REC-008 [bloom: recall]
-**Pytanie:** What is the cold-start problem in recommendations? What are the standard mitigations?
-**Modelowa odpowiedź:** **Cold-start** refers to the inability to generate good recommendations for items or users with no (or very little) historical interaction data.
+**Question:** What is the cold-start problem in recommendations? What are the standard mitigations?
+**Model answer:** **Cold-start** refers to the inability to generate good recommendations for items or users with no (or very little) historical interaction data.
 
 **Item cold-start:** a new product has zero views, zero purchases — no behavioral signal. CF systems simply cannot recommend it, or can only show it via popularity rules.
 
@@ -147,14 +147,14 @@ Standard mitigations:
 5. **Hybrid models:** combine CF and content signals so that new items get content-based scores and established items get CF boost.
 
 At Allegro (arxiv 2508.03702): content-based encoding **fully solves** item cold-start. A new listing is encoded from its features; after the next daily index refresh, it's available for ANN retrieval. The trade-off is that the encoding quality depends on feature richness and the model's ability to generalize from features.
-**Pułapka rozmowna:** "With daily index refresh, there's still a 24-hour cold-start window even with content-based encoding." True — and important. An item listed at 9am won't appear in recommendations until the next midnight refresh. For flash sales or new listings that need immediate visibility, a real-time fallback (text search, explicit boosting) is needed alongside the ANN index.
-**Tagi:** cold-start, content-based, fallback, catalog
+**Interview trap:** "With daily index refresh, there's still a 24-hour cold-start window even with content-based encoding." True — and important. An item listed at 9am won't appear in recommendations until the next midnight refresh. For flash sales or new listings that need immediate visibility, a real-time fallback (text search, explicit boosting) is needed alongside the ANN index.
+**Tags:** cold-start, content-based, fallback, catalog
 
 ---
 
 ## Q-REC-009 [bloom: understand]
-**Pytanie:** Why would you tie weights between the query tower and item tower (shared encoder)? When does it make sense — and when doesn't it?
-**Modelowa odpowiedź:** **Weight tying** means the query tower and item tower share the same neural network parameters — a single "Product Encoder" that maps any product's features to an embedding. The query embedding and item embedding are both produced by the same function.
+**Question:** Why would you tie weights between the query tower and item tower (shared encoder)? When does it make sense — and when doesn't it?
+**Model answer:** **Weight tying** means the query tower and item tower share the same neural network parameters — a single "Product Encoder" that maps any product's features to an embedding. The query embedding and item embedding are both produced by the same function.
 
 **When it makes sense:**
 - The query and item are **the same type of object** — at Allegro (Similarity-TT, Complementary-TT), both query and candidate are products. Encoding a "query product" and a "candidate product" should use the same transformation since they live in the same semantic space.
@@ -168,14 +168,14 @@ At Allegro (arxiv 2508.03702): content-based encoding **fully solves** item cold
 - When interaction features (query × item crosses) are needed — which requires a cross-encoder, not two towers.
 
 The key insight: weight tying is elegant when query and item are the same entity type. It breaks down when the encoding context is fundamentally different.
-**Pułapka rozmowna:** "Weight tying means the query and item towers are identical, so why bother with two towers at all?" Because they still receive different *inputs* at different *times* — item embeddings are precomputed offline; query embeddings are computed live at serving time. The "two towers" distinction is about the serving-time computation graph, not necessarily about having different weights.
-**Tagi:** weight-tying, two-tower, architecture, shared-encoder
+**Interview trap:** "Weight tying means the query and item towers are identical, so why bother with two towers at all?" Because they still receive different *inputs* at different *times* — item embeddings are precomputed offline; query embeddings are computed live at serving time. The "two towers" distinction is about the serving-time computation graph, not necessarily about having different weights.
+**Tags:** weight-tying, two-tower, architecture, shared-encoder
 
 ---
 
 ## Q-REC-010 [bloom: understand]
-**Pytanie:** What is negative sampling in Two-Tower training? What are "in-batch negatives" and "mixed negative sampling"? Why are they needed?
-**Modelowa odpowiedź:** Two-Tower models are trained to push the dot product of (query, positive item) higher than (query, negative item). **Negative examples** — items that are irrelevant to the query — are necessary to prevent the model from collapsing (mapping everything to the same embedding).
+**Question:** What is negative sampling in Two-Tower training? What are "in-batch negatives" and "mixed negative sampling"? Why are they needed?
+**Model answer:** Two-Tower models are trained to push the dot product of (query, positive item) higher than (query, negative item). **Negative examples** — items that are irrelevant to the query — are necessary to prevent the model from collapsing (mapping everything to the same embedding).
 
 **Why not random negatives?** If negatives are random items from the catalog, the model learns to distinguish the positive from random noise, which is too easy. It doesn't learn to distinguish between the positive and hard-to-distinguish items (items that are similar but not the right one).
 
@@ -186,14 +186,14 @@ The key insight: weight tying is elegant when query and item are the same entity
 **Sampled softmax:** the training objective. Instead of computing a softmax over all N items (expensive), compute it over the positive + a sampled subset of negatives. Equivalent to noise-contrastive estimation (NCE). Allegro uses this with NVIDIA T4 GPU during training.
 
 You as a serving engineer will not implement this — but you need to know it exists because: (a) it affects what the embeddings optimize for, and (b) when debugging quality issues, a data scientist will talk about "hard negatives" and "false negatives."
-**Pułapka rozmowna:** "Can't we use all catalog items as negatives?" Technically yes (full softmax), but at Allegro's catalog scale (millions of items), the full softmax is computationally prohibitive per training step. Sampled softmax achieves nearly the same result with a small sample.
-**Tagi:** negative-sampling, in-batch-negatives, training, softmax
+**Interview trap:** "Can't we use all catalog items as negatives?" Technically yes (full softmax), but at Allegro's catalog scale (millions of items), the full softmax is computationally prohibitive per training step. Sampled softmax achieves nearly the same result with a small sample.
+**Tags:** negative-sampling, in-batch-negatives, training, softmax
 
 ---
 
 ## Q-REC-011 [bloom: understand]
-**Pytanie:** Define Recall@K, Precision@K, and NDCG. When would you use each as an offline eval metric for a retrieval model?
-**Modelowa odpowiedź:** These are ranking metrics computed on a held-out test set where you know the "ground truth" relevant items (e.g., items the user actually purchased).
+**Question:** Define Recall@K, Precision@K, and NDCG. When would you use each as an offline eval metric for a retrieval model?
+**Model answer:** These are ranking metrics computed on a held-out test set where you know the "ground truth" relevant items (e.g., items the user actually purchased).
 
 **Recall@K:** of all relevant items for a query, what fraction did the model retrieve in its top-K? `Recall@K = |relevant ∩ top_K| / |relevant|`. Ranges [0, 1]. Use when: the retrieval stage must not miss relevant items. For Allegro's Two-Tower retrieval, Recall@K is the primary offline metric — if the relevant item isn't in the top-500 candidates, the downstream ranker has no chance to surface it.
 
@@ -205,14 +205,14 @@ You as a serving engineer will not implement this — but you need to know it ex
 - Retrieval / candidate generation → Recall@K (did we find it at all?)
 - Re-ranker quality → NDCG (did we rank it in the right position?)
 - Business presentations → A/B on CTR/GMV (offline metrics are proxies; always validate online)
-**Pułapka rozmowna:** "NDCG is always better because it captures ordering." For the retrieval stage, ordering within top-500 candidates doesn't matter — the downstream ranker will reorder them. Optimizing NDCG for retrieval is over-engineering. Recall@K is the right metric because retrieval is a binary gate: item is in or out of the candidate set.
-**Tagi:** recall-at-k, precision-at-k, ndcg, offline-eval, metrics
+**Interview trap:** "NDCG is always better because it captures ordering." For the retrieval stage, ordering within top-500 candidates doesn't matter — the downstream ranker will reorder them. Optimizing NDCG for retrieval is over-engineering. Recall@K is the right metric because retrieval is a binary gate: item is in or out of the candidate set.
+**Tags:** recall-at-k, precision-at-k, ndcg, offline-eval, metrics
 
 ---
 
 ## Q-REC-012 [bloom: understand]
-**Pytanie:** Allegro runs A/B tests measuring CTR, GMV/visit, CTA, CR, bounce rate, and exit rate — not just CTR. Why? What's the risk of optimizing only for CTR?
-**Modelowa odpowiedź:** **CTR (Click-Through Rate)** measures how often users click a recommendation. It's easy to inflate: surface clickbait items, irrelevant-but-intriguing items, low-priced items with misleading titles. A model that maximizes CTR alone will recommend items users click but don't buy.
+**Question:** Allegro runs A/B tests measuring CTR, GMV/visit, CTA, CR, bounce rate, and exit rate — not just CTR. Why? What's the risk of optimizing only for CTR?
+**Model answer:** **CTR (Click-Through Rate)** measures how often users click a recommendation. It's easy to inflate: surface clickbait items, irrelevant-but-intriguing items, low-priced items with misleading titles. A model that maximizes CTR alone will recommend items users click but don't buy.
 
 **Business metrics that matter beyond CTR:**
 
@@ -224,14 +224,14 @@ You as a serving engineer will not implement this — but you need to know it ex
 **Why measure all of them?** Metrics are often in tension. A re-ranker that boosts CTR by surfacing cheap clickbait may decrease CR and GMV. A recommendation that increases "add to cart" but not purchase may inflate CTA without GMV lift. Measuring all signals allows detecting **metric gaming** and understanding the full effect.
 
 Allegro (arxiv 2508.03702): 2-year continuous A/B at α=0.01, split by desktop vs app, measuring all these metrics. The high bar (α=0.01, not 0.05) reflects the cost of false positives on a system at this scale.
-**Pułapka rozmowna:** "CTR is the most important metric." At an e-commerce company, GMV is the ground truth. CTR is a leading indicator, not the goal. If a recruiter at Allegro hears you say "we optimized for CTR," the follow-up will be "and what happened to GMV?" — be ready.
-**Tagi:** a-b-testing, metrics, ctر, gmv, business-metrics, online-eval
+**Interview trap:** "CTR is the most important metric." At an e-commerce company, GMV is the ground truth. CTR is a leading indicator, not the goal. If a recruiter at Allegro hears you say "we optimized for CTR," the follow-up will be "and what happened to GMV?" — be ready.
+**Tags:** a-b-testing, metrics, ctر, gmv, business-metrics, online-eval
 
 ---
 
 ## Q-REC-013 [bloom: apply]
-**Pytanie:** Design the full request path for serving recommendations at ~20k RPS with p99 ~40ms. Be concrete: feature fetch, encode, ANN query, rerank, telemetry. Use Kotlin coroutines + WebClient.
-**Modelowa odpowiedź:** At 20k RPS, p99 40ms budget is tight. Every step must be parallelized where possible and bounded by timeouts.
+**Question:** Design the full request path for serving recommendations at ~20k RPS with p99 ~40ms. Be concrete: feature fetch, encode, ANN query, rerank, telemetry. Use Kotlin coroutines + WebClient.
+**Model answer:** At 20k RPS, p99 40ms budget is tight. Every step must be parallelized where possible and bounded by timeouts.
 
 **Budget allocation (approximate):**
 - Feature fetch: 5ms (Redis/in-process cache)
@@ -291,14 +291,14 @@ suspend fun getRecommendations(request: RecsRequest): RecsResponse {
 - `productEncoder.encode()` must be non-blocking (ONNX Runtime has a sync call but runs on CPU thread pool, wrap with `withContext(Dispatchers.Default)`).
 - Telemetry is launched in a structured child coroutine (not `GlobalScope`) so it survives request completion but doesn't block it.
 - Fallback logic (next question) is a separate concern — see Q-REC-014.
-**Pułapka rozmowna:** "Just use `GlobalScope.async` for parallel steps." GlobalScope coroutines are not cancelled if the parent coroutine fails or the request times out. They leak. Always use a structured scope (`coroutineScope { }`, `CoroutineScope(job + dispatcher)`) or a lifecycle-bound scope.
-**Tagi:** serving, coroutines, faiss, latency, kotlin, webflux
+**Interview trap:** "Just use `GlobalScope.async` for parallel steps." GlobalScope coroutines are not cancelled if the parent coroutine fails or the request times out. They leak. Always use a structured scope (`coroutineScope { }`, `CoroutineScope(job + dispatcher)`) or a lifecycle-bound scope.
+**Tags:** serving, coroutines, faiss, latency, kotlin, webflux
 
 ---
 
 ## Q-REC-014 [bloom: apply]
-**Pytanie:** Implement a fallback strategy for when the Faiss ANN index is unavailable. Cover: popular items fallback, cached fallback, cohort default. Write in Kotlin.
-**Modelowa odpowiedź:** A serving system must degrade gracefully. Three-tier fallback, each tier activating when the tier above fails:
+**Question:** Implement a fallback strategy for when the Faiss ANN index is unavailable. Cover: popular items fallback, cached fallback, cohort default. Write in Kotlin.
+**Model answer:** A serving system must degrade gracefully. Three-tier fallback, each tier activating when the tier above fails:
 
 ```kotlin
 suspend fun getRecommendationsWithFallback(request: RecsRequest): RecsResponse {
@@ -342,14 +342,14 @@ private suspend fun getFallback(request: RecsRequest): RecsResponse {
 - Each fallback tier emits a metric tag — crucial for on-call visibility. If `recs.fallback.popular` spikes, the Faiss index is down.
 - The fallback must **not** block indefinitely. `recommendationCache.get()` and `popularItemsStore.get()` must also have timeouts.
 - Telemetry must record which fallback tier was used — A/B analysis that naively attributes conversions will be contaminated if some users received fallback recommendations.
-**Pułapka rozmowna:** "Return an empty list if Faiss is down — it's safer than showing wrong items." An empty response breaks the UI and gives users zero value. A popular-items fallback is always better than an empty list. "Safer" in serving means "still useful," not "return nothing."
-**Tagi:** fallback, resilience, faiss, kotlin, coroutines, cache
+**Interview trap:** "Return an empty list if Faiss is down — it's safer than showing wrong items." An empty response breaks the UI and gives users zero value. A popular-items fallback is always better than an empty list. "Safer" in serving means "still useful," not "return nothing."
+**Tags:** fallback, resilience, faiss, kotlin, coroutines, cache
 
 ---
 
 ## Q-REC-015 [bloom: apply]
-**Pytanie:** Design A/B test exposure logging for the recommendations system. How do you log impressions to Kafka so offline analysis can correctly attribute variant outcomes? What pitfalls must you avoid?
-**Modelowa odpowiedź:** Correct A/B logging is the foundation of trustworthy experiments. A wrong impression log corrupts every metric computation.
+**Question:** Design A/B test exposure logging for the recommendations system. How do you log impressions to Kafka so offline analysis can correctly attribute variant outcomes? What pitfalls must you avoid?
+**Model answer:** Correct A/B logging is the foundation of trustworthy experiments. A wrong impression log corrupts every metric computation.
 
 **Impression event schema (Avro/JSON, published to Kafka topic `recs.impressions`):**
 
@@ -383,13 +383,13 @@ data class RecsImpressionEvent(
 4. **User re-assignment between sessions:** if variant assignment is session-based instead of user-based, the same user may see both variants — contaminating the control group. Fix: persist variant assignment to user profile or use a deterministic hash(userId, experimentId) → variant.
 
 5. **Missing `modelVersion` / `indexTimestamp`:** when a model is updated mid-experiment, you cannot tell whether a CTR change is due to the model update or the A/B variant. Fix: always log what produced the result.
-**Pułapka rozmowna:** "We can reconstruct the exposure from click logs." You cannot. If a user was shown recommendations and didn't click anything, there is no click log entry. You lose the denominator for CTR. Impression logging must be unconditional, at serving time.
-**Tagi:** a-b-testing, kafka, impression-logging, srm, telemetry, experiment
+**Interview trap:** "We can reconstruct the exposure from click logs." You cannot. If a user was shown recommendations and didn't click anything, there is no click log entry. You lose the denominator for CTR. Impression logging must be unconditional, at serving time.
+**Tags:** a-b-testing, kafka, impression-logging, srm, telemetry, experiment
 
 ---
 
 ## Q-REC-016 [bloom: apply]
-**Pytanie:** Review this Kotlin code for serving recommendations. Find and fix all bugs.
+**Question:** Review this Kotlin code for serving recommendations. Find and fix all bugs.
 
 ```kotlin
 suspend fun fetchAndRank(productId: String): List<Item> {
@@ -402,7 +402,7 @@ suspend fun fetchAndRank(productId: String): List<Item> {
     return reranker.rank(candidates.await())
 }
 ```
-**Modelowa odpowiedź:** This code has four distinct bugs:
+**Model answer:** This code has four distinct bugs:
 
 **Bug 1: `GlobalScope.async` — unstructured concurrency.**
 `GlobalScope` creates coroutines that are not children of the calling coroutine. If the parent coroutine is cancelled (e.g., request timeout), these coroutines keep running, leaking resources (CPU, threads, connections).
@@ -455,14 +455,14 @@ suspend fun fetchAndRank(productId: String): List<Item> {
     }
 }
 ```
-**Pułapka rozmowna:** "GlobalScope is fine for fire-and-forget." Only for genuinely fire-and-forget work (telemetry) where you explicitly accept the leak risk. For load-bearing retrieval paths, it's a reliability bug. The correct fire-and-forget pattern is `scope.launch` on a lifecycle-managed scope, not `GlobalScope`.
-**Tagi:** code-review, coroutines, globalscope, timeout, fallback, kotlin
+**Interview trap:** "GlobalScope is fine for fire-and-forget." Only for genuinely fire-and-forget work (telemetry) where you explicitly accept the leak risk. For load-bearing retrieval paths, it's a reliability bug. The correct fire-and-forget pattern is `scope.launch` on a lifecycle-managed scope, not `GlobalScope`.
+**Tags:** code-review, coroutines, globalscope, timeout, fallback, kotlin
 
 ---
 
 ## Q-REC-017 [bloom: analyze]
-**Pytanie:** Analyze the trade-offs between Two-Tower retrieval and a cross-encoder ranker. Why use Two-Tower for retrieval and a heavier ranker on top?
-**Modelowa odpowiedź:** The core constraint is compute vs quality.
+**Question:** Analyze the trade-offs between Two-Tower retrieval and a cross-encoder ranker. Why use Two-Tower for retrieval and a heavier ranker on top?
+**Model answer:** The core constraint is compute vs quality.
 
 **Two-Tower retrieval:**
 - Query and item encode **independently** — item embeddings pre-computed offline.
@@ -489,14 +489,14 @@ suspend fun fetchAndRank(productId: String): List<Item> {
 For Allegro at ~20k RPS, p99 40ms: running a cross-encoder over 10M items is physically impossible. Two-Tower narrows to 500, then a ranker can afford to be expensive.
 
 **When to question this design:** if catalog size is <100k items, exact search over all items with a lightweight ranker may be simpler and better. Two-Tower complexity pays off only at scale.
-**Pułapka rozmowna:** "We'll just make the Two-Tower model bigger to get ranker-quality results." Bigger Two-Tower still only computes a dot product as the final interaction. No amount of MLP depth in the towers compensates for the absence of cross-encoder attention over (query, item) pairs. The architectural constraint is the dot product itself, not the tower capacity.
-**Tagi:** two-tower, cross-encoder, retrieval, ranking, tradeoffs, architecture
+**Interview trap:** "We'll just make the Two-Tower model bigger to get ranker-quality results." Bigger Two-Tower still only computes a dot product as the final interaction. No amount of MLP depth in the towers compensates for the absence of cross-encoder attention over (query, item) pairs. The architectural constraint is the dot product itself, not the tower capacity.
+**Tags:** two-tower, cross-encoder, retrieval, ranking, tradeoffs, architecture
 
 ---
 
 ## Q-REC-018 [bloom: analyze]
-**Pytanie:** When does Faiss in-process (embedded in the JVM serving process) beat Faiss-as-a-service (separate model server with RPC)? Analyze trade-offs.
-**Modelowa odpowiedź:** This is an infrastructure architecture decision with real latency, operational, and reliability consequences.
+**Question:** When does Faiss in-process (embedded in the JVM serving process) beat Faiss-as-a-service (separate model server with RPC)? Analyze trade-offs.
+**Model answer:** This is an infrastructure architecture decision with real latency, operational, and reliability consequences.
 
 **Faiss in-process (embedded, JNI):**
 - Zero network RTT for the ANN call — eliminates 5-20ms of network latency.
@@ -525,14 +525,14 @@ For Allegro at ~20k RPS, p99 40ms: running a cross-encoder over 10M items is phy
 | Index hot-swap | Complex (in-process coordination) | Simple (independent deploy) |
 | Operational isolation | Coupled to serving | Decoupled |
 | SPOF | No (each pod self-contained) | Yes (requires HA) |
-**Pułapka rozmowna:** "Just use Faiss-as-a-service — microservices are best practice." Microservices add latency. When your SLA is 40ms p99 and each network hop costs 10-20ms, "best practice" architectural patterns become constraints you need to explicitly justify or violate.
-**Tagi:** faiss, in-process, microservices, latency, infrastructure, tradeoffs
+**Interview trap:** "Just use Faiss-as-a-service — microservices are best practice." Microservices add latency. When your SLA is 40ms p99 and each network hop costs 10-20ms, "best practice" architectural patterns become constraints you need to explicitly justify or violate.
+**Tags:** faiss, in-process, microservices, latency, infrastructure, tradeoffs
 
 ---
 
 ## Q-REC-019 [bloom: analyze]
-**Pytanie:** A team member proposes switching from daily index refresh to real-time embedding index updates (stream every new/updated product into the Faiss index within 60 seconds). Critique this proposal — analyze cost and benefit.
-**Modelowa odpowiedź:** This is a classic "real-time everything" proposal that sounds better than it is. Let's break it down.
+**Question:** A team member proposes switching from daily index refresh to real-time embedding index updates (stream every new/updated product into the Faiss index within 60 seconds). Critique this proposal — analyze cost and benefit.
+**Model answer:** This is a classic "real-time everything" proposal that sounds better than it is. Let's break it down.
 
 **Claimed benefit:** new listings appear in recommendations within 60 seconds instead of up to 24 hours. Critical for flash deals, limited-edition drops, daily new listings.
 
@@ -555,14 +555,14 @@ For Allegro at ~20k RPS, p99 40ms: running a cross-encoder over 10M items is phy
 **Verdict:** the proposal makes sense **only if** the business has a demonstrated need (e.g., flash sales are a primary driver of GMV and 24h cold-start is measurably hurting them) AND the team is willing to migrate to a streaming-capable vector DB. For typical catalog updates (regular product listings), daily refresh is a better trade-off. The 24h latency is a known, acceptable constraint given the simplicity it buys.
 
 Counter-proposal: hybrid — keep daily batch rebuild for the main index, add a small "hot" index (BM25 text search or simple popularity index) for items listed in the last 24 hours. Much simpler, handles the flash-sale use case.
-**Pułapka rozmowna:** "Real-time is always better than batch." In ML systems, "real-time" means a whole new class of operational problems (consistency, version drift, streaming infrastructure). The right answer is "it depends on the business need and operational cost." Batch is not legacy; it's simple and correct for many use cases.
-**Tagi:** real-time, index-refresh, streaming, faiss, mlops, tradeoffs
+**Interview trap:** "Real-time is always better than batch." In ML systems, "real-time" means a whole new class of operational problems (consistency, version drift, streaming infrastructure). The right answer is "it depends on the business need and operational cost." Batch is not legacy; it's simple and correct for many use cases.
+**Tags:** real-time, index-refresh, streaming, faiss, mlops, tradeoffs
 
 ---
 
 ## Q-REC-020 [bloom: analyze]
-**Pytanie:** How would you measure if the Two-Tower recommendation model is degrading in production without retraining? Cover: concept drift, embedding drift, popularity bias. What signals would you monitor?
-**Modelowa odpowiedź:** Model degradation in production is insidious — the model doesn't throw errors, it silently becomes less relevant. You need a multi-layer monitoring strategy.
+**Question:** How would you measure if the Two-Tower recommendation model is degrading in production without retraining? Cover: concept drift, embedding drift, popularity bias. What signals would you monitor?
+**Model answer:** Model degradation in production is insidious — the model doesn't throw errors, it silently becomes less relevant. You need a multi-layer monitoring strategy.
 
 **Layer 1: Online business metrics (primary signal)**
 The real canary: if CTR, CR, or GMV/visit trend down over weeks despite stable traffic mix, the model is degrading. Set up automated alerts on 7-day rolling averages with seasonal baselines (compare week-over-week, not absolute). Allegro's 2-year A/B (arxiv 2508.03702) is an example of long-horizon tracking.
@@ -603,5 +603,5 @@ data class RecsMetricsEvent(
 )
 ```
 Aggregate these in Grafana/BigQuery with weekly baselines. Alert on: top candidate score trending down >10% from 30-day baseline; diversity score dropping >15%; fallback rate rising.
-**Pułapka rozmowna:** "We don't need drift monitoring — we'll retrain daily." Daily retraining doesn't eliminate drift; it reduces it. If the training pipeline has a bug (silent feature schema change, data pipeline outage causing stale training data), you can retrain daily and still degrade. Monitoring must be independent of the training pipeline.
-**Tagi:** model-monitoring, drift, popularity-bias, embedding-drift, recall-at-k, mlops, observability
+**Interview trap:** "We don't need drift monitoring — we'll retrain daily." Daily retraining doesn't eliminate drift; it reduces it. If the training pipeline has a bug (silent feature schema change, data pipeline outage causing stale training data), you can retrain daily and still degrade. Monitoring must be independent of the training pipeline.
+**Tags:** model-monitoring, drift, popularity-bias, embedding-drift, recall-at-k, mlops, observability
