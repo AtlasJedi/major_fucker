@@ -65,14 +65,15 @@ def render_markdown(md):
     while i < n:
         line = lines[i]
 
-        # fenced code block
-        m = re.match(r"^```(\w*)\s*$", line)
+        # fenced code block (tolerate leading indentation, e.g. inside list items)
+        m = re.match(r"^(\s*)```+(\w*)\s*$", line)
         if m:
-            lang = m.group(1)
+            indent, lang = m.group(1), m.group(2)
             i += 1
             buf = []
-            while i < n and not re.match(r"^```\s*$", lines[i]):
-                buf.append(lines[i])
+            while i < n and not re.match(r"^\s*```+\s*$", lines[i]):
+                # dedent by the fence's own indentation
+                buf.append(lines[i][len(indent):] if lines[i].startswith(indent) else lines[i].lstrip())
                 i += 1
             i += 1  # skip closing fence
             code = html.escape("\n".join(buf), quote=False)
@@ -119,7 +120,7 @@ def render_markdown(md):
         # paragraph (gather until blank / block start)
         buf = [line]
         i += 1
-        while i < n and lines[i].strip() and not re.match(r"^(```|\s*[-*]\s+|\s*\d+\.\s+)", lines[i]) \
+        while i < n and lines[i].strip() and not re.match(r"^(\s*```|\s*[-*]\s+|\s*\d+\.\s+)", lines[i]) \
                 and not ("|" in lines[i] and i + 1 < n and re.match(r"^\s*\|?[\s:|-]+\|[\s:|-]+$", lines[i + 1])):
             buf.append(lines[i])
             i += 1
