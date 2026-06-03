@@ -34,3 +34,7 @@ playground/local.properties
 *.war
 *.ear
 *.log
+
+# Python bytecode
+__pycache__/
+*.pyc
