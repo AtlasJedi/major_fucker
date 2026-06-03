@@ -1,25 +1,27 @@
-# Recsys — bank pytań
+# Recommendation Systems — question bank
 
-> Covers recommendation system fundamentals with a focus on the **serving/engineering path** — not model training from scratch. Context: Allegro's production Two-Tower DLRM system as described in arxiv 2508.03702 ("Suggest, Complement, Inspire: Story of Two Tower Recommendations at Allegro.com"). You will be on the **recommendations system team as a Kotlin Regular Developer**, meaning your job is to build and operate the infrastructure that encodes requests, calls Faiss, ranks results, logs telemetry, and keeps p99 latency under 40ms at ~20k RPS. ML literacy here means speaking the language of data scientists and understanding the system's constraints — not training models.
+> Covers recommendation system fundamentals with a focus on the **serving/engineering path** — not model training from scratch. Context: Allegro's production Two-Tower DLRM system as described in arxiv 2508.03702 ("Suggest, Complement, Inspire: Story of Two Tower Recommendations at Allegro.com"). You will be on the **recommendations system team as a Kotlin/Java Senior Developer**, meaning your job is to build and operate the infrastructure that encodes requests, calls Faiss, ranks results, logs telemetry, and keeps p99 latency under 40ms at ~20k RPS. ML literacy here means speaking the language of data scientists and understanding the system's constraints — not training models.
 
 ## Scope
 
 - Two-stage recommendation architecture: retrieval (candidate generation) vs ranking (re-ranking)
-- Two-Tower DLRM: query tower + item tower, dot product, weight tying, L2 normalization
+- Two-Tower DLRM: query tower + item tower, dot product, L2 normalization, weight tying
 - Allegro's three variants: Similarity-TT, Complementary-TT, Inspirational-TT
 - Content-based encoding: features → embeddings → MLP → L2-normalize (cold-start solution)
-- Approximate nearest neighbor (ANN): Faiss, IVF / HNSW / Flat index types
+- Approximate nearest neighbor (ANN): Faiss, IVF / HNSW / Flat index types and their tradeoffs
 - Serving path: feature fetch → encode → ANN query → rerank → telemetry, Kotlin coroutines
 - Negative sampling: in-batch negatives, mixed negative sampling, why it matters for training signal
-- Offline eval metrics: Recall@K, Precision@K, NDCG
+- Offline eval metrics: Recall@K, Precision@K, NDCG — and when to use each
 - Online eval: A/B testing strategy, business metrics (CTR, GMV/visit, CTA, CR, bounce, exit), SRM
 - Fallback strategies: index unavailability, cold-start, degraded-mode serving
 - Production MLOps: daily index refresh, blue/green swap, concept drift detection
 - Cold-start problem and content-based mitigation
+- Serving engineering tradeoffs: in-process vs Faiss-as-a-service, p99 budget allocation
+- Real-time vs batch index update tradeoffs
 
 ---
 
-## Q-REC-001 [bloom: recall]
+## Q-REC-001 [bloom: recall] [level: junior]
 **Question:** What is a recommendation system at a high level? Explain the two-stage architecture: retrieval vs ranking.
 **Model answer:** A recommendation system selects items from a large catalog that are most relevant to a user or context at a given moment. At scale, doing this in a single step over millions of items is too slow, so systems are split into two stages.
 
@@ -33,7 +35,7 @@ At Allegro, the Two-Tower model (arxiv 2508.03702) serves the retrieval stage. I
 
 ---
 
-## Q-REC-002 [bloom: recall]
+## Q-REC-002 [bloom: recall] [level: junior]
 **Question:** What is candidate generation and what is re-ranking? What does each layer do and what does it optimize?
 **Model answer:** **Candidate generation** (retrieval layer): takes the incoming context (user query, viewed item, session) and retrieves a small set of plausible candidates from the full catalog. Optimizes for **recall** — do not miss relevant items. Techniques: ANN on embeddings, inverted indexes, collaborative filtering, popularity rules. The output is typically 100–1000 items.
 
@@ -41,13 +43,13 @@ At Allegro, the Two-Tower model (arxiv 2508.03702) serves the retrieval stage. I
 
 The split exists because: (a) the retrieval model must be fast enough to query millions of items in milliseconds, so it uses a simplified scoring function (dot product of L2-normalized vectors); (b) the ranker can be expensive but only sees a small candidate set, so it can use more expressive feature crosses.
 
-At Allegro, after Two-Tower retrieval via Faiss, a downstream ranking layer (not detailed in the public paper) applies before final delivery.
+At Allegro, after Two-Tower retrieval via Faiss, a downstream ranking layer applies before final delivery.
 **Interview trap:** "Can't you just use one model?" Yes, for small catalogs. At Allegro's catalog scale (millions of active listings with daily churn), the single-model approach breaks on latency and compute budget. The answer is always tied to scale.
 **Tags:** candidate-generation, reranking, architecture, scale
 
 ---
 
-## Q-REC-003 [bloom: recall]
+## Q-REC-003 [bloom: recall] [level: junior]
 **Question:** What is an embedding? Define it, describe its key properties, and explain why it's useful for recommendations.
 **Model answer:** An **embedding** is a dense, fixed-dimensional vector representation of a discrete object (item, user, query). Key properties:
 
@@ -63,7 +65,7 @@ At Allegro (arxiv 2508.03702), product embeddings are computed from features (ti
 
 ---
 
-## Q-REC-004 [bloom: recall]
+## Q-REC-004 [bloom: recall] [level: junior]
 **Question:** What is Approximate Nearest Neighbor (ANN) search and why use it instead of exact nearest neighbor search?
 **Model answer:** **Exact nearest neighbor (exact NN)** finds the mathematically closest vectors to a query by comparing against every vector in the index. For d=128 and N=10M items: 10M dot products per query. At 20k RPS that's 200 billion operations per second — infeasible on CPU.
 
@@ -77,9 +79,9 @@ The recall loss from ANN is typically small (1-5%) and is acceptable because: (a
 
 ---
 
-## Q-REC-005 [bloom: recall]
+## Q-REC-005 [bloom: recall] [level: junior]
 **Question:** What is Faiss? Compare IVF, HNSW, and Flat index types — when would you use each?
-**Model answer:** **Faiss** (Facebook AI Similarity Search) is an open-source library (C++/Python) for efficient similarity search over dense vectors. Supports billion-scale indexes, CPU and GPU, multiple index types.
+**Model answer:** **Faiss** (Facebook AI Similarity Search) is an open-source library (C++/Python, JNI available) for efficient similarity search over dense vectors. Supports billion-scale indexes, CPU and GPU, multiple index types.
 
 **Flat (IndexFlatL2 / IndexFlatIP):** brute-force exact search. No approximation. Slowest at query time, fastest to build. Use when: catalog is small (<1M items), or you need ground truth for evaluation, or index rebuild is trivial. Faiss Flat is still faster than naive Python loops due to BLAS-optimized batched matrix multiply.
 
@@ -93,7 +95,7 @@ Allegro's paper mentions Faiss ANN with daily offline rebuild + blue/green swap 
 
 ---
 
-## Q-REC-006 [bloom: recall]
+## Q-REC-006 [bloom: recall] [level: junior]
 **Question:** Define the Two-Tower architecture. What are the query tower and item tower? How is the final score computed?
 **Model answer:** A **Two-Tower model** has two independent neural networks (towers) that independently encode two objects into the same embedding space:
 
@@ -105,12 +107,12 @@ Both towers output a fixed-d vector, L2-normalized to the unit sphere. **Similar
 **Why two towers?** Item embeddings can be pre-computed offline for the entire catalog and stored in the ANN index. At serving time, only the query tower runs live (single forward pass for one query). The expensive O(N × d) matrix multiply is replaced by one ANN lookup. This is the architectural choice that makes the system scalable.
 
 At Allegro (arxiv 2508.03702), the towers share the same **Product Encoder** architecture (weight tying). For Similarity-TT: query tower = product encoder applied to the viewed item. For Complementary-TT: query tower has a modified head that maps the viewed item's category to a cross-category embedding space. For Inspirational-TT: a hierarchical ANN index is layered on top.
-**Interview trap:** "The user tower encodes the user profile, right?" Not necessarily. At Allegro, the query tower encodes a *product* (the item the user is currently viewing) — making this a item-to-item similarity model, not a user-to-item personalization model. The distinction matters for cold-start and for what features are available at serving time.
+**Interview trap:** "The user tower encodes the user profile, right?" Not necessarily. At Allegro, the query tower encodes a *product* (the item the user is currently viewing) — making this an item-to-item similarity model, not a user-to-item personalization model. The distinction matters for cold-start and for what features are available at serving time.
 **Tags:** two-tower, dlrm, architecture, dot-product
 
 ---
 
-## Q-REC-007 [bloom: recall]
+## Q-REC-007 [bloom: recall] [level: junior]
 **Question:** Define content-based filtering vs collaborative filtering. When would you use each?
 **Model answer:** **Collaborative filtering (CF):** recommendations based on behavioral patterns of many users — "users who interacted with item A also interacted with item B." Requires historical interaction data (clicks, purchases, views). Works well when: you have dense interaction data, you can tolerate cold-start issues, you want to capture latent preferences not visible in item features.
 
@@ -126,7 +128,7 @@ Problems: limited serendipity (filter bubble — you only see items similar to w
 
 ---
 
-## Q-REC-008 [bloom: recall]
+## Q-REC-008 [bloom: recall] [level: junior]
 **Question:** What is the cold-start problem in recommendations? What are the standard mitigations?
 **Model answer:** **Cold-start** refers to the inability to generate good recommendations for items or users with no (or very little) historical interaction data.
 
@@ -152,7 +154,7 @@ At Allegro (arxiv 2508.03702): content-based encoding **fully solves** item cold
 
 ---
 
-## Q-REC-009 [bloom: understand]
+## Q-REC-009 [bloom: understand] [level: regular]
 **Question:** Why would you tie weights between the query tower and item tower (shared encoder)? When does it make sense — and when doesn't it?
 **Model answer:** **Weight tying** means the query tower and item tower share the same neural network parameters — a single "Product Encoder" that maps any product's features to an embedding. The query embedding and item embedding are both produced by the same function.
 
@@ -173,7 +175,7 @@ The key insight: weight tying is elegant when query and item are the same entity
 
 ---
 
-## Q-REC-010 [bloom: understand]
+## Q-REC-010 [bloom: understand] [level: regular]
 **Question:** What is negative sampling in Two-Tower training? What are "in-batch negatives" and "mixed negative sampling"? Why are they needed?
 **Model answer:** Two-Tower models are trained to push the dot product of (query, positive item) higher than (query, negative item). **Negative examples** — items that are irrelevant to the query — are necessary to prevent the model from collapsing (mapping everything to the same embedding).
 
@@ -191,7 +193,7 @@ You as a serving engineer will not implement this — but you need to know it ex
 
 ---
 
-## Q-REC-011 [bloom: understand]
+## Q-REC-011 [bloom: understand] [level: regular]
 **Question:** Define Recall@K, Precision@K, and NDCG. When would you use each as an offline eval metric for a retrieval model?
 **Model answer:** These are ranking metrics computed on a held-out test set where you know the "ground truth" relevant items (e.g., items the user actually purchased).
 
@@ -210,7 +212,7 @@ You as a serving engineer will not implement this — but you need to know it ex
 
 ---
 
-## Q-REC-012 [bloom: understand]
+## Q-REC-012 [bloom: understand] [level: regular]
 **Question:** Allegro runs A/B tests measuring CTR, GMV/visit, CTA, CR, bounce rate, and exit rate — not just CTR. Why? What's the risk of optimizing only for CTR?
 **Model answer:** **CTR (Click-Through Rate)** measures how often users click a recommendation. It's easy to inflate: surface clickbait items, irrelevant-but-intriguing items, low-priced items with misleading titles. A model that maximizes CTR alone will recommend items users click but don't buy.
 
@@ -225,11 +227,28 @@ You as a serving engineer will not implement this — but you need to know it ex
 
 Allegro (arxiv 2508.03702): 2-year continuous A/B at α=0.01, split by desktop vs app, measuring all these metrics. The high bar (α=0.01, not 0.05) reflects the cost of false positives on a system at this scale.
 **Interview trap:** "CTR is the most important metric." At an e-commerce company, GMV is the ground truth. CTR is a leading indicator, not the goal. If a recruiter at Allegro hears you say "we optimized for CTR," the follow-up will be "and what happened to GMV?" — be ready.
-**Tags:** a-b-testing, metrics, ctر, gmv, business-metrics, online-eval
+**Tags:** a-b-testing, metrics, ctr, gmv, business-metrics, online-eval
 
 ---
 
-## Q-REC-013 [bloom: apply]
+## Q-REC-013 [bloom: understand] [level: regular]
+**Question:** What is L2 normalization in the context of Two-Tower models? Why normalize embeddings before computing the dot product?
+**Model answer:** **L2 normalization** projects a vector onto the unit sphere: `v_normalized = v / ||v||_2` where `||v||_2 = sqrt(sum(v_i^2))`. After normalization, every embedding has magnitude 1.
+
+**Why normalize before dot product:**
+After L2 normalization, the dot product `<q, i>` equals the **cosine similarity** between q and i. Cosine similarity measures the angle between vectors, not their magnitude — range [-1, 1]. Without normalization, the raw dot product is dominated by vector magnitude, not directional similarity. A long vector with an irrelevant direction can outscore a short vector perfectly aligned with the query.
+
+**Training consequence:** the model learns to encode semantic meaning in the *direction* of the embedding, not its *length*. This is the intended behavior: two similar products should point in the same direction in embedding space.
+
+**Serving consequence:** you only need to L2-normalize item embeddings once, at index build time. The ANN index stores normalized vectors. At query time, normalize the query embedding, then run ANN. The returned distances are cosine similarities — directly interpretable as [-1, 1] relevance scores.
+
+**Inner product search vs L2 search:** Faiss has `IndexFlatIP` (inner product) and `IndexFlatL2` (Euclidean). After L2 normalization, inner product = cosine similarity. Always use `IndexFlatIP` (or `IndexIVFFlat` with `metric_type=METRIC_INNER_PRODUCT`) with normalized embeddings. Using L2 distance on normalized vectors gives equivalent rankings (since for unit vectors, `||a-b||^2 = 2 - 2<a,b>`), but inner product is more standard and interpretable.
+**Interview trap:** "Can I skip L2 normalization if I use cosine distance in Faiss?" Faiss does not natively support cosine distance as a metric. The standard pattern is always: normalize your vectors externally, then use inner product search. Forgetting this step means your Faiss index silently computes the wrong similarity.
+**Tags:** l2-normalization, dot-product, cosine-similarity, faiss, two-tower
+
+---
+
+## Q-REC-014 [bloom: apply] [level: regular]
 **Question:** Design the full request path for serving recommendations at ~20k RPS with p99 ~40ms. Be concrete: feature fetch, encode, ANN query, rerank, telemetry. Use Kotlin coroutines + WebClient.
 **Model answer:** At 20k RPS, p99 40ms budget is tight. Every step must be parallelized where possible and bounded by timeouts.
 
@@ -290,13 +309,13 @@ suspend fun getRecommendations(request: RecsRequest): RecsResponse {
 - `withTimeout` on every external call — if Faiss returns in 50ms, the whole p99 blows.
 - `productEncoder.encode()` must be non-blocking (ONNX Runtime has a sync call but runs on CPU thread pool, wrap with `withContext(Dispatchers.Default)`).
 - Telemetry is launched in a structured child coroutine (not `GlobalScope`) so it survives request completion but doesn't block it.
-- Fallback logic (next question) is a separate concern — see Q-REC-014.
+- Fallback logic (next question) is a separate concern.
 **Interview trap:** "Just use `GlobalScope.async` for parallel steps." GlobalScope coroutines are not cancelled if the parent coroutine fails or the request times out. They leak. Always use a structured scope (`coroutineScope { }`, `CoroutineScope(job + dispatcher)`) or a lifecycle-bound scope.
 **Tags:** serving, coroutines, faiss, latency, kotlin, webflux
 
 ---
 
-## Q-REC-014 [bloom: apply]
+## Q-REC-015 [bloom: apply] [level: regular]
 **Question:** Implement a fallback strategy for when the Faiss ANN index is unavailable. Cover: popular items fallback, cached fallback, cohort default. Write in Kotlin.
 **Model answer:** A serving system must degrade gracefully. Three-tier fallback, each tier activating when the tier above fails:
 
@@ -347,7 +366,7 @@ private suspend fun getFallback(request: RecsRequest): RecsResponse {
 
 ---
 
-## Q-REC-015 [bloom: apply]
+## Q-REC-016 [bloom: apply] [level: regular]
 **Question:** Design A/B test exposure logging for the recommendations system. How do you log impressions to Kafka so offline analysis can correctly attribute variant outcomes? What pitfalls must you avoid?
 **Model answer:** Correct A/B logging is the foundation of trustworthy experiments. A wrong impression log corrupts every metric computation.
 
@@ -388,7 +407,7 @@ data class RecsImpressionEvent(
 
 ---
 
-## Q-REC-016 [bloom: apply]
+## Q-REC-017 [bloom: apply] [level: senior]
 **Question:** Review this Kotlin code for serving recommendations. Find and fix all bugs.
 
 ```kotlin
@@ -432,7 +451,7 @@ val candidates = withTimeout(15.millis) { faissClient.search(queryEmbedding, top
 **Bug 4: No fallback.**
 If `encoder.encode` or `faissClient.search` throws (timeout, unavailability), the exception propagates to the caller with no degradation. In production, this returns a 500 error to the user.
 ```kotlin
-// Fix: wrap with try/catch and delegate to fallback (see Q-REC-014)
+// Fix: wrap with try/catch and delegate to fallback
 return try {
     val candidates = withTimeout(15.millis) { faissClient.search(queryEmbedding, topK = 200) }
     reranker.rank(candidates)
@@ -460,7 +479,77 @@ suspend fun fetchAndRank(productId: String): List<Item> {
 
 ---
 
-## Q-REC-017 [bloom: analyze]
+## Q-REC-018 [bloom: apply] [level: senior]
+**Question:** Describe the daily index refresh pipeline with blue/green swap for a Faiss-based recommendation system serving 20k RPS. What are the exact steps, what can go wrong, and how do you roll back?
+**Model answer:** The daily index refresh ensures the ANN index reflects today's catalog (new listings, updated prices, removed items) and the latest model embeddings. The blue/green swap guarantees zero-downtime cutover.
+
+**Pipeline steps:**
+
+```
+[Nightly batch, e.g., 02:00–04:00 UTC]
+
+1. DATA EXTRACTION
+   - Pull all active product listings from the catalog DB (Kafka compacted topic or snapshot)
+   - Filter: active status, not deleted, has required features (title, category, price)
+   - Output: products.parquet on HDFS/S3
+
+2. FEATURE GENERATION
+   - For each product: compute feature vector (text tokenization, category embedding lookup,
+     price normalization, seller features)
+   - Output: features.parquet
+
+3. EMBEDDING INFERENCE
+   - Batch inference: load Product Encoder model (current production version, pinned by hash)
+   - For each product: encoder.forward(features) → float[128], L2-normalize
+   - Output: embeddings.parquet (product_id, float[128])
+   - Checkpoint: record model_version and index_build_timestamp
+
+4. FAISS INDEX BUILD
+   - Load all embeddings into Faiss IndexIVFFlat or IndexHNSW
+   - IVF: train k-means centroids (if first build or model retrain), then add vectors
+   - HNSW: add vectors (no training needed)
+   - Serialize index to disk: index_YYYYMMDD.faiss
+   - Write metadata: index_meta_YYYYMMDD.json {model_version, item_count, build_timestamp, checksum}
+
+5. VALIDATION (BEFORE SWAP)
+   - Load new index in a "shadow" instance (separate serving pod not in production traffic)
+   - Run smoke tests: query 100 known products, check Recall@50 >= threshold (e.g., 0.90)
+   - Check item_count delta: if |today - yesterday| > 20%, ABORT (likely data pipeline failure)
+   - Latency check: p99 of 1000 ANN queries < 20ms on shadow pod
+
+6. BLUE/GREEN SWAP
+   - "Green" = current production index, "Blue" = new index (pre-loaded in memory)
+   - Serving pods load new index in background (parallel to serving traffic on old index)
+   - Atomic pointer swap: indexRef.set(newIndex) — all new requests use new index
+   - Old index remains in memory for 5 minutes (hot rollback window)
+   - Drain old index from memory after 5 minutes
+
+7. POST-SWAP MONITORING (15-minute watch)
+   - Alert on: error rate spike, p99 latency increase >20%, fallback rate spike
+   - If any alert fires: rollback (re-swap to old index)
+```
+
+**What can go wrong:**
+
+| Failure | Detection | Response |
+|---|---|---|
+| Encoder model version mismatch | checksum mismatch in metadata | Abort build, page on-call |
+| Item count drop >20% | step 5 validation | Abort, serve yesterday's index |
+| Recall@K below threshold | step 5 smoke test | Abort, investigate feature drift |
+| Swap causes latency spike | post-swap p99 alert | Rollback to old index |
+| OOM during index load | pod crash | Tune Xmx, increase pod memory, restart with old index |
+
+**Rollback:**
+- Keep yesterday's index serialized on disk for 7 days.
+- If hot rollback (within 5 minutes): `indexRef.set(oldIndex)` — old index still in memory.
+- If cold rollback: reload yesterday's index from disk; serving pods restart with old index path.
+- Never delete old index files until new index has been stable for 24 hours.
+**Interview trap:** "Just replace the index file and restart serving pods." Pod restart means ~30 seconds of unavailability per pod, times the number of rolling restart pods. At 20k RPS, that's service degradation during restart. The atomic in-memory pointer swap eliminates restart-based downtime entirely.
+**Tags:** index-refresh, blue-green, mlops, faiss, production, pipeline
+
+---
+
+## Q-REC-019 [bloom: analyze] [level: senior]
 **Question:** Analyze the trade-offs between Two-Tower retrieval and a cross-encoder ranker. Why use Two-Tower for retrieval and a heavier ranker on top?
 **Model answer:** The core constraint is compute vs quality.
 
@@ -494,7 +583,7 @@ For Allegro at ~20k RPS, p99 40ms: running a cross-encoder over 10M items is phy
 
 ---
 
-## Q-REC-018 [bloom: analyze]
+## Q-REC-020 [bloom: analyze] [level: senior]
 **Question:** When does Faiss in-process (embedded in the JVM serving process) beat Faiss-as-a-service (separate model server with RPC)? Analyze trade-offs.
 **Model answer:** This is an infrastructure architecture decision with real latency, operational, and reliability consequences.
 
@@ -530,7 +619,7 @@ For Allegro at ~20k RPS, p99 40ms: running a cross-encoder over 10M items is phy
 
 ---
 
-## Q-REC-019 [bloom: analyze]
+## Q-REC-021 [bloom: analyze] [level: senior]
 **Question:** A team member proposes switching from daily index refresh to real-time embedding index updates (stream every new/updated product into the Faiss index within 60 seconds). Critique this proposal — analyze cost and benefit.
 **Model answer:** This is a classic "real-time everything" proposal that sounds better than it is. Let's break it down.
 
@@ -560,7 +649,7 @@ Counter-proposal: hybrid — keep daily batch rebuild for the main index, add a 
 
 ---
 
-## Q-REC-020 [bloom: analyze]
+## Q-REC-022 [bloom: analyze] [level: senior]
 **Question:** How would you measure if the Two-Tower recommendation model is degrading in production without retraining? Cover: concept drift, embedding drift, popularity bias. What signals would you monitor?
 **Model answer:** Model degradation in production is insidious — the model doesn't throw errors, it silently becomes less relevant. You need a multi-layer monitoring strategy.
 
@@ -605,3 +694,429 @@ data class RecsMetricsEvent(
 Aggregate these in Grafana/BigQuery with weekly baselines. Alert on: top candidate score trending down >10% from 30-day baseline; diversity score dropping >15%; fallback rate rising.
 **Interview trap:** "We don't need drift monitoring — we'll retrain daily." Daily retraining doesn't eliminate drift; it reduces it. If the training pipeline has a bug (silent feature schema change, data pipeline outage causing stale training data), you can retrain daily and still degrade. Monitoring must be independent of the training pipeline.
 **Tags:** model-monitoring, drift, popularity-bias, embedding-drift, recall-at-k, mlops, observability
+
+---
+
+## Q-REC-023 [bloom: apply] [level: senior]
+**Question:** You are on call. The p99 latency for the `/recommendations` endpoint spikes from 35ms to 180ms. Walk through your diagnosis. What are the most likely causes specific to the Two-Tower serving stack, and how do you isolate each?
+**Model answer:** A p99 latency spike in the Two-Tower serving path has a handful of characteristic causes. Systematic isolation beats guessing.
+
+**Step 1: Check the obvious — is it infrastructure or application?**
+- CPU usage on serving pods: if at 100%, the encode step or reranker is bottlenecked.
+- Network saturation: if Faiss-as-a-service, check network throughput to the Faiss server.
+- GC pause: check JVM GC logs. A large Faiss index loaded into off-heap shouldn't cause GC, but candidate feature fetches (Redis calls returning large payloads) can.
+
+**Step 2: Break down latency by stage.**
+Every stage must emit a histogram metric. Drill into which stage p99 spiked:
+
+| Stage | Normal p99 | Spike investigation |
+|---|---|---|
+| Feature fetch (Redis) | 3ms | Redis memory pressure, eviction, connection pool exhaustion |
+| Encode (ONNX/TorchServe) | 4ms | Thread pool saturation, model version change, CPU contention |
+| Faiss ANN | 10ms | Index loaded correctly? IVF nprobe increased? More items in index? |
+| Candidate feature fetch | 8ms | Batch size too large, Redis hotspot on popular products |
+| Reranker | 3ms | New business logic rule added, scoring model change |
+
+**Step 3: Common recsys-specific causes:**
+
+1. **Index rebuild deployed a larger index.** After daily refresh, item count grew (new seasonal listings). More vectors → longer ANN search. Check `index_meta.json` item_count delta.
+
+2. **nprobe was changed.** If a data scientist increased IVF nprobe to improve recall, query time increases proportionally. Check config changelog.
+
+3. **Faiss index loaded into the wrong memory tier.** If the index got swapped to disk (OS paged it out due to memory pressure), first queries after a cold pod restart are extremely slow. Check `/proc/[pid]/smaps` for Faiss memory pages.
+
+4. **Model version change increased embedding dimensionality.** If d=128 → d=256 was deployed, both encode time and ANN search time roughly double. Check `model_version` in recent index metadata.
+
+5. **Batch size on candidate feature fetch grew.** If topK was increased from 200 → 500, the Redis batch call fetches 2.5x more features. Check topK config.
+
+6. **Thread pool exhaustion on encode.** ONNX Runtime uses a fixed thread pool. If request rate spiked (traffic burst), encode calls queue up. Check `encoder.queue_depth` metric.
+
+**Step 4: Rollback decision.**
+- If cause is a config change: revert config, deploy.
+- If cause is the new index: swap back to yesterday's index (keep old index on disk for exactly this reason).
+- If cause is infrastructure (Redis degraded): activate fallback tier, page Redis on-call, do not wait for a fix.
+**Interview trap:** "Just increase the timeout." Increasing timeout is hiding the problem, not fixing it. A timeout increase delays customer impact by a few milliseconds and guarantees the p99 stays elevated. Fix the root cause; the timeout is a safety valve, not a tuning parameter.
+**Tags:** oncall, latency-debugging, faiss, serving, p99, diagnosis
+
+---
+
+## Q-REC-024 [bloom: analyze] [level: master]
+**Question:** Allegro's Three Two-Tower variants (Similarity-TT, Complementary-TT, Inspirational-TT) serve different recommendation intents from the same product detail page. From a serving-engineering perspective, how would you architect a single endpoint that routes to the right model variant per surface, handles their different ANN indexes, and manages their independent index lifecycles without coupling the release cycles?
+**Model answer:** This is a multiplexed multi-model serving problem. The key constraint: three models, three indexes, three use cases — but a single serving fleet must handle them without N×3 operational burden.
+
+**Architecture: Model Registry + Index Registry + Surface Router**
+
+```
+Request: POST /recommendations
+  Body: { productId, surface: "similar|complementary|inspirational", limit, userId }
+
+Surface Router (in-process):
+  surface → ModelVariantConfig {
+    encoderModelId: "product-encoder-v4",     # shared for Similarity + Complementary
+    encoderModelId: "hierarchical-encoder-v2", # Inspirational uses a different encoder
+    indexId: "similarity-index-2025-06-02",
+    indexId: "complementary-index-2025-06-02",
+    indexId: "inspirational-l1-index-2025-06-02"  # multi-level for Inspirational
+    topK: 500 | 300 | 200,                    # different retrieval counts per variant
+    rerankerId: "standard-ranker-v3"
+  }
+```
+
+**Key design decisions:**
+
+1. **Shared encoder where possible (weight tying payoff).** Similarity-TT and Complementary-TT share the same Product Encoder body (weight tying). Load one encoder model into memory, use it for both surfaces. Only the head layers differ. Saves ~60% of inference RAM vs loading two full models. Inspirational-TT uses a different encoder architecture — separate model file.
+
+2. **Independent index mmap files.** Each variant's Faiss index is memory-mapped from a separate file. They share physical RAM if the same vectors appear (mmap deduplication at OS level), but can be swapped independently. A daily refresh of the Similarity index does not require reloading the Inspirational index.
+
+3. **Index metadata version tracking per variant.** The routing layer reads:
+   ```kotlin
+   data class IndexManifest(
+       val variantId: String,
+       val indexPath: String,
+       val modelVersion: String,
+       val buildTimestamp: Instant,
+       val itemCount: Int,
+       val checksum: String
+   )
+   ```
+   Published to a config store (Consul, Redis, etcd) by the build pipeline. Serving reads this at startup and on signal (SIGHUP or config watch) — no pod restart needed for index swap.
+
+4. **Decoupled release cycles via feature flags.** Each variant has an independent "active index version" flag. When Similarity-TT's new index passes validation, flip its flag. Complementary-TT's index is unchanged. No coordinated deploy.
+
+5. **Circuit breaker per variant.** If Inspirational-TT's index is corrupted or slow (>25ms p99), its circuit breaker opens, and that surface falls back to Similarity-TT results. The other surfaces are unaffected.
+
+6. **A/B test isolation.** Each variant has its own experiment ID namespace. A/B tests on Similarity-TT do not pollute Complementary-TT's metrics. The impression log includes `surface` as a mandatory field.
+
+**Operational lifecycle:**
+```
+Daily build pipeline runs 3 jobs in parallel (one per variant):
+  [02:00] build similarity-index → validate → publish manifest
+  [02:00] build complementary-index → validate → publish manifest
+  [02:15] build inspirational-index → validate → publish manifest  # slower: hierarchical
+  [04:00] serving pods poll config store → hot-swap each index independently
+```
+
+**What breaks at scale:** the single serving fleet now holds 3 large indexes in RAM simultaneously. At 5GB each, that's 15GB per pod. If pod count is 20, that's 300GB aggregate RAM. Evaluate whether Inspirational-TT (the lowest-traffic variant) warrants its own dedicated fleet vs sharing. Independent fleets cost more; shared fleets risk RAM pressure.
+**Interview trap:** "Just deploy three separate services, one per variant." That triples your fleet size, operational overhead, and deployment complexity. The shared-encoder optimization (weight tying) only works if the model runs in the same process. And you lose the ability to handle a request that needs all three variants on the same page in a single hop.
+**Tags:** multi-model-serving, routing, index-lifecycle, architecture, weight-tying, master
+
+---
+
+## Q-REC-025 [bloom: analyze] [level: master]
+**Question:** The Two-Tower model uses L2-normalized embeddings and dot product similarity. Under what conditions does this scoring break down — producing poor retrieval quality despite good offline Recall@K? What are the root causes and how do you diagnose them?
+**Model answer:** Offline Recall@K looking good while production quality degrades is one of the most dangerous failure modes in ML serving. Here are the specific failure modes for L2-normalized dot product retrieval.
+
+**Failure mode 1: Train-serve distribution skew (the most common)**
+The model was trained on a distribution of products from 6 months ago. The catalog now has new categories (e.g., Allegro opened a new vertical: pets, sports equipment). Embeddings for the new category land in a sparse region of the embedding space that the training distribution never covered. Dot products to query embeddings are low but uniformly so — the model retrieves the least wrong option, which is still wrong.
+
+**Diagnosis:** per-category Recall@K on a recent test set. If new categories have Recall@K significantly below the average, this is train-serve skew. Fix: retrain with recent data including the new category.
+
+**Failure mode 2: False negative contamination in training (causes in-batch negative problem)**
+During training, in-batch negatives occasionally include products that are *also* relevant to the query (co-viewed by the same user). The model is penalized for getting them right. This teaches the model to push products *away* that should be close — the embedding space becomes less smooth in high-density regions (popular categories).
+
+**Diagnosis:** compare retrieval quality for popular categories vs niche categories. If popular categories have *lower* Recall@K (counterintuitive), false negative contamination is likely.
+
+**Failure mode 3: Popularity collapse (anisotropic embedding space)**
+The model learns that the safest strategy is to point all embeddings toward the centroid of the most popular items — this minimizes average training loss (popular items appear as positives frequently). Result: all embeddings cluster tightly in a small cone; dot products are all similar; ANN retrieves the same popular items regardless of query.
+
+**Diagnosis:** compute the angular standard deviation of all item embeddings. A healthy embedding space should have high angular spread. If 80% of items are within 10 degrees of the centroid, collapse has occurred. Also check: diversity@K in production results trending down over time.
+
+**Failure mode 4: Quantization error in IVF+PQ index**
+IVF with Product Quantization (PQ) compresses each 128-dim float32 vector into 16 bytes via codebook quantization. Compression introduces error. For vectors near cell boundaries in IVF, the nearest centroid may change after quantization, causing the item to be assigned to the wrong cell and never retrieved.
+
+**Diagnosis:** compare Recall@K between IVF+PQ and IVF+Flat (no compression) indexes on the same query set. If PQ recall is significantly lower, PQ codebook needs more centroids (m parameter), or you need a higher nprobe.
+
+**Failure mode 5: Embedding dimension mismatch after model update**
+A new model was trained with d=256 but the index still stores d=128 vectors (build pipeline bug: old embeddings not flushed). Dot products between 256-dim query and 128-dim item embeddings are undefined — Faiss will silently truncate or crash, depending on the index type and Faiss version.
+
+**Diagnosis:** validate in build pipeline: assert `query_dim == index_dim`. Emit a metric `index.embedding_dim` and alert on change. This should be caught by the smoke test step in the build pipeline.
+
+**Unified diagnostic tool:**
+```python
+# Run after each index build — serves as the quality gate
+for surface in ["similar", "complementary"]:
+    recall = eval_recall_at_k(index=new_index, test_set=last_7_days_copurchases, k=50)
+    assert recall >= thresholds[surface], f"Recall@50 below threshold: {recall}"
+    
+    # Also check embedding space health
+    embeddings = load_sample(new_index, n=10000)
+    angular_std = compute_angular_std(embeddings)
+    assert angular_std >= MIN_ANGULAR_STD, f"Embedding collapse detected: {angular_std}"
+```
+**Interview trap:** "High offline Recall@K means the model is good." Offline metrics are computed on historical data with historical catalog distribution. They say nothing about how the model performs on the *new* 10% of the catalog added since training. Always track per-category metrics on a *recent* test set.
+**Tags:** embedding-quality, recall-at-k, failure-modes, train-serve-skew, popularity-collapse, diagnosis, master
+
+---
+
+## Q-REC-026 [bloom: analyze] [level: master]
+**Question:** You need to serve 20k RPS at p99 40ms from a JVM service calling a Faiss index. Walk through capacity planning: how many pods, what pod size, and what are the bottlenecks at each tier of scale?
+**Model answer:** Capacity planning for an ANN serving system requires reasoning about three resources simultaneously: CPU (for encoding + ANN), RAM (for the index), and network (for feature fetches). Each has a different scaling behavior.
+
+**Baseline: single pod characterization**
+First, benchmark a single pod to establish the per-pod limits:
+
+| Resource | Measurement method | Typical result |
+|---|---|---|
+| Encode latency (p50/p99) | ab/wrk against encode-only endpoint | 2ms / 5ms |
+| ANN latency (p50/p99) | Faiss benchmark query | 5ms / 12ms |
+| Max RPS before p99 > 40ms | load test with realistic request mix | ~200 RPS per pod |
+| RAM: index | Faiss index file size × 1.2 (mmap overhead) | 6GB for 10M×128 |
+| RAM: JVM heap (candidate features, caches) | heap dump at peak | 2GB |
+| Total RAM per pod | | 8–10GB |
+| CPU at 200 RPS | top / async profiler | 6 cores (encoding-heavy) |
+
+**At 20k RPS:** 20,000 / 200 = **100 pods minimum** for the serving fleet.
+
+**Headroom and redundancy:**
+- Never run at 100% capacity. Target: pods loaded at ~70% → 100 / 0.70 = **143 pods**.
+- Cross-AZ redundancy: if 3 AZs, must survive 1 AZ failure. 143 pods × (3/2) = **~215 pods total**.
+
+**RAM bottleneck at scale:**
+- 215 pods × 8GB = **1.7TB aggregate RAM** for the serving fleet.
+- This is the dominant cost driver. If the index grows from 10M to 50M items (5× catalog growth), index RAM grows proportionally — but ANN latency also grows (more cells to search in IVF).
+- Mitigation: IVF+PQ compression (8GB → 2GB per pod), or Faiss-as-a-service (centralize index, 1 copy instead of 215).
+
+**CPU bottleneck:**
+- ONNX Runtime encoder uses a thread pool (default: num_cpus). At 200 RPS sustained, the encode step saturates 6 cores. Going beyond 200 RPS causes encode queue buildup → latency spike.
+- Mitigation: batched inference (batch size 4-8 for the encode step), larger pods (12 cores), or offload encode to a dedicated encoder service.
+
+**Faiss ANN bottleneck at index growth:**
+- IVF with nprobe=32 over 10M items: ~10ms p99.
+- IVF with nprobe=32 over 50M items: ~30ms p99 (linear in nprobe × cells_searched).
+- This exceeds the p99 budget. Must either: reduce nprobe (accept recall loss), use HNSW (sublinear growth with graph size), or shard the index across multiple Faiss instances.
+
+**Summary table:**
+| Scale trigger | Bottleneck | Mitigation |
+|---|---|---|
+| >200 RPS per pod | CPU (encode) | Larger pods, batching, more pods |
+| >10M items | RAM per pod | IVF+PQ compression, Faiss-as-a-service |
+| >50M items | ANN latency | HNSW, index sharding, reduce nprobe |
+| >215 pods | Operational complexity | Service mesh, centralized Faiss, streaming index |
+**Interview trap:** "Just add more pods." Pods with in-process Faiss each hold the full index. 215 pods × 8GB = 1.7TB RAM. Adding more pods to handle traffic growth is viable to a point — but at some catalog size, the RAM cost forces architectural changes (Faiss-as-a-service or index sharding). "Add more pods" is not an infinite answer.
+**Tags:** capacity-planning, pods, faiss, rps, ram, cpu, scaling, master
+
+---
+
+## Q-REC-027 [bloom: analyze] [level: master]
+**Question:** Two-Tower models trained with sampled softmax and in-batch negatives tend to develop **popularity bias** — they over-recommend popular items. Explain the mechanism, its serving-side consequences, and what engineering interventions mitigate it without retraining the model.
+**Model answer:** Popularity bias in Two-Tower models is a training artifact with measurable serving-side consequences. Understanding the mechanism lets you attack it at the right layer.
+
+**Mechanism:**
+In sampled softmax training, negatives are sampled proportionally to item frequency in the training corpus (or uniform, depending on implementation). Popular items appear as negatives more often, but they *also* appear as positives more often (because popular items have more co-purchase pairs). The gradient signal is asymmetric: the model sees popular items repeatedly in both positive and negative positions.
+
+The result: embeddings of popular items are pulled toward many query embeddings (as positives) and pushed away from many query embeddings (as negatives) — but the pull-toward force wins because the model minimizes the loss, which is dominated by the most-frequent pairs. Popular items end up close to many query embeddings in the embedding space.
+
+Additionally, in-batch negatives: a batch of training examples is more likely to contain popular items than niche items. Popular items are harder (more "false hard negatives") but the model still gets penalized for them.
+
+**Serving-side consequence:**
+- ANN retrieval consistently surfaces the same 5-10% of popular items regardless of query.
+- Long-tail items (90% of catalog) are rarely retrieved — their embeddings are in sparse regions far from any query embedding.
+- Business impact: diversity metrics drop, filter bubble effect, niche-product sellers see zero recommendation traffic.
+
+**Engineering interventions (without retraining):**
+
+1. **Popularity penalty in the ANN score:**
+   ```kotlin
+   val adjustedScore = annScore - lambda * log(itemPopularityRank + 1)
+   ```
+   Subtract a log-popularity penalty from the ANN dot product before ranking. `lambda` is tunable. Effect: demotes popular items unless they are genuinely similar to the query.
+   Risk: if set too aggressively, popular items that are also genuinely relevant are suppressed.
+
+2. **Re-ranking diversity constraint (MMR — Maximal Marginal Relevance):**
+   When selecting the final top-N from the top-K candidates:
+   ```
+   score(item) = alpha * relevance(item) - (1 - alpha) * max_similarity_to_already_selected(item)
+   ```
+   Ensures the result set covers diverse regions of the embedding space, not just the one popular cluster.
+
+3. **Candidate set pre-filtering by tier:**
+   - Retrieve top-K from ANN (biased toward popular).
+   - Split candidates into "popular" (top-1% by interaction count) and "long-tail" (remainder).
+   - Enforce: at least 30% of final results must come from long-tail bucket.
+   - Limits popular-item dominance hard.
+
+4. **Separate hot index for new/niche items:**
+   Run a lightweight popularity-agnostic retrieval (BM25 text search or content-similarity-only model) for items in the bottom 50% by popularity. Blend results with ANN results.
+
+5. **Impression diversity logging and feedback loop:**
+   Track per-item impression counts in the recommendation stream. If an item has been surfaced X times in the last 24h, penalize its score for the next Y hours. This is a short-term fix but effective for preventing a single viral product from dominating all recommendation slots.
+**Interview trap:** "Popularity bias is a model problem — fix it in training." True in the long run. But model retraining is a weekly or monthly cycle; serving-side interventions can be deployed in hours. The question is asking for serving-side mitigations specifically — show you know the levers you control as a serving engineer.
+**Tags:** popularity-bias, diversity, mmr, reranking, serving, master
+
+---
+
+## Q-REC-028 [bloom: apply] [level: senior]
+**Question:** Implement a health check and readiness probe for a JVM service that serves Two-Tower recommendations with an in-process Faiss index. What conditions must be true for the pod to be "ready"? What should the liveness probe check?
+**Model answer:** Kubernetes readiness and liveness serve different purposes. Getting them wrong causes either unnecessary traffic loss (too strict readiness) or zombie pods serving bad results (too lenient liveness).
+
+**Readiness probe — "am I ready to serve traffic?"**
+
+A pod with an in-process Faiss index is NOT ready until:
+1. The Faiss index is fully loaded into memory (not still mmap-ing pages from disk).
+2. The Product Encoder model is loaded and warmed up (first ONNX inference is slow; warmup hides this from users).
+3. The feature store connection pool has at least N healthy connections (Redis ping succeeds).
+4. The model version in the loaded index matches the expected version from the config store.
+
+```kotlin
+@Component
+class RecsReadinessIndicator(
+    private val faissIndex: FaissIndex,
+    private val productEncoder: ProductEncoder,
+    private val featureStore: FeatureStore,
+    private val indexConfig: IndexConfig
+) : HealthIndicator {
+
+    override fun health(): Health {
+        val checks = mutableMapOf<String, Any>()
+
+        // Check 1: Faiss index loaded
+        if (!faissIndex.isLoaded()) {
+            return Health.down().withDetail("faiss", "index not loaded").build()
+        }
+        checks["faiss_item_count"] = faissIndex.itemCount()
+        checks["faiss_model_version"] = faissIndex.modelVersion()
+
+        // Check 2: Model version matches expected
+        if (faissIndex.modelVersion() != indexConfig.expectedModelVersion) {
+            return Health.down()
+                .withDetail("model_version_mismatch",
+                    "expected=${indexConfig.expectedModelVersion}, actual=${faissIndex.modelVersion()}")
+                .build()
+        }
+
+        // Check 3: Encoder warmed up
+        if (!productEncoder.isWarmedUp()) {
+            return Health.down().withDetail("encoder", "not warmed up").build()
+        }
+        checks["encoder_version"] = productEncoder.modelVersion()
+
+        // Check 4: Feature store reachable
+        val featureStoreOk = runBlocking {
+            try {
+                featureStore.ping()
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+        if (!featureStoreOk) {
+            return Health.down().withDetail("feature_store", "unreachable").build()
+        }
+
+        return Health.up().withDetails(checks).build()
+    }
+}
+```
+
+Spring Boot Actuator configuration:
+```yaml
+management:
+  endpoint:
+    health:
+      show-details: always
+  health:
+    readiness-state:
+      enabled: true
+    # Map to K8s readiness probe
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+```
+
+**Liveness probe — "am I still alive and not deadlocked?"**
+
+Liveness should be simple and cheap — it runs every 10 seconds and must never fail on a healthy pod. Check:
+- JVM is responsive (the actuator endpoint itself is the check).
+- No deadlock in thread pool (check `ThreadMXBean.findDeadlockedThreads()`).
+- Do NOT check Faiss index state in liveness — a slow index load will kill the pod before it gets a chance to become ready.
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 30   # give JVM time to start
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 60   # Faiss index load takes 30-60s
+  periodSeconds: 5
+  failureThreshold: 6       # allow up to 30s for index load beyond initialDelay
+```
+
+**Why `initialDelaySeconds: 60` for readiness?** A 5GB Faiss index takes 30-60 seconds to load from disk and page into RAM. If the readiness probe fires before load completes, the pod will be killed and restarted in a loop — never becoming ready.
+**Interview trap:** "Just use the default Spring Boot health endpoint for both probes." Spring Boot 2.3+ separates liveness (`/actuator/health/liveness`) and readiness (`/actuator/health/readiness`) automatically. Using the single `/actuator/health` endpoint for both causes the liveness probe to fail when the index is loading (OutOfService state), killing the pod before it ever becomes ready.
+**Tags:** kubernetes, health-check, readiness-probe, liveness-probe, faiss, spring-boot, actuator
+
+---
+
+## Q-REC-029 [bloom: analyze] [level: master]
+**Question:** Describe how you would implement Allegro's Inspirational-TT variant at the serving-engineering level. It uses a hierarchical ANN index (category-level → item-level). What are the data structures, query plan, and operational challenges?
+**Model answer:** The Inspirational-TT variant serves cross-category inspiration: given a product the user is viewing, recommend items from *different* but complementary categories (e.g., viewing a coffee machine → recommend coffee beans, mugs, espresso books). This requires a two-level ANN hierarchy to retrieve diverse cross-category results efficiently.
+
+**Why a flat ANN index fails for Inspirational-TT:**
+A flat ANN index optimized for similarity would return items from the same or adjacent category — the embedding space clusters by category, so nearest neighbors are always in the same category. To find inspirational items, you need to deliberately *leave* the current category cluster and retrieve from distant but semantically connected clusters.
+
+**Two-level index structure:**
+
+```
+Level 1: Category index
+  - N_cat category embeddings (e.g., 500 categories)
+  - Each category embedding = centroid of all item embeddings in that category
+  - Index type: Flat (small, 500 categories — exact search is fine)
+  - Query: find top-K_cat categories that are "inspirationally related" to the query product
+    (not the same category, but semantically connected)
+
+Level 2: Per-category item indexes (or a combined index with category filter)
+  Option A: 500 separate per-category Faiss indexes
+    - Each stores item embeddings for that category only
+    - Query: for each of the K_cat retrieved categories, run ANN within that category index
+    - Pro: clean isolation, easy per-category index updates
+    - Con: 500 index files, complex lifecycle management
+
+  Option B: Single flat index with a category metadata filter
+    - Single Faiss index containing all item embeddings
+    - After ANN retrieval of top-K items, filter by "must be in retrieved category set"
+    - Pro: single index to manage
+    - Con: ANN retrieval is category-agnostic — you retrieve more candidates and discard many
+           (recall loss if category boundaries are ignored during ANN)
+  
+  Allegro's approach (arxiv 2508.03702): hierarchical ANN (Level 1 then Level 2)
+  — suggests Option A or a two-stage index query
+```
+
+**Query plan for a single Inspirational-TT request:**
+
+```
+1. Encode query product → query_embedding (same Product Encoder as Similarity-TT)
+2. Query Level-1 category index → top-5 "inspirational" categories
+   (categories with high dot product to query_embedding, excluding the query product's own category)
+3. For each of the 5 categories: query Level-2 item index → top-20 items per category
+4. Total candidates: 5 × 20 = 100 items across diverse categories
+5. Rerank 100 candidates using the full reranker
+6. Return top-N
+```
+
+**Latency budget for two-level query:**
+- Level-1 query (500 categories, flat exact): <1ms
+- Level-2 queries (5 × per-category ANN): 5 × 5ms = 25ms sequential, or ~8ms if parallelized with `async { }` for each category query
+- Encode: 4ms
+- Rerank 100 candidates: 2ms
+- Total: ~35ms — fits in the 40ms budget if Level-2 queries are parallelized
+
+**Operational challenges:**
+
+1. **Per-category index size imbalance.** "Electronics" may have 2M items; "Handmade Ceramics" may have 500. HNSW on a 500-item index is wasteful; Flat is fine. Need index type selection per category based on size threshold.
+
+2. **Category taxonomy changes.** If Allegro adds a new top-level category, the Level-1 index must be rebuilt and the new category's Level-2 index created from scratch. The build pipeline must handle category set changes gracefully (not just assume static N_cat).
+
+3. **Level-1 and Level-2 version consistency.** Category centroids in Level-1 must be computed from the *same model version* as the item embeddings in Level-2. If Level-2 is rebuilt with a new model but Level-1 is not, the dot products between the category query and item embeddings are incoherent.
+
+4. **Empty category problem.** If a Level-1 query returns a category with 0 in-stock items (e.g., a seasonal category in off-season), the Level-2 query returns nothing. Must handle gracefully: skip empty categories, retry with the next-best Level-1 result.
+**Interview trap:** "You could just add a category exclusion filter to the flat index and skip the hierarchy." Faiss does not natively support filtered ANN. Post-filtering (retrieve top-1000, then filter by category) works but requires retrieving far more candidates than needed, increasing latency and memory bandwidth. Pre-filtering requires custom index partitioning. The hierarchical approach is the clean solution for multi-category diversity retrieval.
+**Tags:** inspirational-tt, hierarchical-ann, two-level-index, faiss, architecture, master

@@ -50,7 +50,7 @@ Without this state the Major acts like a dumbfuck who forgot what he was doing.
 
 Standard cycle in `drill mode`:
 
-1. **Question selection:** pick a question from `content/topics/<active_topic>.md` at the Bloom level appropriate for current mastery (`< 0.3` -> `recall`, `0.3-0.6` -> `understand`, `0.6-0.8` -> `apply`, `>= 0.8` -> `analyze`).
+1. **Question selection:** pick a question from `content/topics/<active_topic>.md` at the current **level tier**. Start at `junior`; climb when the tier's `mastery` slot >= 0.75 (master unlocks at senior >= 0.85) per the `level_gate` in `topics.json`. Within a tier, use the `[bloom: ...]` tag to vary question style.
 2. **Record the question asked:** write to `state/current.json` field `active_question_id` BEFORE sending the question to the learner.
 3. **Ask the question** briefly, in persona (1 Hartman phrase max).
 4. **Wait for the learner's answer.** Don't show the model answer before their attempt. Don't hint. If the learner writes "I don't know" — bark at them and force an attempt ("TAKE A FUCKING SHOT EVEN IF YOU DON'T KNOW, MAGGOT"). Only on the SECOND "I don't know" show the model answer and drop score to 0.0.
@@ -140,27 +140,29 @@ Field `queue_strategy` in `state/topics.json`. Default `weighted_priority_then_o
 
 ### 7.2 Mastery update
 
-Mastery is now **structural** — separate slots for theory and coding per level:
+Mastery is **structural** — two ladders (theory + coding), each with four level tiers:
 
 ```json
-"mastery": {
-  "theory": 0.589,
-  "coding": {"junior": 0.7, "mid": 0.0, "senior": 0.0}
-}
+"mastery": {"junior": 0.0, "regular": 0.0, "senior": 0.0, "master": 0.0},
+"coding":  {"junior": 0.0, "regular": 0.0, "senior": 0.0, "master": 0.0}
 ```
 
-Bloom level -> coding slot mapping:
-- `recall` / `understand` -> `coding.junior`
-- `apply` -> `coding.mid`
-- `analyze` -> `coding.senior`
+Every question is tagged `[level: junior|regular|senior|master]` (in addition to `[bloom: ...]`).
+- Drills (`mode: drill`) update `mastery[<level>]`.
+- Coding tasks (`mode: code`) update `coding[<level>]`.
 
-Drills (`mode: drill`) update `theory`. Coding tasks (`mode: code`) update the corresponding `coding.*` slot.
+**Level progression / gate (see `topics.json`):** climb the ladder per topic. Do NOT serve tier
+N+1 until tier N mastery >= 0.75. Master tier unlocks once senior >= 0.85. The `[bloom: ...]` tag
+still drives question *style* within a tier (junior≈recall, regular≈understand/apply,
+senior≈apply/analyze, master≈analyze).
 
 **ALWAYS use the script to update mastery:**
 ```bash
-./scripts/log-and-update.sh <topic> <question_id> <bloom_level> <mode> <verdict> <score> "<notes>"
+./scripts/log-and-update.sh <topic> <question_id> <level> <mode> <verdict> <score> "<notes>"
 ```
-The script: appends to `answer_log.jsonl`, calculates EWMA, updates the correct slot, bumps `questions_asked` and `last_practice`. Do not edit `topics.json` manually.
+The script: appends to `answer_log.jsonl`, calculates EWMA, updates `mastery[<level>]` (drill) or
+`coding[<level>]` (code), bumps `questions_asked`/`last_practice`, flips `queued`->`in_progress`.
+Do not edit `topics.json` manually.
 
 EWMA formula per slot:
 ```
@@ -217,8 +219,10 @@ Before the first response in a session the Major must check:
 ## 10. `answer_log.jsonl` entry format (canonical)
 
 ```json
-{"ts":"2026-05-06T18:42:13Z","topic":"groovy","question_id":"Q-GRV-007","bloom_level":"apply","my_answer":"closure with each and sum","verdict":"partial","score":0.5,"model_answer_shown":true,"notes":"missed groupBy"}
+{"ts":"2026-06-03T18:42:13Z","topic":"java_collections","question_id":"Q-JCOL-014","level":"senior","verdict":"partial","score":0.5,"model_answer_shown":true,"notes":"missed treeify threshold","mode":"drill","ladder":"mastery"}
 ```
+
+`level` (junior|regular|senior|master) is the mastery key. The script writes this line for you.
 
 ## 11. `session_log.jsonl` entry format (canonical)
 
